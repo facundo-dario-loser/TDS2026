@@ -89,7 +89,7 @@ type -> INT | BOOL | VOID
 
 p    -> type MAIN ( ) { c }
 
-c    -> d c | s c | λ		  // cuerpo de la funcion main
+c    -> d c | s c | λ		  // cuerpo de la función main
 
 e    -> e + e                 // expresión
 e    -> e * e

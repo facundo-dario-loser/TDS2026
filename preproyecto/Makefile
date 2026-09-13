@@ -5,6 +5,7 @@ PROGRAMAS_C = analizador_sintactico/parser.tab.c 		\
 			  analizador_semantico/analisis_semantico.c \
 			  interprete/interprete.c 				    \
 			  pseudo_asm/ir_asm.c 					    \
+			  asm/asm.c 								\
 			  main.c
 
 main : analizador_lexico/lexico.l analizador_sintactico/parser.y $(PROGRAMAS_C)

@@ -35,6 +35,8 @@ typedef struct Symbol {
     struct Symbol *parametros; // para funciones
     struct Symbol *next;
     int           refCount;    // contador de referencias (de nodos del ast apuntando al simbolo)
+    int           offset;      // offset en el stack frame respecto del rbp (se usa en la generacion de asm)
+    bool          offsetSet;   // para saber si a una variable o temporal ya se le asigno un offset
 } Symbol;
 
 // sirve para rellenar los campos que se deseen al insertar un nuevo simbolo

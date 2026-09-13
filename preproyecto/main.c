@@ -4,6 +4,7 @@
 #include "analizador_semantico/analisis_semantico.h"
 #include "interprete/interprete.h"
 #include "pseudo_asm/ir_asm.h"
+#include "asm/asm.h"
 
 typedef enum ArgumentFlag {
     INTERPRETE,
@@ -57,7 +58,8 @@ int main(int argc, char **argv) {
         Instruction *head = generarPseudoAsmList(root);
         printf("[LOG]: generacion de pseudo assembly completado\n"); 
         printInstructions(head);
-        freeInstructionList(head); // NOTA: cuando genere assembly no deberia liberar la lista aca
+        generarAsm(head);
+        freeInstructionList(head);
     }
 
     // liberamos la memoria de todos los nodos del arbol (y por ende todos los simbolos creados)
