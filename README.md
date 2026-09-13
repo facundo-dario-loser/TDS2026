@@ -30,6 +30,7 @@ gcc analizador_sintactico/parser.tab.c 		  \
 	analizador_semantico/analisis_semantico.c \
 	interprete/interprete.c 				  \
 	pseudo_asm/ir_asm.c 					  \
+	asm/asm.c 								  \
 	main.c                                    \
     -o build/preproyecto
 ```
@@ -54,9 +55,10 @@ cd preproyecto
 ```
 **Aclaración:**
 
-El interprete la unica salida que genera es un print del valor resultante de evaluar la expresión asociada a un return (`return exp;`). Si no se retorna nada, el interprete no genera ninguna salida.
+El interprete la única salida que genera es un print del valor resultante de evaluar la expresión asociada a un return (`return exp;`). Si no se retorna nada, el interprete no genera ninguna salida.
 
-En el caso del generador de pseudo assembly al finalizar imprime en la terminal todas las instrucciones generadas.
+En el caso del generador de pseudo assembly al finalizar imprime en la terminal todas las instrucciones generadas.<br>
+Luego como extra (ya que no es parte del preproyecto) genera dentro de la carpeta `/preproyecto` un archivo llamado `main.s` que contiene el programa assembly x86-64 correspondiente al código fuente.
 
 ## Organización
 
@@ -66,11 +68,13 @@ dentro de `/preproyecto` se cuenta con las siguientes carpetas y archivos:
 
 `/analizador_sintactico`: contiene el parser hecho con bison.
 
-`/analizador_semantico`: codigo correspondiente al analisis semantico.
+`/analizador_semantico`: código correspondiente al análisis semántico.
 
-`/interprete`: codigo correspondiente al interprete (fue implementado usando recursión sobre el ast).
+`/interprete`: código correspondiente al interprete (fue implementado usando recursión sobre el ast).
 
-`/pseudo_asm`: codigo correspondiente a la generación de pseudo assembly (usando código de 3 direcciones).
+`/pseudo_asm`: código correspondiente a la generación de pseudo assembly (usando código de 3 direcciones).
+
+`/asm`: codigó correspondiente a la generación de assembly x86-64 (esto no era parte del preproyecto, pero lo hice para entender todas las etapas).
 
 `/TADs`: contiene la implementación del árbol sintactico abstracto (`ast.h/.c`) y de la tabla de simbolos (`ts.h/.c`).
 El ast esta implementado como un árbol binario y la tabla de simbolos como una pila de niveles (implementada con una lista enlazada) dónde cada nivel a su vez tiene una lista enlazada de simbolos.
