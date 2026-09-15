@@ -2,7 +2,7 @@
 
 Option getArgumentOption(int argc, char *argv[]) {
     if (argc == 1) {
-        ERROR(MESSAGE_SOURCE_ARGUMENT, "no arguments were given\n\t\t  use: ./c-tds [option] nombreArchivo.ctds\n")
+        ERROR(MESSAGE_SOURCE_ARGUMENT, "no arguments were given\n\t\t  Usage: ./c-tds [option] nombreArchivo.ctds\n")
     }
 
     if (strcmp(argv[1], "-o") == 0)      return OPTION_O;
@@ -15,7 +15,7 @@ Option getArgumentOption(int argc, char *argv[]) {
 
 Stage getArgumentStage(int argc, char *argv[]) {
     if (argc < 3) {
-        ERROR(MESSAGE_SOURCE_ARGUMENT, "no stage was provided\nuse: c-tds -target <etapa> nombreArchivo.ctds\n")
+        ERROR(MESSAGE_SOURCE_ARGUMENT, "no stage was provided\nUsage: c-tds -target <etapa> nombreArchivo.ctds\n")
     }
 
     if (strcmp(argv[2], "scan") == 0)     return STAGE_SCAN;

@@ -1,7 +1,9 @@
 [NOTA] hacer carpetas con test para cada etapa. tambien podria tener un script que corra los tests que estan en dicha carpetas
 [NOTA] doc y comentarios los hago en espanol, pero codigo en ingles
 
-[IMPLEMENTAR] para ejecutar automaticamente los test hacer una opcion en Make
-
 [TEST] probar muchos mas casos de test
+
+[NOTA] los comentarios multilinea que elegi no permiten comentarios anidados
+
+[IMPLEMENTAR] mejorar la ejecucion de test con python para que tambien permita ejecutar tests individuales
 

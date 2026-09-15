@@ -10,4 +10,8 @@ main : frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.
 	gcc $(PROGRAMAS_C) -o build/c-tds
 
 test: build/c-tds
-	./build/c-tds -o main tests/test1.ctds
+	python3 run_tests.py -o || python3 run_tests.py -o
+
+test_debug: build/c-tds
+	python3 run_tests.py -debug || python3 run_tests.py -debug
+ 

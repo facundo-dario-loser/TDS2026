@@ -2,11 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "../../utils/debug.h"
 
 extern int yylex(void);
 void yyerror(const char *s);
 
 extern FILE *yyin;
+extern int  yylineno;
 %}
 
 // para hacer mejores logs cuando hay un error de sintaxis
@@ -38,12 +40,12 @@ extern FILE *yyin;
 %precedence UMINUS '!'
 
 %%
-p: decl_list {}
+p: global_decl_list {}
 ;
 
-decl_list: var_decl decl_list           {}
-         | method_decl method_decl_list {}
-         | %empty                       {}
+global_decl_list: var_decl global_decl_list    {}
+                | method_decl method_decl_list {}
+                | %empty                       {}
 ;
 
 method_decl_list: method_decl method_decl_list {}
@@ -57,14 +59,13 @@ list_id: ID             {}
        | ID ',' list_id {} 
 ;
 
-method_decl: type ID '(' ')' block        {}
-           | type ID '(' params ')' block {}
-           | VOID ID '(' ')' block        {}
+method_decl: type ID '(' params ')' block {}
            | VOID ID '(' params ')' block {}
 ;
 
 params: param ',' params {} 
       | param            {}
+      | %empty           {}
 ;
 
 param: type ID {}
@@ -83,7 +84,7 @@ type: INT     {}
 ;
 
 statements: statement statements {}
-          | %empty
+          | %empty               {}
 ;
 
 statement: ID '=' expr ';'                  {}
@@ -131,7 +132,6 @@ literal: INT_LITERAL   {}
 %%
 
 void yyerror(const char *s) {
-    printf("[SINTAX ERROR]: %s\n", s);
-    exit(EXIT_FAILURE);
+    ERROR(MESSAGE_SOURCE_SINTAX_ANALYSIS, "%s (line %d)\n", s, yylineno)
 }
 
