@@ -2,8 +2,6 @@
 
 // solo tenemos la funcion main y dentro var locales y temporales
 
-#define TODO { printf("[ERROR:ASM]: NOT IMPLEMENTED\n"); }
-
 void generarAsmADD(Instruction *list, FILE *f);
 void generarAsmMultiplication(Instruction *list, FILE *f);
 void generarAsmAnd(Instruction *list, FILE *f);

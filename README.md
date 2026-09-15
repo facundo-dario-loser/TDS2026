@@ -74,7 +74,7 @@ dentro de `/preproyecto` se cuenta con las siguientes carpetas y archivos:
 
 `/pseudo_asm`: código correspondiente a la generación de pseudo assembly (usando código de 3 direcciones).
 
-`/asm`: codigó correspondiente a la generación de assembly x86-64 (esto no era parte del preproyecto, pero lo hice para entender todas las etapas).
+`/asm`: código correspondiente a la generación de assembly x86-64 (esto no era parte del preproyecto, pero lo hice para entender todas las etapas).
 
 `/TADs`: contiene la implementación del árbol sintactico abstracto (`ast.h/.c`) y de la tabla de simbolos (`ts.h/.c`).
 El ast esta implementado como un árbol binario y la tabla de simbolos como una pila de niveles (implementada con una lista enlazada) dónde cada nivel a su vez tiene una lista enlazada de simbolos.
