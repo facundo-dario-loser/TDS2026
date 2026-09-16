@@ -6,7 +6,8 @@
 #include "utils/debug.h"
 #include "utils/argument.h"
 
-bool debugFlag = false; // se setea en true sii se usa la opcion -debug
+bool debugFlag = false; // flag para saber si se ejecuta el compilador en modo debug o no
+                        // se setea en true sii se usa la opcion -debug
 
 int main(int argc, char *argv[]) {
     Option option = getArgumentOption(argc, argv);

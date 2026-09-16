@@ -23,7 +23,6 @@ extern int  yylineno;
 }
 
 %token VOID INT BOOLEAN FLOAT IF ELSE WHILE RETURN EQUAL AND OR BOOL_LITERAL INT_LITERAL FLOAT_LITERAL ID
-// + - * / % < > 
 
 // precendencia (de menor a mayor)
 %left OR
@@ -32,12 +31,10 @@ extern int  yylineno;
 %nonassoc '<' '>'
 %left '-' '+'
 %left '*' '/' '%'
-
-// quiero definir la precendencia pero no quiero definir la asociatividad
-// porque no tiene sentido dado que son operadores unarios
-// luego: '-' expr %prec UMINUS le dice a bison que en ese caso tome la
-// precedencia del - (unario) y no del menos binario (resta)
-%precedence UMINUS '!'
+%precedence UMINUS '!' // quiero definir la precendencia pero no quiero definir la asociatividad
+                       // porque no tiene sentido dado que son operadores unarios
+                       // luego: '-' expr %prec UMINUS le dice a bison que en ese caso tome la
+                       // precedencia del - (unario) y no del menos binario (resta)
 
 %%
 p: global_decl_list {}
@@ -133,6 +130,6 @@ literal: INT_LITERAL   {}
 %%
 
 void yyerror(const char *s) {
-    ERROR(MESSAGE_SOURCE_SINTAX_ANALYSIS, "%s (line %d)\n", s, yylineno)
+    ERROR_PARSER("%s (line %d)\n", s, yylineno)
 }
 

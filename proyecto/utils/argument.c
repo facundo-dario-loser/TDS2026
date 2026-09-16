@@ -1,40 +1,44 @@
 #include "argument.h"
 
+bool stringEquals(char *str1, char *str2) {
+    return strcmp(str1, str2) == 0;
+}
+
 Option getArgumentOption(int argc, char *argv[]) {
     if (argc == 1) {
-        ERROR(MESSAGE_SOURCE_ARGUMENT, "no arguments were given\n\t\t  Usage: ./c-tds [option] nombreArchivo.ctds\n")
+        ERROR_ARGUMENT("no arguments were given\n\t\t  Usage: ./c-tds [option] nombreArchivo.ctds\n")
     }
 
-    if (strcmp(argv[1], "-o") == 0)      return OPTION_O;
-    if (strcmp(argv[1], "-target") == 0) return OPTION_TARGET;
-    if (strcmp(argv[1], "-opt") == 0)    return OPTION_OPT;
-    if (strcmp(argv[1], "-debug") == 0)  return OPTION_DEBUG;
+    if (stringEquals(argv[1], "-o"))      return OPTION_O;
+    if (stringEquals(argv[1], "-target")) return OPTION_TARGET;
+    if (stringEquals(argv[1], "-opt"))    return OPTION_OPT;
+    if (stringEquals(argv[1], "-debug"))  return OPTION_DEBUG;
 
-    ERROR(MESSAGE_SOURCE_ARGUMENT, "invalid option '%s'\n", argv[1])
+    ERROR_ARGUMENT("invalid option '%s'\n", argv[1])
 }
 
 Stage getArgumentStage(int argc, char *argv[]) {
     if (argc < 3) {
-        ERROR(MESSAGE_SOURCE_ARGUMENT, "no stage was provided\nUsage: c-tds -target <etapa> nombreArchivo.ctds\n")
+        ERROR_ARGUMENT("no stage was provided\nUsage: c-tds -target <etapa> nombreArchivo.ctds\n")
     }
 
-    if (strcmp(argv[2], "scan") == 0)     return STAGE_SCAN;
-    if (strcmp(argv[2], "parse") == 0)    return STAGE_PARSE;
-    if (strcmp(argv[2], "codinter") == 0) return STAGE_CODINTER;
-    if (strcmp(argv[2], "assembly") == 0) return STAGE_ASSEMBLY;
+    if (stringEquals(argv[2], "scan"))     return STAGE_SCAN;
+    if (stringEquals(argv[2], "parse"))    return STAGE_PARSE;
+    if (stringEquals(argv[2], "codinter")) return STAGE_CODINTER;
+    if (stringEquals(argv[2], "assembly")) return STAGE_ASSEMBLY;
 
-    ERROR(MESSAGE_SOURCE_ARGUMENT, "invalid stage '%s'\n", argv[2])
+    ERROR_ARGUMENT("invalid stage '%s'\n", argv[2])
 }
 
 void processOptionO(int argc, char *argv[]) {
-    if (argc < 3) ERROR(MESSAGE_SOURCE_ARGUMENT, "the name of the executable file was not specified")
+    if (argc < 3) ERROR_ARGUMENT("the name of the executable file was not specified")
     char *outputFileName = argv[2];
 
-    if (argc < 4) ERROR(MESSAGE_SOURCE_ARGUMENT, "the path to the source file was not provided")
+    if (argc < 4) ERROR_ARGUMENT("the path to the source file was not provided")
     yyin = fopen(argv[3], "r");
 
     if (!yyin) {
-        ERROR(MESSAGE_SOURCE_GLOBAL, "couldn't open file '%s'\n", argv[3])
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
     }
 
     int parseResult = yyparse();
@@ -42,7 +46,7 @@ void processOptionO(int argc, char *argv[]) {
     if (parseResult == 0) {
         DEBUG("sintax analysis done\n")
     } else {
-        ERROR(MESSAGE_SOURCE_GLOBAL, "[ERROR]: parseResult is '%d'\n", parseResult)
+        ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
 }
 
@@ -51,11 +55,11 @@ void processOptionTarget(int argc, char *argv[]) {
 
     char *outputFileName = "a"; // por default
 
-    if (argc < 4) ERROR(MESSAGE_SOURCE_ARGUMENT, "the path to the source file was not provided")
+    if (argc < 4) ERROR_ARGUMENT("the path to the source file was not provided")
     yyin = fopen(argv[3], "r");
 
     if (!yyin) {
-        ERROR(MESSAGE_SOURCE_GLOBAL, "couldn't open file '%s'\n", argv[3])
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
     }
 
     switch (stage) {
@@ -68,11 +72,11 @@ void processOptionTarget(int argc, char *argv[]) {
                           if (parseResult == 0) {
                             DEBUG("sintax analysis done\n")
                           } else {
-                            ERROR(MESSAGE_SOURCE_GLOBAL, "[ERROR]: parseResult is '%d'\n", parseResult)
+                            ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
                           }
 
                           break;
-        
+
         case STAGE_CODINTER: TODO("processOptionTarget (STAGE_CODINTER) not implemented yet")
         case STAGE_ASSEMBLY: TODO("processOptionTarget (STAGE_ASSEMBLY) not implemented yet")
     }
@@ -86,11 +90,11 @@ void processOptionDebug(int argc, char *argv[]) {
     debugFlag = true;
     char *outputFileName = "a"; // default executable name
 
-    if (argc < 3) ERROR(MESSAGE_SOURCE_ARGUMENT, "the path to the source file was not provided")
+    if (argc < 3) ERROR_ARGUMENT("the path to the source file was not provided")
     yyin = fopen(argv[2], "r");
 
     if (!yyin) {
-        ERROR(MESSAGE_SOURCE_GLOBAL, "couldn't open file '%s'\n", argv[3])
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
     }
 
     int parseResult = yyparse();
@@ -98,6 +102,6 @@ void processOptionDebug(int argc, char *argv[]) {
     if (parseResult == 0) {
         DEBUG("sintax analysis done\n")
     } else {
-        ERROR(MESSAGE_SOURCE_GLOBAL, "[ERROR]: parseResult is '%d'\n", parseResult)
+        ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
 }

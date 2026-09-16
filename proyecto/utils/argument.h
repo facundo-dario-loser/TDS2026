@@ -1,6 +1,9 @@
 #ifndef ARGUMENT_H
 #define ARGUMENT_H
 
+// argument.h: modulo para obtener los argumentos de la linea 
+// de comandos con los que se invoca al compilador
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -28,12 +31,14 @@ extern bool debugFlag;
 extern int  yyparse();
 extern int  yylex(void);
 
-Option getArgumentOption(int argc, char *argv[]);
-Stage  getArgumentStage(int argc, char *argv[]);
+bool stringEquals(char *str1, char *str2); // retorna true sii str1 == str2 y false en otro caso
 
-void processOptionO(int argc, char *argv[]);
-void processOptionTarget(int argc, char *argv[]);
-void processOptionOpt(int argc, char *argv[]);
-void processOptionDebug(int argc, char *argv[]);
+Option getArgumentOption(int argc, char *argv[]); // dada una opcion en los argumentos de invocacion, retorna un valor del enumerado 'Option'
+Stage  getArgumentStage(int argc, char *argv[]);  // dada la opcion '-target' en los argumentos de invocacion, retorna un valor del enumerado 'Stage'
+
+void processOptionO(int argc, char *argv[]);      // ejecuta el compilador con la opcion '-o <nombre_ejecutable>'
+void processOptionTarget(int argc, char *argv[]); // ejecuta el compilador con la opcion '-target <etapa>'
+void processOptionOpt(int argc, char *argv[]);    // ejecuta el compilador con la opcion '-opt'
+void processOptionDebug(int argc, char *argv[]);  // ejecuta el compilador con la opcion '-debug'
 
 #endif // ARGUMENT_H

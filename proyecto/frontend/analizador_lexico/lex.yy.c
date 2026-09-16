@@ -991,7 +991,7 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 #line 48 "lexer.l"
-{ ERROR(MESSAGE_SOURCE_LEXICAL_ANALYSIS, "invalid token '%s' (line: %d)", yytext, yylineno) }
+{ ERROR_LEXER("invalid token '%s' (line: %d)", yytext, yylineno)  }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP

@@ -1,4 +1,3 @@
-[NOTA] hacer carpetas con test para cada etapa. tambien podria tener un script que corra los tests que estan en dicha carpetas
 [NOTA] doc y comentarios los hago en espanol, pero codigo en ingles
 
 [TEST] probar muchos mas casos de test
@@ -6,13 +5,14 @@
 [NOTA] los comentarios multilinea que elegi no permiten comentarios anidados
 
 [IMPLEMENTAR] mejorar la ejecucion de test con python para que tambien permita ejecutar tests individuales
-
-[IMPLEMENTAR] junto a  cada test asociar si debe pasar o no para poder hacer mejor el log
-
-[AGREGAR] comentarios a todos los archivos .h explicando que hace cada uno
+[IMPLEMENTAR] junto a cada test asociar si debe pasar o no para poder hacer mejor el log
 
 [MODIFICAR] intentar sacar los %empty de la gramatica
 
-[AGREGAR] permitir ejecutar tests seleccionando la opcion (en el Makefile) y tambien permitiendo en el caso de target seleccionar la etapa 
-
 [TEST] poner un comentario de si debe pasar y ademas especificar mejor apra que es cada test. para testear que cosa 
+[TEST] ponerles nombres significativos a los tests 
+
+[TEST] hacer carpetas test if while
+[TEST] en caso de test que no son debugs solo imprimir el nombre de tests que pasan y nombre de tests que no pasan
+
+[MANEJO ERRORES SEMANTICO]: hacer un enum para eso cuando haga el analisis semantico

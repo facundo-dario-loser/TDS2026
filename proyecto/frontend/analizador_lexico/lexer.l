@@ -45,5 +45,5 @@ false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       return BOO
 [ \n\t]+                  { /* ignorar espacios, new line y tab */                          }
 "//".*                    { DEBUG_LEXER("LINE_COMMENT(%s)", yytext);                        }
 "/*"[a-zA-Z0-9 \t\n]*"*/" { DEBUG_LEXER("MULTILINE_COMMENT(%s)", yytext);                   }
-.                         { ERROR(MESSAGE_SOURCE_LEXICAL_ANALYSIS, "invalid token '%s' (line: %d)", yytext, yylineno) }
+.                         { ERROR_LEXER("invalid token '%s' (line: %d)", yytext, yylineno)  }
 %%

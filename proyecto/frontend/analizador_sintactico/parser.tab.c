@@ -545,14 +545,14 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int8 yyrline[] =
 {
-       0,    43,    43,    46,    47,    48,    51,    52,    55,    58,
-      59,    62,    63,    64,    65,    68,    69,    72,    75,    78,
-      79,    82,    83,    84,    87,    88,    91,    92,    93,    94,
-      95,    96,    97,    98,    99,   102,   103,   106,   107,   110,
-     111,   112,   113,   114,   115,   116,   117,   118,   119,   120,
-     121,   122,   123,   124,   125,   128,   129,   130
+       0,    40,    40,    43,    44,    45,    48,    49,    52,    55,
+      56,    59,    60,    61,    62,    65,    66,    69,    72,    75,
+      76,    79,    80,    81,    84,    85,    88,    89,    90,    91,
+      92,    93,    94,    95,    96,    99,   100,   103,   104,   107,
+     108,   109,   110,   111,   112,   113,   114,   115,   116,   117,
+     118,   119,   120,   121,   122,   125,   126,   127
 };
 #endif
 
@@ -1428,337 +1428,337 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* p: global_decl_list  */
-#line 43 "parser.y"
+#line 40 "parser.y"
                     {}
 #line 1434 "parser.tab.c"
     break;
 
   case 3: /* global_decl_list: var_decl global_decl_list  */
-#line 46 "parser.y"
+#line 43 "parser.y"
                                                {}
 #line 1440 "parser.tab.c"
     break;
 
   case 4: /* global_decl_list: method_decl method_decl_list  */
-#line 47 "parser.y"
+#line 44 "parser.y"
                                                {}
 #line 1446 "parser.tab.c"
     break;
 
   case 5: /* global_decl_list: %empty  */
-#line 48 "parser.y"
+#line 45 "parser.y"
                                                {}
 #line 1452 "parser.tab.c"
     break;
 
   case 6: /* method_decl_list: method_decl method_decl_list  */
-#line 51 "parser.y"
+#line 48 "parser.y"
                                                {}
 #line 1458 "parser.tab.c"
     break;
 
   case 7: /* method_decl_list: %empty  */
-#line 52 "parser.y"
+#line 49 "parser.y"
                                                {}
 #line 1464 "parser.tab.c"
     break;
 
   case 8: /* var_decl: type list_id ';'  */
-#line 55 "parser.y"
+#line 52 "parser.y"
                            {}
 #line 1470 "parser.tab.c"
     break;
 
   case 9: /* list_id: ID  */
-#line 58 "parser.y"
+#line 55 "parser.y"
                         {}
 #line 1476 "parser.tab.c"
     break;
 
   case 10: /* list_id: ID ',' list_id  */
-#line 59 "parser.y"
+#line 56 "parser.y"
                         {}
 #line 1482 "parser.tab.c"
     break;
 
   case 11: /* method_decl: type ID '(' params ')' block  */
-#line 62 "parser.y"
+#line 59 "parser.y"
                                           {}
 #line 1488 "parser.tab.c"
     break;
 
   case 12: /* method_decl: type ID '(' ')' block  */
-#line 63 "parser.y"
+#line 60 "parser.y"
                                           {}
 #line 1494 "parser.tab.c"
     break;
 
   case 13: /* method_decl: VOID ID '(' params ')' block  */
-#line 64 "parser.y"
+#line 61 "parser.y"
                                           {}
 #line 1500 "parser.tab.c"
     break;
 
   case 14: /* method_decl: VOID ID '(' ')' block  */
-#line 65 "parser.y"
+#line 62 "parser.y"
                                           {}
 #line 1506 "parser.tab.c"
     break;
 
   case 15: /* params: param ',' params  */
-#line 68 "parser.y"
+#line 65 "parser.y"
                          {}
 #line 1512 "parser.tab.c"
     break;
 
   case 16: /* params: param  */
-#line 69 "parser.y"
+#line 66 "parser.y"
                          {}
 #line 1518 "parser.tab.c"
     break;
 
   case 17: /* param: type ID  */
-#line 72 "parser.y"
+#line 69 "parser.y"
                {}
 #line 1524 "parser.tab.c"
     break;
 
   case 18: /* block: '{' block_elems '}'  */
-#line 75 "parser.y"
+#line 72 "parser.y"
                            {}
 #line 1530 "parser.tab.c"
     break;
 
   case 19: /* block_elems: var_decl block_elems  */
-#line 78 "parser.y"
+#line 75 "parser.y"
                                   {}
 #line 1536 "parser.tab.c"
     break;
 
   case 20: /* block_elems: statements  */
-#line 79 "parser.y"
+#line 76 "parser.y"
                                   {}
 #line 1542 "parser.tab.c"
     break;
 
   case 21: /* type: INT  */
-#line 82 "parser.y"
+#line 79 "parser.y"
               {}
 #line 1548 "parser.tab.c"
     break;
 
   case 22: /* type: BOOLEAN  */
-#line 83 "parser.y"
+#line 80 "parser.y"
               {}
 #line 1554 "parser.tab.c"
     break;
 
   case 23: /* type: FLOAT  */
-#line 84 "parser.y"
+#line 81 "parser.y"
               {}
 #line 1560 "parser.tab.c"
     break;
 
   case 24: /* statements: statement statements  */
-#line 87 "parser.y"
+#line 84 "parser.y"
                                  {}
 #line 1566 "parser.tab.c"
     break;
 
   case 25: /* statements: %empty  */
-#line 88 "parser.y"
+#line 85 "parser.y"
                                  {}
 #line 1572 "parser.tab.c"
     break;
 
   case 26: /* statement: ID '=' expr ';'  */
-#line 91 "parser.y"
+#line 88 "parser.y"
                                             {}
 #line 1578 "parser.tab.c"
     break;
 
   case 27: /* statement: method_call ';'  */
-#line 92 "parser.y"
+#line 89 "parser.y"
                                             {}
 #line 1584 "parser.tab.c"
     break;
 
   case 28: /* statement: IF '(' expr ')' block  */
-#line 93 "parser.y"
+#line 90 "parser.y"
                                             {}
 #line 1590 "parser.tab.c"
     break;
 
   case 29: /* statement: IF '(' expr ')' block ELSE block  */
-#line 94 "parser.y"
+#line 91 "parser.y"
                                             {}
 #line 1596 "parser.tab.c"
     break;
 
   case 30: /* statement: WHILE '(' expr ')' block  */
-#line 95 "parser.y"
+#line 92 "parser.y"
                                             {}
 #line 1602 "parser.tab.c"
     break;
 
   case 31: /* statement: RETURN expr ';'  */
-#line 96 "parser.y"
+#line 93 "parser.y"
                                             {}
 #line 1608 "parser.tab.c"
     break;
 
   case 32: /* statement: RETURN ';'  */
-#line 97 "parser.y"
+#line 94 "parser.y"
                                             {}
 #line 1614 "parser.tab.c"
     break;
 
   case 33: /* statement: ';'  */
-#line 98 "parser.y"
+#line 95 "parser.y"
                                             {}
 #line 1620 "parser.tab.c"
     break;
 
   case 34: /* statement: block  */
-#line 99 "parser.y"
+#line 96 "parser.y"
                                             {}
 #line 1626 "parser.tab.c"
     break;
 
   case 35: /* method_call: ID '(' ')'  */
-#line 102 "parser.y"
+#line 99 "parser.y"
                                   {}
 #line 1632 "parser.tab.c"
     break;
 
   case 36: /* method_call: ID '(' list_expr ')'  */
-#line 103 "parser.y"
+#line 100 "parser.y"
                                   {}
 #line 1638 "parser.tab.c"
     break;
 
   case 37: /* list_expr: expr ',' list_expr  */
-#line 106 "parser.y"
+#line 103 "parser.y"
                               {}
 #line 1644 "parser.tab.c"
     break;
 
   case 38: /* list_expr: expr  */
-#line 107 "parser.y"
+#line 104 "parser.y"
                               {}
 #line 1650 "parser.tab.c"
     break;
 
   case 39: /* expr: ID  */
-#line 110 "parser.y"
+#line 107 "parser.y"
                             {}
 #line 1656 "parser.tab.c"
     break;
 
   case 40: /* expr: method_call  */
-#line 111 "parser.y"
+#line 108 "parser.y"
                             {}
 #line 1662 "parser.tab.c"
     break;
 
   case 41: /* expr: literal  */
-#line 112 "parser.y"
+#line 109 "parser.y"
                             {}
 #line 1668 "parser.tab.c"
     break;
 
   case 42: /* expr: expr '+' expr  */
-#line 113 "parser.y"
+#line 110 "parser.y"
                             {}
 #line 1674 "parser.tab.c"
     break;
 
   case 43: /* expr: expr '-' expr  */
-#line 114 "parser.y"
+#line 111 "parser.y"
                             {}
 #line 1680 "parser.tab.c"
     break;
 
   case 44: /* expr: expr '*' expr  */
-#line 115 "parser.y"
+#line 112 "parser.y"
                             {}
 #line 1686 "parser.tab.c"
     break;
 
   case 45: /* expr: expr '/' expr  */
-#line 116 "parser.y"
+#line 113 "parser.y"
                             {}
 #line 1692 "parser.tab.c"
     break;
 
   case 46: /* expr: expr '%' expr  */
-#line 117 "parser.y"
+#line 114 "parser.y"
                             {}
 #line 1698 "parser.tab.c"
     break;
 
   case 47: /* expr: expr '<' expr  */
-#line 118 "parser.y"
+#line 115 "parser.y"
                             {}
 #line 1704 "parser.tab.c"
     break;
 
   case 48: /* expr: expr '>' expr  */
-#line 119 "parser.y"
+#line 116 "parser.y"
                             {}
 #line 1710 "parser.tab.c"
     break;
 
   case 49: /* expr: expr EQUAL expr  */
-#line 120 "parser.y"
+#line 117 "parser.y"
                             {}
 #line 1716 "parser.tab.c"
     break;
 
   case 50: /* expr: expr AND expr  */
-#line 121 "parser.y"
+#line 118 "parser.y"
                             {}
 #line 1722 "parser.tab.c"
     break;
 
   case 51: /* expr: expr OR expr  */
-#line 122 "parser.y"
+#line 119 "parser.y"
                             {}
 #line 1728 "parser.tab.c"
     break;
 
   case 52: /* expr: '-' expr  */
-#line 123 "parser.y"
+#line 120 "parser.y"
                             {}
 #line 1734 "parser.tab.c"
     break;
 
   case 53: /* expr: '!' expr  */
-#line 124 "parser.y"
+#line 121 "parser.y"
                             {}
 #line 1740 "parser.tab.c"
     break;
 
   case 54: /* expr: '(' expr ')'  */
-#line 125 "parser.y"
+#line 122 "parser.y"
                             {}
 #line 1746 "parser.tab.c"
     break;
 
   case 55: /* literal: INT_LITERAL  */
-#line 128 "parser.y"
+#line 125 "parser.y"
                        {}
 #line 1752 "parser.tab.c"
     break;
 
   case 56: /* literal: BOOL_LITERAL  */
-#line 129 "parser.y"
+#line 126 "parser.y"
                        {}
 #line 1758 "parser.tab.c"
     break;
 
   case 57: /* literal: FLOAT_LITERAL  */
-#line 130 "parser.y"
+#line 127 "parser.y"
                        {}
 #line 1764 "parser.tab.c"
     break;
@@ -1988,10 +1988,10 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 133 "parser.y"
+#line 130 "parser.y"
 
 
 void yyerror(const char *s) {
-    ERROR(MESSAGE_SOURCE_SINTAX_ANALYSIS, "%s (line %d)\n", s, yylineno)
+    ERROR_PARSER("%s (line %d)\n", s, yylineno)
 }
 
