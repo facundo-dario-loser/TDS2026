@@ -5,11 +5,6 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-typedef enum MessageType {
-    MESSAGE_TYPE_ERROR,
-    MESSAGE_TYPE_LOG,
-} MessageType;
-
 typedef enum MessageSource {
     MESSAGE_SOURCE_GLOBAL,
     MESSAGE_SOURCE_ARGUMENT,

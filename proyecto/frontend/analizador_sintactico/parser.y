@@ -28,8 +28,8 @@ extern int  yylineno;
 // precendencia (de menor a mayor)
 %left OR
 %left AND
-%left EQUAL
-%left '<' '>'
+%nonassoc EQUAL
+%nonassoc '<' '>'
 %left '-' '+'
 %left '*' '/' '%'
 
@@ -60,12 +60,13 @@ list_id: ID             {}
 ;
 
 method_decl: type ID '(' params ')' block {}
+           | type ID '(' ')' block        {}
            | VOID ID '(' params ')' block {}
+           | VOID ID '(' ')' block        {}
 ;
 
 params: param ',' params {} 
       | param            {}
-      | %empty           {}
 ;
 
 param: type ID {}
@@ -91,7 +92,7 @@ statement: ID '=' expr ';'                  {}
          | method_call ';'                  {}
          | IF '(' expr ')' block            {}
          | IF '(' expr ')' block ELSE block {}
-         | WHILE expr block                 {}
+         | WHILE '(' expr ')' block         {}
          | RETURN expr ';'                  {}
          | RETURN ';'                       {}
          | ';'                              {}

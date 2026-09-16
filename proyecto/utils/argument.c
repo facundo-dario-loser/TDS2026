@@ -47,11 +47,39 @@ void processOptionO(int argc, char *argv[]) {
 }
 
 void processOptionTarget(int argc, char *argv[]) {
-    TODO("OPTION_TARGET 'processOptionTarget()' not implemented yet")
+    Stage stage = getArgumentStage(argc, argv);
+
+    char *outputFileName = "a"; // por default
+
+    if (argc < 4) ERROR(MESSAGE_SOURCE_ARGUMENT, "the path to the source file was not provided")
+    yyin = fopen(argv[3], "r");
+
+    if (!yyin) {
+        ERROR(MESSAGE_SOURCE_GLOBAL, "couldn't open file '%s'\n", argv[3])
+    }
+
+    switch (stage) {
+        case STAGE_SCAN: while (yylex() != 0) {} 
+                         DEBUG("lexical analysis done\n")
+                         break;
+        
+        case STAGE_PARSE: int parseResult = yyparse();
+    
+                          if (parseResult == 0) {
+                            DEBUG("sintax analysis done\n")
+                          } else {
+                            ERROR(MESSAGE_SOURCE_GLOBAL, "[ERROR]: parseResult is '%d'\n", parseResult)
+                          }
+
+                          break;
+        
+        case STAGE_CODINTER: TODO("processOptionTarget (STAGE_CODINTER) not implemented yet")
+        case STAGE_ASSEMBLY: TODO("processOptionTarget (STAGE_ASSEMBLY) not implemented yet")
+    }
 }
 
 void processOptionOpt(int argc, char *argv[]) {
-    TODO("OPTION_OPT 'processOptionOpt()' not impelemented yet")
+    TODO("OPTION_OPT 'processOptionOpt()' not implemented yet")
 }
 
 void processOptionDebug(int argc, char *argv[]) {

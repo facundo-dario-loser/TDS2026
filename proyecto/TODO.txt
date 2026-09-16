@@ -7,3 +7,12 @@
 
 [IMPLEMENTAR] mejorar la ejecucion de test con python para que tambien permita ejecutar tests individuales
 
+[IMPLEMENTAR] junto a  cada test asociar si debe pasar o no para poder hacer mejor el log
+
+[AGREGAR] comentarios a todos los archivos .h explicando que hace cada uno
+
+[MODIFICAR] intentar sacar los %empty de la gramatica
+
+[AGREGAR] permitir ejecutar tests seleccionando la opcion (en el Makefile) y tambien permitiendo en el caso de target seleccionar la etapa 
+
+[TEST] poner un comentario de si debe pasar y ademas especificar mejor apra que es cada test. para testear que cosa 

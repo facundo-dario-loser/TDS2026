@@ -24,8 +24,9 @@ typedef enum Stage {
 } Stage;
 
 extern FILE *yyin;
-extern int  yyparse();
 extern bool debugFlag;
+extern int  yyparse();
+extern int  yylex(void);
 
 Option getArgumentOption(int argc, char *argv[]);
 Stage  getArgumentStage(int argc, char *argv[]);

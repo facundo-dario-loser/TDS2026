@@ -1,3 +1,5 @@
+// este test debe pasar
+
 int main() {
     int x;
     int y;

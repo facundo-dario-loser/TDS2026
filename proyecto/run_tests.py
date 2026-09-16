@@ -24,14 +24,13 @@ if not test_files:
 
 for file_name in test_files:
     file_path = os.path.join(TEST_DIR, file_name)
-    
-    print(f"Running: {COMPILER} {FLAG_COMPILADOR} {file_path}")
-
-    result = None
+    result    = None
 
     if FLAG_COMPILADOR == "-o":
+        print(f"Running: {COMPILER} -o a {file_path}")
         result = subprocess.run([COMPILER, "-o", "a", file_path])
     elif FLAG_COMPILADOR == "-debug":
+        print(f"Running: {COMPILER} -debug {file_path}")
         result = subprocess.run([COMPILER, "-debug", file_path])
     elif FLAG_COMPILADOR == "-opt":
         print("[TODO]: option -opt no yet implemented")

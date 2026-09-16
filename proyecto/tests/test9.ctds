@@ -1,0 +1,12 @@
+// este test no debe pasar
+
+void main() {
+    int x;
+    x = 2 + 1;
+    
+    int y;
+    y = 8;
+
+    boolean a;
+    a = x < y;
+}
