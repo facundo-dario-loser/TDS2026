@@ -1,0 +1,8 @@
+void main() {
+    /*
+    esto es un comentario multilinea con diferentes tipos de caracteres,
+    :*%$;()!@|\_-^/#&=
+    // comentario de una linea anidado
+    */
+    int x;
+}

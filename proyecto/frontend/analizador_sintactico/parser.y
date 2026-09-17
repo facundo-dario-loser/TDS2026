@@ -38,52 +38,51 @@ extern int  yylineno;
 
 %%
 p: global_decl_list {}
-;
+ ;
 
 global_decl_list: var_decl global_decl_list    {}
-                | method_decl method_decl_list {}
-                | %empty                       {}
-;
+                | method_decl_list             {}
+                ;
 
 method_decl_list: method_decl method_decl_list {}
                 | %empty                       {}
-;
+                ;
 
 var_decl: type list_id ';' {} 
-;
+        ;
 
 list_id: ID             {} 
        | ID ',' list_id {} 
-;
+       ;
 
 method_decl: type ID '(' params ')' block {}
            | type ID '(' ')' block        {}
            | VOID ID '(' params ')' block {}
            | VOID ID '(' ')' block        {}
-;
+           ;
 
 params: param ',' params {} 
       | param            {}
-;
+      ;
 
 param: type ID {}
-;
+     ;
 
 block: '{' block_elems '}' {}
-;
+     ;
 
 block_elems: var_decl block_elems {}
            | statements           {}
-;
+           ;
 
 type: INT     {}
     | BOOLEAN {}
     | FLOAT   {}
-;
+    ;
 
 statements: statement statements {}
           | %empty               {}
-;
+          ;
 
 statement: ID '=' expr ';'                  {}
          | method_call ';'                  {}
@@ -94,15 +93,15 @@ statement: ID '=' expr ';'                  {}
          | RETURN ';'                       {}
          | ';'                              {}
          | block                            {}
-;
+         ;
 
 method_call: ID '(' ')'           {}
            | ID '(' list_expr ')' {}
-;
+           ;
 
 list_expr: expr ',' list_expr {}
          | expr               {}
-;
+         ;
 
 expr: ID                    {}
     | method_call           {}
@@ -120,12 +119,12 @@ expr: ID                    {}
     | '-' expr %prec UMINUS {} 
     | '!' expr              {}
     | '(' expr ')'          {}
-;
+    ;
 
 literal: INT_LITERAL   {}
        | BOOL_LITERAL  {}
        | FLOAT_LITERAL {}
-;
+       ;
 
 %%
 

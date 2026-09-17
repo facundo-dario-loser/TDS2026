@@ -1,0 +1,44 @@
+// comentario de 1 linea
+
+/*
+comentario 
+de 
+varias 
+lineas
+*/
+
+int dec(int x) {
+    return x - 1;
+}
+
+void main() {
+    int x;
+    boolean y;
+    int WHILE;
+    int whiletrue;
+    int whilefalse;
+    int RETURN;
+    int iftrue;
+    int iffalse;
+    int integer;
+    boolean bool;
+    int elsetrue;
+    int elsefalse;
+    int 1st;
+    boolean 2nd;
+    void z;
+
+    if (x == y) {
+        x = -y;
+    } else {
+        x = 2*y;
+    }
+
+    while (x > 0) {
+        x = x - 1;
+    }
+
+    if (y > 0) {
+        y = dec(y);
+    }
+}

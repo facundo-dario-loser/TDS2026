@@ -1,0 +1,12 @@
+int main() {
+    int x;
+    int WHILE;
+    int RETURN;
+    int whiletrue;
+
+    x = 1;
+
+    while (true) {
+        x = x + 1;
+    }
+}

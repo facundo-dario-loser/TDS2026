@@ -1,0 +1,18 @@
+int x;
+boolean y;
+
+/*
+hola
+*/
+
+/*
+comentario externo
+/*
+comentario interno
+*/
+comentario externo
+*/
+
+void main() {
+    
+}
