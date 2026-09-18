@@ -9,6 +9,9 @@ main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y
 	make -C frontend/analizador_sintactico/ 
 	gcc $(PROGRAMAS_C) -o build/c-tds
 
+
+# reglas para ejecutar cada etapa del compilador:
+
 # ejecuta solo el analizador lexico
 test_lexer: build/c-tds
 	python3 run_tests.py -target scan tests/lexer/ || python3 run_tests.py -target scan tests/lexer/
@@ -20,3 +23,19 @@ test_parser: build/c-tds
 # ejecuta todas las etapas del compilador
 test_general: build/c-tds
 	python3 run_tests.py -o tests/general/ || python3 run_tests.py -o tests/general/
+
+
+# reglas para correr un test en particular:
+# quixa esto no hace falta ?????????????????
+
+# la variable FILE_PATH se puede sobreescribir desde la terminal.
+# ejemplo para sobre escribir FILE_PATH:
+# make test_individual FILE_PATH=tests/parser/test5.ctds
+FILE_PATH = /tests/general/test1.ctds # por default
+
+test_individual: build/c-tds
+	./build/c-tds -o a $(FILE_PATH)
+
+test_individual_debug: build/c-tds
+	./build/c-tds -debug $(FILE_PATH)
+

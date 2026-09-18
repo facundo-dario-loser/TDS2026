@@ -1,0 +1,18 @@
+// returns treu iff x > y and false otherwise
+boolean isBigger(int x, int y) {
+    if (x > y) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+void main() {
+    int x;
+    x = 80;
+    y = 40;
+
+    while (isBigger(x,y)) {
+        x = x - 1;
+    }
+}

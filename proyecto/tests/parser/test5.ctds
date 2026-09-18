@@ -1,0 +1,68 @@
+// operadores binarios y unarios
+
+int main() {
+    int x, y, z, w;
+    boolean a, b, c, d;
+
+    x = 20;
+    y = 4;
+    w = 100;
+
+    z = -x + y;
+
+    z = x + y;
+    z = x - y;
+    z = x * y;
+    z = x / y;
+    z = x % y;
+    z = -x;
+
+    z = (x + y);
+    z = (x - y);
+    z = (x * y);
+    z = (x / y);
+    z = (x % y);
+    z = (-x);
+
+    z = (x + y) + w;
+    z = (x + y) - w;
+    z = (x + y) * w;
+    z = (x + y) / w;
+    z = (x + y) % w;
+
+    z = (x - y) - w;
+    z = (x - y) + w;
+    z = (x - y) * w;
+    z = (x - y) / w;
+    z = (x - y) % w;
+
+    a = true;
+    b = false;
+    d = true;
+
+    c = x < y;
+    c = x > y;
+    c = a && b;
+    c = a || b;
+    c = a == b;
+    c = !a;
+
+    c = (x < y);
+    c = (x > y);
+    c = (a && b);
+    c = (a || b);
+    c = (a == b);
+    c = (!a);
+
+    c = (x < y) < w;
+    c = (x < y) > w;
+    c = (x < y) && a;
+    c = (x < y) || b;
+    c = (x < y) == a;
+    c = (a && b) && c;
+    c = (a && b) || c;
+    c = (a && b) && !c;
+    c = (a || b) && c;
+    c = (a || b) || c;
+    c = (a && b) && !c;
+}

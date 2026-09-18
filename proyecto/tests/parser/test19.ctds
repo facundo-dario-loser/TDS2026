@@ -1,0 +1,12 @@
+void main () {
+    int x, y, z, w;
+    boolean a, b, c, d;
+
+    while (a && b) {}
+
+    while (a || b) {}
+
+    while ((a && b) || c) {}
+
+    while ((x > y) && a) {}
+}

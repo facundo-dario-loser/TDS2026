@@ -1,0 +1,29 @@
+void main() {
+    int x;
+    int y;
+    boolean a, b, c, d, e;
+
+    if (x == y) {
+        a = true;
+    } else {
+        a = false;
+    }
+
+    if (x > y) {
+        b = true;
+    } else {
+        b = false;
+    }
+
+    if (x < y) {
+        c = true;
+    } else {
+        c = false;
+    }
+
+    if (!x) {
+        d = true;
+    } else {
+        d = true;
+    }
+}

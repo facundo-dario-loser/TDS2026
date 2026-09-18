@@ -1,0 +1,112 @@
+# TDS2026 (Preproyecto)
+repositorio de la materia Taller de Diseño de Software UNRC 2026
+
+### Integrante: Loser Facundo Dario
+
+## Instrucciones para compilar
+
+si se cuenta con la herramienta `Make` instalada, ejecutar en la terminal:
+
+```
+cd preproyecto
+make
+```
+
+en caso de no tener `Make` entonces hacer:
+
+```
+cd preproyecto/analizador_lexico
+flex lexico.l 
+cd ..
+
+cd analizador_sintactico
+bison parser.y 
+cd ..
+
+gcc analizador_sintactico/parser.tab.c 		  \
+	analizador_lexico/lex.yy.c 		  		  \
+	TADs/ts.c 						  		  \
+	TADs/ast.c 								  \
+	analizador_semantico/analisis_semantico.c \
+	interprete/interprete.c 				  \
+	pseudo_asm/ir_asm.c 					  \
+	asm/asm.c 								  \
+	main.c                                    \
+    -o build/preproyecto
+```
+
+luego de esto se creara el ejecutable llamado `preproyecto` dentro de la carpeta `/preproyecto/build/`
+
+## Uso: 
+
+para usar el programa se debe proveer primero un flag para indicar si se desea ejecutar el interprete o se quiere generar pseudo assembly y luego se debe pasar el path al archivo con el programa fuente
+
+**Flags:**
+- `-i` (intérprete)
+- `-p` (generar pseudo assembly)
+
+```
+./build/preproyecto -flag path_to_source_code
+```
+**Ejemplo:**	
+```
+cd preproyecto
+./build/preproyecto -p tests/test7.txt	
+```
+**Aclaración:**
+
+El interprete la única salida que genera es un print del valor resultante de evaluar la expresión asociada a un return (`return exp;`). Si no se retorna nada, el interprete no genera ninguna salida.
+
+En el caso del generador de pseudo assembly al finalizar imprime en la terminal todas las instrucciones generadas.<br>
+Luego como extra (ya que no es parte del preproyecto) genera dentro de la carpeta `/preproyecto` un archivo llamado `main.s` que contiene el programa assembly x86-64 correspondiente al código fuente.
+
+## Organización
+
+dentro de `/preproyecto` se cuenta con las siguientes carpetas y archivos:
+
+`/analizador_lexico`: contiene el lexer hecho con flex.
+
+`/analizador_sintactico`: contiene el parser hecho con bison.
+
+`/analizador_semantico`: código correspondiente al análisis semántico.
+
+`/interprete`: código correspondiente al interprete (fue implementado usando recursión sobre el ast).
+
+`/pseudo_asm`: código correspondiente a la generación de pseudo assembly (usando código de 3 direcciones).
+
+`/asm`: código correspondiente a la generación de assembly x86-64 (esto no era parte del preproyecto, pero lo hice para entender todas las etapas).
+
+`/TADs`: contiene la implementación del árbol sintactico abstracto (`ast.h/.c`) y de la tabla de simbolos (`ts.h/.c`).
+El ast esta implementado como un árbol binario y la tabla de simbolos como una pila de niveles (implementada con una lista enlazada) dónde cada nivel a su vez tiene una lista enlazada de simbolos.
+
+`/build`: aca se guarda el ejecutable final llamado `preproyecto`.
+
+`/tests`: algunos tests con los que se probo el proyecto.
+
+`main.c`: punto de entrada de todo el programa.
+
+
+## Gramática del lenguaje
+**Aclaración**: esto no es código de bison. Esta escrita asi para que sea mas legible
+```
+type -> INT | BOOL | VOID
+
+p    -> type MAIN ( ) { c }
+
+c    -> d c | s c | λ		  // cuerpo de la función main
+
+e    -> e + e                 // expresión
+e    -> e * e
+e    -> e AND e 
+e    -> e OR e
+e    -> ( e )
+e    -> CONSTANTE_NUMERICA
+e    -> CONSTANTE_BOOLEANA 
+e    -> ID
+
+s    -> ID = e ; 			  // sentencia 
+s    -> RETURN e ;       
+s    -> RETURN ;          
+
+d    -> type ID ;             // declaración
+```

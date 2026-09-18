@@ -18,3 +18,5 @@
 [MANEJO ERRORES SEMANTICO]: hacer un enum para eso cuando haga el analisis semantico
 
 [TESTS] asociar a los tests que fallaron el mensaje de error (y no dejar que se imprima el error asi nomas)
+
+[README] actualizar readme 

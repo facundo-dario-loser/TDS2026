@@ -1,0 +1,8 @@
+void main() {
+    boolean a, b;
+    a = true;
+
+    if (a,) {
+        b = false;
+    }
+}

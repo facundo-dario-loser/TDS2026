@@ -1,112 +1,135 @@
-# TDS2026
+# TDS2026 (Proyecto)
 repositorio de la materia Taller de Diseño de Software UNRC 2026
 
 ### Integrante: Loser Facundo Dario
 
 ## Instrucciones para compilar
+**Nota:** el repositorio ya provee un ejecutable llamado `c-tds` en la carpeta `/proyecto/build/`. El mismo es para Linux x86_64. Si tiene otro sistema operativo o arquitectura debera seguir las instrucciones de abajo para compilar el proyecto.
 
-si se cuenta con la herramienta `Make` instalada, ejecutar en la terminal:
+Si se cuenta con la herramienta `Make` instalada, ejecutar en la terminal:
 
 ```
-cd preproyecto
+cd proyecto
 make
 ```
 
 en caso de no tener `Make` entonces hacer:
 
 ```
-cd preproyecto/analizador_lexico
-flex lexico.l 
+cd proyecto
+
+cd frontend/analizador_lexico/
+flex lexer.l
 cd ..
 
-cd analizador_sintactico
-bison parser.y 
+frontend/analizador_sintactico/
+bison parser.y
 cd ..
 
-gcc analizador_sintactico/parser.tab.c 		  \
-	analizador_lexico/lex.yy.c 		  		  \
-	TADs/ts.c 						  		  \
-	TADs/ast.c 								  \
-	analizador_semantico/analisis_semantico.c \
-	interprete/interprete.c 				  \
-	pseudo_asm/ir_asm.c 					  \
-	asm/asm.c 								  \
-	main.c                                    \
-    -o build/preproyecto
+gcc frontend/analizador_lexico/lex.yy.c         \
+	frontend/analizador_sintactico/parser.tab.c \
+	utils/argument.c							\
+	utils/debug.c							    \
+	main.c -o build/c-tds
 ```
 
-luego de esto se creara el ejecutable llamado `preproyecto` dentro de la carpeta `/preproyecto/build/`
+Esto creará un ejecutable llamado `c-tds` dentro de la carpeta `/proyecto/build/`.
 
-## Uso: 
+## Uso
 
-para usar el programa se debe proveer primero un flag para indicar si se desea ejecutar el interprete o se quiere generar pseudo assembly y luego se debe pasar el path al archivo con el programa fuente
+`./proyecto/build/c-tds -option path_to_file`
 
-**Flags:**
-- `-i` (intérprete)
-- `-p` (generar pseudo assembly)
+**Opciones**
+- `-o <salida>` Renombra el archivo ejecutable a `<salida>`.
+- `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (todavia no esta implementado).
+- `-opt` Aplicar optimizaciones (todavia no esta implementado).
+- `-debug` Ejecuta la compilación con logs e información útil en la terminal.
 
+<br>
+
+**Etapas**
+- `scan` ejecutar solo el análisis léxico.
+- `parse` ejecutar hasta el análisis sintáctico.
+- `codinter` ejecutar hasta la generación de código intermedio de bajo nivel (no implementado aun).
+- `assembly` ejecutar hasta la generación de assembly (no implementado aun).
+
+**Ejemplos de uso**
+
+`./proyecto/build/c-tds -o main path_to_file/main.ctds`
+
+`./proyecto/build/c-tds -target scan path_to_file/main.ctds`
+
+`./proyecto/build/c-tds -opt path_to_file/main.ctds`
+
+`./proyecto/build/c-tds -debug path_to_file/main.ctds`
+
+## Ejecución automática de tests
+El proyecto cuenta con un script de python y reglas en el Makefile que permiten ejecutar tests automaticamente. Debera contar obligatoriamente con Make y un interprete de python instalados.
+
+Dentro de la carpeta `/tests` se encuentran las subcarpetas:
+- `/lexer`: tests para la etapa del analisis lexico.
+- `/parser`: tests para la etapa del analisis sintactico.
+- `/general`: tests generales para todas las etapas del compilador.
+
+**Uso**: <br>
+Para poder correr los tests debera ejecutar las siguientes reglas de Make en la terminal:
+
+Ejecutar los tests para la etapa de analisis lexico:
 ```
-./build/preproyecto -flag path_to_source_code
+make test_lexer
 ```
-**Ejemplo:**	
-```
-cd preproyecto
-./build/preproyecto -p tests/test7.txt	
-```
-**Aclaración:**
 
-El interprete la única salida que genera es un print del valor resultante de evaluar la expresión asociada a un return (`return exp;`). Si no se retorna nada, el interprete no genera ninguna salida.
+Ejecutar los tests para la etapa de analisis sintactico:
+```
+make test_parser
+```
 
-En el caso del generador de pseudo assembly al finalizar imprime en la terminal todas las instrucciones generadas.<br>
-Luego como extra (ya que no es parte del preproyecto) genera dentro de la carpeta `/preproyecto` un archivo llamado `main.s` que contiene el programa assembly x86-64 correspondiente al código fuente.
+Ejecutar los tests generales:
+```
+make test_general
+```
+
+Cada una de estas reglas de Make llama al script `run_tests.py` que se encuentra en `/proyecto`. El mismo genera un log indicando cada test que va corriendo y si este paso o no (TEST PASSED o TEST FAILED). En el caso de los tests que fallaron tambien se muestra un mensaje adicional del compilador informando los errores especificos.<br>
+Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fallaron.
+
+## Documentacion
+El archivo `Documentation.md` dentro de `/proyecto` contiene una descripcion mas detallada del proyecto junto con decisiones diseno para la etapa correspondiente.
 
 ## Organización
+Dentro de la carpeta `/proyecto` se encuentran las siguientes carpetas y archivos:
 
-dentro de `/preproyecto` se cuenta con las siguientes carpetas y archivos:
+**Carpetas:**
+- `/build` acá se guarda el ejecutable del compilador llamado `c-tds`.
 
-`/analizador_lexico`: contiene el lexer hecho con flex.
+- `/frontend` contiene subcarpetas correspondientes al frontend del compilador:
+    - `/analizador_lexico` contiene el lexer dentro del archivo `lexer.l`.
+    - `/analizador_sintactico` contiene el parser en el archivo `parser.y`.
 
-`/analizador_sintactico`: contiene el parser hecho con bison.
+- `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.
+    - `/lexer` contiene tests correspondientes a la etapa del analisis lexico.
+    - `/parser` contiene tests correspondientes a la etapa del analisis sintactico.
+    - `/general` contiene tests que no corresponden a ninguna etapa en concreto.
 
-`/analizador_semantico`: código correspondiente al análisis semántico.
+- `/utils` contiene archivos con utilidades.
+    - `argument.h/.c` contiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.
+    - `debug.h/.c` contiene funciones y macros para debugear e imprimir errores.
 
-`/interprete`: código correspondiente al interprete (fue implementado usando recursión sobre el ast).
+**Archivos:**
 
-`/pseudo_asm`: código correspondiente a la generación de pseudo assembly (usando código de 3 direcciones).
+- `main.c` punto de entrada de todo el compilador.
 
-`/asm`: código correspondiente a la generación de assembly x86-64 (esto no era parte del preproyecto, pero lo hice para entender todas las etapas).
+- `run_tests.py` script para ejecutar tests automáticamente.
 
-`/TADs`: contiene la implementación del árbol sintactico abstracto (`ast.h/.c`) y de la tabla de simbolos (`ts.h/.c`).
-El ast esta implementado como un árbol binario y la tabla de simbolos como una pila de niveles (implementada con una lista enlazada) dónde cada nivel a su vez tiene una lista enlazada de simbolos.
+- `Makefile` archivo para compilar y ejecutar tests automáticamente.
 
-`/build`: aca se guarda el ejecutable final llamado `preproyecto`.
+- `TODO.txt` para anotar que cosas debo implementar, refactorizar, ideas, etc.
 
-`/tests`: algunos tests con los que se probo el proyecto.
+- `Documentation.md`: archivo markdown con documentacion mas detallada del proyecto.
 
-`main.c`: punto de entrada de todo el programa.
+<br>
+
+**Nota:**
+Dentro de cada archivo `.h` y `.c` se pueden encontrar comentarios con una descripción mas completa sobre que hace cada módulo y que hacen sus funciones, macros y tipos de datos.
 
 
-## Gramática del lenguaje
-**Aclaración**: esto no es código de bison. Esta escrita asi para que sea mas legible
-```
-type -> INT | BOOL | VOID
 
-p    -> type MAIN ( ) { c }
-
-c    -> d c | s c | λ		  // cuerpo de la función main
-
-e    -> e + e                 // expresión
-e    -> e * e
-e    -> e AND e 
-e    -> e OR e
-e    -> ( e )
-e    -> CONSTANTE_NUMERICA
-e    -> CONSTANTE_BOOLEANA 
-e    -> ID
-
-s    -> ID = e ; 			  // sentencia 
-s    -> RETURN e ;       
-s    -> RETURN ;          
-
-d    -> type ID ;             // declaración
-```
