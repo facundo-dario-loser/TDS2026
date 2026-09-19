@@ -36,7 +36,7 @@ gcc frontend/analizador_lexico/lex.yy.c         \
 Esto creará un ejecutable llamado `c-tds` dentro de la carpeta `/proyecto/build/`.
 
 ## Uso
-
+Ejemplo para ejecutar en la terminal:<br>
 `./proyecto/build/c-tds -option path_to_file`
 
 **Opciones**
@@ -66,7 +66,7 @@ Esto creará un ejecutable llamado `c-tds` dentro de la carpeta `/proyecto/build
 ## Ejecución automática de tests
 El proyecto cuenta con un script de python y reglas en el Makefile que permiten ejecutar tests automaticamente. Debera contar obligatoriamente con Make y un interprete de python instalados.
 
-Dentro de la carpeta `/tests` se encuentran las subcarpetas:
+Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/lexer`: tests para la etapa del analisis lexico.
 - `/parser`: tests para la etapa del analisis sintactico.
 - `/general`: tests generales para todas las etapas del compilador.
@@ -91,6 +91,8 @@ make test_general
 
 Cada una de estas reglas de Make llama al script `run_tests.py` que se encuentra en `/proyecto`. El mismo genera un log indicando cada test que va corriendo y si este paso o no (TEST PASSED o TEST FAILED). En el caso de los tests que fallaron tambien se muestra un mensaje adicional del compilador informando los errores especificos.<br>
 Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fallaron.
+
+**Nota:** si se desea, puede agregar mas tests a las carpetas respectivas y ejecutarlos con las reglas de Make dadas.
 
 ## Documentacion
 El archivo `Documentation.md` dentro de `/proyecto` contiene una descripcion mas detallada del proyecto junto con decisiones diseno para la etapa correspondiente.

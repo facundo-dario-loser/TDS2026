@@ -9,15 +9,15 @@
 
 // enum para saber la fuente o de donde viene un mensaje/printf
 typedef enum MessageSource {
-    MESSAGE_SOURCE_GLOBAL,
-    MESSAGE_SOURCE_ARGUMENT,
-    MESSAGE_SOURCE_LEXICAL_ANALYSIS,
-    MESSAGE_SOURCE_SINTAX_ANALYSIS,
-    MESSAGE_SOURCE_SEMANTIC_ANALYSIS,
-    MESSAGE_SOURCE_IR_GENERATION,
-    MESSAGE_SOURCE_ASSEMBLY_GENERATION,
-    MESSAGE_SOURCE_AST,
-    MESSAGE_SOURCE_SYMBOL_TABLE,
+    MESSAGE_SOURCE_GLOBAL,              // no proviene de ningun lugar en especifico (no sabia que nombre ponerle y deje GLOBAL)
+    MESSAGE_SOURCE_ARGUMENT,            // proviene de los argumentos con los que se invoco al compilador
+    MESSAGE_SOURCE_LEXICAL_ANALYSIS,    // proviene del analisis lexico
+    MESSAGE_SOURCE_SINTAX_ANALYSIS,     // proviene del analisis sintactico
+    MESSAGE_SOURCE_SEMANTIC_ANALYSIS,   // proviene del analisis semantico
+    MESSAGE_SOURCE_IR_GENERATION,       // proviene de la generacion de codigo intermedio de bajo nivel
+    MESSAGE_SOURCE_ASSEMBLY_GENERATION, // proviene de la generacion de assembly
+    MESSAGE_SOURCE_AST,                 // proviene del arbol sintactico abstracto
+    MESSAGE_SOURCE_SYMBOL_TABLE,        // proviene de la tabla de simbolos
 } MessageSource;
 
 extern bool debugFlag;
@@ -33,7 +33,7 @@ char * getMessageSourceString(MessageSource msgSrc);
                     exit(EXIT_FAILURE);  \
                   }                      \
 
-// macro para hacer logs para debuguear.
+// macro para hacer logs y debuguear. Solo printea si se ejecuto el compilador con la opcion -debug.
 // printea el prefijo 'LOG_' junto al el source de donde viene el mensaje y finalmente el mensaje en si.
 #define LOG(msgSrc, ...) {                                                         \
                             if (debugFlag) {                                       \

@@ -105,7 +105,9 @@ list_expr: expr ',' list_expr {}
 
 expr: ID                    {}
     | method_call           {}
-    | literal               {}
+    | INT_LITERAL           {}
+    | FLOAT_LITERAL         {}
+    | BOOL_LITERAL          {}
     | expr '+' expr         {}
     | expr '-' expr         {}
     | expr '*' expr         {}
@@ -116,15 +118,10 @@ expr: ID                    {}
     | expr EQUAL expr       {}
     | expr AND expr         {}
     | expr OR expr          {}
-    | '-' expr %prec UMINUS {} 
+    | '-' expr %prec UMINUS {}
     | '!' expr              {}
     | '(' expr ')'          {}
     ;
-
-literal: INT_LITERAL   {}
-       | BOOL_LITERAL  {}
-       | FLOAT_LITERAL {}
-       ;
 
 %%
 

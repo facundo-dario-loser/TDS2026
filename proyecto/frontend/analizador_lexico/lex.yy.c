@@ -2031,14 +2031,14 @@ void yyfree (void * ptr )
 // puntero al caracter actual/corriente en un buffer.
 
 void processMultilineComment(void) {
-    int  currentCharacter;         // caracter corriente que se leyo con input()
+    int  currentCharacter;         // caracter corriente que se esta leyendo del comentario
     bool multilineCommentIsClosed; // para saber si el comentario se cerro o se dejo abierto
     char multilineComment[2048];   // es para guardar el comentario multilinea para imprimirlo
     int index;                     // indice en el buffer multilineComment
 
     multilineCommentIsClosed = false;
-    index = 0;
-    currentCharacter = input();
+    index                    = 0;
+    currentCharacter         = input();
 
     while (currentCharacter != 0) { // si no llego al final del archivo
         multilineComment[index] = currentCharacter;
@@ -2064,8 +2064,8 @@ void processMultilineComment(void) {
         currentCharacter = input();
     }
 
+    // si el comentario esta bien cerrado, entonces eliminar el * de */
     if (multilineComment[index-1] == '*') multilineComment[index-1] = '\0';
-    //multilineComment[index] = '\0';
 
     if (!multilineCommentIsClosed) {
         ERROR_LEXER("multiline comment is not closed (line: %d)", yylineno)

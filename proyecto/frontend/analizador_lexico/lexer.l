@@ -66,7 +66,7 @@ false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       return BOO
 void processMultilineComment(void) {
     int  currentCharacter;         // caracter corriente que se esta leyendo del comentario
     bool multilineCommentIsClosed; // para saber si el comentario se cerro o se dejo abierto
-    char multilineComment[2048];   // es para guardar el comentario multilinea para imprimirlo
+    char multilineComment[2048];   // es para guardar el comentario multilinea para imprimirlo ya que yytext no lo guarda
     int index;                     // indice en el buffer multilineComment
 
     multilineCommentIsClosed = false;
