@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "../tads/st.h"
 
 // enum para saber la fuente o de donde viene un mensaje/printf
 typedef enum MessageSource {
@@ -78,5 +79,7 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define ERROR_ASSEMBLY(...) ERROR(MESSAGE_SOURCE_ASSEMBLY_GENERATION, __VA_ARGS__)
 #define ERROR_AST(...)      ERROR(MESSAGE_SOURCE_AST, __VA_ARGS__)
 #define ERROR_ST(...)       ERROR(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
+
+#define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
 
 #endif // DEBUG_H

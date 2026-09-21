@@ -4,3 +4,5 @@
 [TEST] ponerles nombres significativos a los tests 
 
 [MANEJO ERRORES SEMANTICO]: hacer un enum para eso cuando haga el analisis semantico
+
+[TABLA SIMBOLOS] no contar el campo next de symbol como una referencia mas a otro simbolo (solo se usa en la tabla de simbolos eso)
