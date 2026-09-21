@@ -24,13 +24,13 @@ else                      { DEBUG_LEXER("ELSE");                      return ELS
 while                     { DEBUG_LEXER("WHILE");                     return WHILE;         }
 return                    { DEBUG_LEXER("RETURN");                    return RETURN;        }
 ==                        { DEBUG_LEXER("EQUAL");                     return EQUAL;         }
-"&&"                      { DEBUG_LEXER("AND");                       return AND;           }
-"||"                      { DEBUG_LEXER("OR");                        return OR;            }
 true                      { DEBUG_LEXER("BOOL_LITERAL(true)");        return BOOL_LITERAL;  }
 false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       return BOOL_LITERAL;  }
 [0-9][0-9]*               { DEBUG_LEXER("INT_LITERAL(%s)", yytext);   return INT_LITERAL;   }
 [0-9][0-9]*.[0-9][0-9]*   { DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); return FLOAT_LITERAL; }
 [a-zA-Z][a-zA-Z0-9_]*     { DEBUG_LEXER("ID(%s)", yytext);            return ID;            }
+"&&"                      { DEBUG_LEXER("AND");                       return AND;           }
+"||"                      { DEBUG_LEXER("OR");                        return OR;            }
 "+"                       { DEBUG_LEXER("+");                         return '+';           }
 "-"                       { DEBUG_LEXER("-");                         return '-';           }
 "*"                       { DEBUG_LEXER("*");                         return '*';           }

@@ -1,7 +1,10 @@
 # TDS2026 (Proyecto)
-repositorio de la materia Taller de Diseño de Software UNRC 2026
+Repositorio de la materia Taller de Diseño de Software UNRC 2026
 
 ### Integrante: Loser Facundo Dario
+
+## Entregas
+La entrega de cada etapa se hace en el branch correspodiente.
 
 ## Instrucciones para compilar
 **Nota:** el repositorio ya provee un ejecutable llamado `c-tds` en la carpeta `/proyecto/build/`. El mismo es para Linux x86_64. Si tiene otro sistema operativo o arquitectura debera seguir las instrucciones de abajo para compilar el proyecto.
@@ -41,9 +44,9 @@ Ejemplo para ejecutar en la terminal:<br>
 
 **Opciones**
 - `-o <salida>` Renombra el archivo ejecutable a `<salida>`.
-- `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (todavia no esta implementado).
+- `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (implementado parcialmente).
 - `-opt` Aplicar optimizaciones (todavia no esta implementado).
-- `-debug` Ejecuta la compilación con logs e información útil en la terminal.
+- `-debug` Ejecuta el compilador con logs e información útil en la terminal.
 
 <br>
 
@@ -72,19 +75,19 @@ Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/general`: tests generales para todas las etapas del compilador.
 
 **Uso**: <br>
-Para poder correr los tests debera ejecutar las siguientes reglas de Make en la terminal:
+Para poder correr los tests debe ejecutar las siguientes reglas de Make en la terminal:
 
-Ejecutar los tests para la etapa de analisis lexico:
+Ejecutar los tests para la etapa de **análisis léxico**:
 ```
 make test_lexer
 ```
 
-Ejecutar los tests para la etapa de analisis sintactico:
+Ejecutar los tests para la etapa de **análisis sintáctico**:
 ```
 make test_parser
 ```
 
-Ejecutar los tests generales:
+Ejecutar los tests **generales**:
 ```
 make test_general
 ```
@@ -94,11 +97,11 @@ Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fall
 
 **Nota:** si se desea, puede agregar mas tests a las carpetas respectivas y ejecutarlos con las reglas de Make dadas.
 
-## Documentacion
-El archivo `Documentation.md` dentro de `/proyecto` contiene una descripcion mas detallada del proyecto junto con decisiones diseno para la etapa correspondiente.
+## Documentación
+El archivo `Documentation.md` dentro de `/proyecto` contiene una descripcion mas detallada del proyecto junto con decisiones diseño para la etapa correspondiente.
 
 ## Organización
-Dentro de la carpeta `/proyecto` se encuentran las siguientes carpetas y archivos:
+Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y archivos:
 
 **Carpetas:**
 - `/build` acá se guarda el ejecutable del compilador llamado `c-tds`.
@@ -113,8 +116,8 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes carpetas y archivo
     - `/general` contiene tests que no corresponden a ninguna etapa en concreto.
 
 - `/utils` contiene archivos con utilidades.
-    - `argument.h/.c` contiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.
-    - `debug.h/.c` contiene funciones y macros para debugear e imprimir errores.
+    - `argument.h/.c` tiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.
+    - `debug.h/.c` tiene funciones y macros para debugear e imprimir errores.
 
 **Archivos:**
 

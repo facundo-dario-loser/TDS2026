@@ -619,7 +619,7 @@ static const yytype_int8 yydefact[] =
        0,     0,     7,     0,     0,    15,     0,     8,     9,     0,
        0,    24,    13,     0,     0,    16,    11,     0,     0,     0,
        0,     0,    32,    24,    33,     0,     0,    19,    24,     0,
-      12,    14,    10,     0,     0,    41,    40,    42,    38,     0,
+      12,    14,    10,     0,     0,    42,    40,    41,    38,     0,
        0,    31,     0,    39,     0,     0,     0,    18,    17,    23,
       26,     0,     0,    53,    54,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,    30,    34,     0,    37,
@@ -1660,13 +1660,13 @@ yyreduce:
 #line 1661 "parser.tab.c"
     break;
 
-  case 41: /* expr: BOOL_LITERAL  */
+  case 41: /* expr: FLOAT_LITERAL  */
 #line 109 "parser.y"
                             {}
 #line 1667 "parser.tab.c"
     break;
 
-  case 42: /* expr: FLOAT_LITERAL  */
+  case 42: /* expr: BOOL_LITERAL  */
 #line 110 "parser.y"
                             {}
 #line 1673 "parser.tab.c"

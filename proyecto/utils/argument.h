@@ -12,10 +12,10 @@
 
 // opciones del compilador
 typedef enum Option {
-    OPTION_O,      // para renombrar el ejecutable
-    OPTION_TARGET, // indicar hasta que etapa ejecutar el compilador
-    OPTION_OPT,    // indicar optimizaciones
-    OPTION_DEBUG,  // debugear al compilar
+    OPTION_O,
+    OPTION_TARGET,
+    OPTION_OPT,
+    OPTION_DEBUG,
 } Option;
 
 // etapas del compilador

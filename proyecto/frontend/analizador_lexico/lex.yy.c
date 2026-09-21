@@ -385,13 +385,13 @@ struct yy_trans_info
 static const flex_int16_t yy_accept[84] =
     {   0,
         0,    0,   37,   35,   32,   32,   24,   21,   35,   26,
-       27,   19,   17,   31,   18,   20,   14,   30,   22,   25,
-       23,   16,   16,   16,   16,   16,   16,   16,   16,   16,
-       28,   35,   29,   32,   10,   34,   33,    0,   14,    9,
-       16,   16,   16,   16,   16,    5,   16,   16,   16,   16,
-       16,   11,   33,   15,   14,   16,   16,   16,   16,    1,
-       16,   16,   16,   16,   15,   14,   16,    6,   16,   16,
-       16,   12,    3,   16,   16,   13,    4,   16,    7,   16,
+       27,   19,   17,   31,   18,   20,   12,   30,   22,   25,
+       23,   14,   14,   14,   14,   14,   14,   14,   14,   14,
+       28,   35,   29,   32,   15,   34,   33,    0,   12,    9,
+       14,   14,   14,   14,   14,    5,   14,   14,   14,   14,
+       14,   16,   33,   13,   12,   14,   14,   14,   14,    1,
+       14,   14,   14,   14,   13,   12,   14,    6,   14,   14,
+       14,   10,    3,   14,   14,   11,    4,   14,    7,   14,
         8,    2,    0
     } ;
 
@@ -866,37 +866,37 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 #line 27 "lexer.l"
-{ DEBUG_LEXER("AND");                       return AND;           }
+{ DEBUG_LEXER("BOOL_LITERAL(true)");        return BOOL_LITERAL;  }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 28 "lexer.l"
-{ DEBUG_LEXER("OR");                        return OR;            }
+{ DEBUG_LEXER("BOOL_LITERAL(false)");       return BOOL_LITERAL;  }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 29 "lexer.l"
-{ DEBUG_LEXER("BOOL_LITERAL(true)");        return BOOL_LITERAL;  }
+{ DEBUG_LEXER("INT_LITERAL(%s)", yytext);   return INT_LITERAL;   }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 30 "lexer.l"
-{ DEBUG_LEXER("BOOL_LITERAL(false)");       return BOOL_LITERAL;  }
+{ DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); return FLOAT_LITERAL; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 31 "lexer.l"
-{ DEBUG_LEXER("INT_LITERAL(%s)", yytext);   return INT_LITERAL;   }
+{ DEBUG_LEXER("ID(%s)", yytext);            return ID;            }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 32 "lexer.l"
-{ DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); return FLOAT_LITERAL; }
+{ DEBUG_LEXER("AND");                       return AND;           }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 33 "lexer.l"
-{ DEBUG_LEXER("ID(%s)", yytext);            return ID;            }
+{ DEBUG_LEXER("OR");                        return OR;            }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
@@ -2033,7 +2033,7 @@ void yyfree (void * ptr )
 void processMultilineComment(void) {
     int  currentCharacter;         // caracter corriente que se esta leyendo del comentario
     bool multilineCommentIsClosed; // para saber si el comentario se cerro o se dejo abierto
-    char multilineComment[2048];   // es para guardar el comentario multilinea para imprimirlo
+    char multilineComment[2048];   // es para guardar el comentario multilinea para imprimirlo ya que yytext no lo guarda
     int index;                     // indice en el buffer multilineComment
 
     multilineCommentIsClosed = false;
