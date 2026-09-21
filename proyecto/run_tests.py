@@ -39,7 +39,6 @@ flag_is_debug = (FLAG_COMPILER == "-debug")
 tests_passed  = []
 tests_failed  = []
 
-
 for file_name in test_files:
     file_path = os.path.join(TEST_DIR, file_name)
     result    = None
@@ -89,4 +88,6 @@ print("****SUMMARY****")
 print("test folder: " + TEST_DIR)
 print("tests that passed: " + str(tests_passed))
 print("tests that failed: " + str(tests_failed))
+print("*" * 120)
+print("\n")
 

@@ -74,6 +74,8 @@ Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/parser`: tests para la etapa del analisis sintactico.
 - `/general`: tests generales para todas las etapas del compilador.
 
+Cada una de estas carpetas a su vez tiene dos subcarpetas `/positive` y `/negative` con tests que deben pasar y tests que no deben pasar respectivemente. 
+
 **Uso**: <br>
 Para poder correr los tests debe ejecutar las siguientes reglas de Make en la terminal:
 
@@ -92,8 +94,8 @@ Ejecutar los tests **generales**:
 make test_general
 ```
 
-Cada una de estas reglas de Make llama al script `run_tests.py` que se encuentra en `/proyecto`. El mismo genera un log indicando cada test que va corriendo y si este paso o no (TEST PASSED o TEST FAILED). En el caso de los tests que fallaron tambien se muestra un mensaje adicional del compilador informando los errores especificos.<br>
-Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fallaron.
+Cada una de estas reglas de Make llama al script `run_tests.py` que se encuentra en `/proyecto`. Este script se corre 2 veces (una para los tests en `/positive` y otra para los tests en `/negative`). El mismo genera un log indicando cada test que va corriendo y si este paso o no (TEST PASSED o TEST FAILED). En el caso de los tests que fallaron tambien se muestra un mensaje adicional del compilador informando los errores especificos.<br>
+Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fallaron. Al ejecutar el script se mostraran 2 resúmenes ya que el script se corre 2 veces como se menciono tanto para los tests que deben pasar como para los que deben fallar.
 
 **Nota:** si se desea, puede agregar mas tests a las carpetas respectivas y ejecutarlos con las reglas de Make dadas.
 

@@ -1,4 +1,4 @@
-// returns treu iff x > y and false otherwise
+// returns true iff x > y and false otherwise
 boolean isBigger(int x, int y) {
     if (x > y) {
         return true;

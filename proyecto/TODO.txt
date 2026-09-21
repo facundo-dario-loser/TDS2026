@@ -1,19 +1,6 @@
 [NOTA] doc y comentarios los hago en espanol, pero codigo en ingles
 [NOTA] los comentarios multilinea que elegi no permiten comentarios anidados
 
-[IMPLEMENTAR] mejorar la ejecucion de test con python para que tambien permita ejecutar tests individuales
-[IMPLEMENTAR] junto a cada test asociar si debe pasar o no para poder hacer mejor el log
-
-[TEST] poner un comentario de si debe pasar y ademas especificar mejor para que es cada test. para testear que cosa 
 [TEST] ponerles nombres significativos a los tests 
 
-[TEST] hacer carpetas test if while
-
 [MANEJO ERRORES SEMANTICO]: hacer un enum para eso cuando haga el analisis semantico
-
-[TESTS] asociar a los tests que fallaron el mensaje de error (y no dejar que se imprima el error asi nomas)
-[TESTS] dividir los tests en tests positivos y negativos (que deben pasar y los que no deben pasar)
-
-Para crear branchs:
-git branch
-git push -u origin nombre-de-la-rama
