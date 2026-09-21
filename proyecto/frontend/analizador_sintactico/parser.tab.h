@@ -44,6 +44,11 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 18 "parser.y"
+ #include "../../tads/ast.h" 
+
+#line 52 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -54,21 +59,21 @@ extern int yydebug;
     YYEOF = 0,                     /* "end of file"  */
     YYerror = 256,                 /* error  */
     YYUNDEF = 257,                 /* "invalid token"  */
-    VOID = 258,                    /* VOID  */
-    INT = 259,                     /* INT  */
-    BOOLEAN = 260,                 /* BOOLEAN  */
-    FLOAT = 261,                   /* FLOAT  */
-    IF = 262,                      /* IF  */
-    ELSE = 263,                    /* ELSE  */
-    WHILE = 264,                   /* WHILE  */
-    RETURN = 265,                  /* RETURN  */
-    EQUAL = 266,                   /* EQUAL  */
-    AND = 267,                     /* AND  */
-    OR = 268,                      /* OR  */
-    BOOL_LITERAL = 269,            /* BOOL_LITERAL  */
-    INT_LITERAL = 270,             /* INT_LITERAL  */
-    FLOAT_LITERAL = 271,           /* FLOAT_LITERAL  */
-    ID = 272,                      /* ID  */
+    ID = 258,                      /* ID  */
+    INT_LITERAL = 259,             /* INT_LITERAL  */
+    FLOAT_LITERAL = 260,           /* FLOAT_LITERAL  */
+    BOOL_LITERAL = 261,            /* BOOL_LITERAL  */
+    VOID = 262,                    /* VOID  */
+    INT = 263,                     /* INT  */
+    BOOLEAN = 264,                 /* BOOLEAN  */
+    FLOAT = 265,                   /* FLOAT  */
+    IF = 266,                      /* IF  */
+    ELSE = 267,                    /* ELSE  */
+    WHILE = 268,                   /* WHILE  */
+    RETURN = 269,                  /* RETURN  */
+    EQUAL = 270,                   /* EQUAL  */
+    AND = 271,                     /* AND  */
+    OR = 272,                      /* OR  */
     UMINUS = 273                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
@@ -78,14 +83,15 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 18 "parser.y"
+#line 24 "parser.y"
 
     int     intValue;
-    bool    boolValue;
     float   floatValue;
-    char    *string;
+    bool    boolValue;
+    char    *strValue;
+    AstNode *node;
 
-#line 89 "parser.tab.h"
+#line 95 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

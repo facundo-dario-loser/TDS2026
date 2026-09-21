@@ -26,7 +26,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     // primero chequear que no exista el simbolo en el nivel corriente
     Symbol *aux = st->top->head;
 
-    while (aux != NULL) {
+    while (aux) {
         if (strcmp(aux->name, config->name) == 0) {
             return false; // la variable ya fue declarada
         }

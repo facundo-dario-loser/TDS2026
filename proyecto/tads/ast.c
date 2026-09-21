@@ -13,9 +13,10 @@ AstNode * newAstNode(AstNodeConfig *config) {
         node->value = config->value;
     }
 
-    node->left      = config->left;
-    node->middle    = config->middle;
-    node->right     = config->right;
+    node->children1 = config->children1;
+    node->children2 = config->children2;
+    node->children3 = config->children3;
+    node->children4 = config->children4;
     node->symbol    = NULL;           // los simbolos los creo en el analisis semantico
     node->hasReturn = false;
     node->line      = config->line;
@@ -25,9 +26,10 @@ AstNode * newAstNode(AstNodeConfig *config) {
 
 void freeAst(AstNode *root) {
         if (root) {
-        freeAst(root->left);
-        freeAst(root->middle);
-        freeAst(root->right);
+        freeAst(root->children1);
+        freeAst(root->children2);
+        freeAst(root->children3);
+        freeAst(root->children4);
 
         if (root->value.strValue) free(root->value.strValue);
 

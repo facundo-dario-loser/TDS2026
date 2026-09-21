@@ -54,24 +54,36 @@ typedef union AstNodeValue {
     bool  booleanValue; // para constantes booleanas
 } AstNodeValue;
 
+// para declaraciones guardar temporalmente el tipo dentro del nodo del ast 'type'
+// esta info luego se guarda en el simbolo
+typedef enum AstNodeDeclarationType {
+    AST_NODE_DECLARATION_TYPE_INT,
+    AST_NODE_DECLARATION_TYPE_FLOAT,
+    AST_NODE_DECLARATION_TYPE_BOOLEAN,
+} AstNodeDeclarationType;
+
 typedef struct AstNode {
-    AstNodeType    type;
-    AstNodeValue   value; // guarda temporalmente valores para luego darselos a los simbolos
-    Symbol         *symbol;
-    struct AstNode *left;
-    struct AstNode *middle;
-    struct AstNode *right;
-    bool            hasReturn;
-    int             line; // linea donde se ubica en el archivo
+    AstNodeType            type;
+    AstNodeDeclarationType declarationType; // solo para nodos 'AST_NODE_TYPE_TYPE'
+    AstNodeValue           value;           // guarda temporalmente valores para luego darselos a los simbolos
+    Symbol                 *symbol;
+    struct AstNode         *children1;      // left
+    struct AstNode         *children2;      // middle
+    struct AstNode         *children3;      // right
+    struct AstNode         *children4;      // right-most
+    bool                   hasReturn;
+    int                    line;            // linea donde se ubica en el archivo
 } AstNode;
 
 typedef struct AstNodeConfig {
-    AstNodeType  type;
-    AstNodeValue value;
-    AstNode      *left;
-    AstNode      *middle;
-    AstNode      *right;
-    int          line;
+    AstNodeType            type;
+    AstNodeDeclarationType declarationType;
+    AstNodeValue           value;
+    AstNode                *children1;
+    AstNode                *children2;
+    AstNode                *children3;
+    AstNode                *children4;
+    int                    line;
 } AstNodeConfig;
 
 AstNode * newAstNode(AstNodeConfig *config);

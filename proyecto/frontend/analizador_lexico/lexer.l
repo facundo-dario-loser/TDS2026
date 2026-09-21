@@ -15,41 +15,41 @@
 %option yylineno
 
 %%
-int                       { DEBUG_LEXER("INT");                       return INT;           }
-boolean                   { DEBUG_LEXER("BOOLEAN");                   return BOOLEAN;       }
-void                      { DEBUG_LEXER("VOID");                      return VOID;          }
-float                     { DEBUG_LEXER("FLOAT");                     return FLOAT;         }
-if                        { DEBUG_LEXER("IF");                        return IF;            }
-else                      { DEBUG_LEXER("ELSE");                      return ELSE;          }
-while                     { DEBUG_LEXER("WHILE");                     return WHILE;         }
-return                    { DEBUG_LEXER("RETURN");                    return RETURN;        }
-==                        { DEBUG_LEXER("EQUAL");                     return EQUAL;         }
-true                      { DEBUG_LEXER("BOOL_LITERAL(true)");        return BOOL_LITERAL;  }
-false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       return BOOL_LITERAL;  }
-[0-9][0-9]*               { DEBUG_LEXER("INT_LITERAL(%s)", yytext);   return INT_LITERAL;   }
-[0-9][0-9]*.[0-9][0-9]*   { DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); return FLOAT_LITERAL; }
-[a-zA-Z][a-zA-Z0-9_]*     { DEBUG_LEXER("ID(%s)", yytext);            return ID;            }
-"&&"                      { DEBUG_LEXER("AND");                       return AND;           }
-"||"                      { DEBUG_LEXER("OR");                        return OR;            }
-"+"                       { DEBUG_LEXER("+");                         return '+';           }
-"-"                       { DEBUG_LEXER("-");                         return '-';           }
-"*"                       { DEBUG_LEXER("*");                         return '*';           }
-"/"                       { DEBUG_LEXER("/");                         return '/';           }
-"%"                       { DEBUG_LEXER("%%");                        return '%';           }
-"<"                       { DEBUG_LEXER("<");                         return '<';           }
-">"                       { DEBUG_LEXER(">");                         return '>';           }
-"!"                       { DEBUG_LEXER("!");                         return '!';           }
-"="                       { DEBUG_LEXER("=");                         return '=';           }
-"("                       { DEBUG_LEXER("(");                         return '(';           }
-")"                       { DEBUG_LEXER(")");                         return ')';           }
-"{"                       { DEBUG_LEXER("{");                         return '{';           }
-"}"                       { DEBUG_LEXER("}");                         return '}';           }
-";"                       { DEBUG_LEXER(";");                         return ';';           }
-","                       { DEBUG_LEXER(",");                         return ',';           }
-[ \n\t]+                  { /* ignorar espacios, new line y tab */                          }
-"//".*                    { DEBUG_LEXER("LINE_COMMENT(%s)", yytext);                        }
-"/*"                      { processMultilineComment();                                      }
-.                         { ERROR_LEXER("invalid token '%s' (line: %d)", yytext, yylineno)  }
+int                       { DEBUG_LEXER("INT");                       return INT;                                               }
+boolean                   { DEBUG_LEXER("BOOLEAN");                   return BOOLEAN;                                           }
+void                      { DEBUG_LEXER("VOID");                      return VOID;                                              }
+float                     { DEBUG_LEXER("FLOAT");                     return FLOAT;                                             }
+if                        { DEBUG_LEXER("IF");                        return IF;                                                }
+else                      { DEBUG_LEXER("ELSE");                      return ELSE;                                              }
+while                     { DEBUG_LEXER("WHILE");                     return WHILE;                                             }
+return                    { DEBUG_LEXER("RETURN");                    return RETURN;                                            }
+==                        { DEBUG_LEXER("EQUAL");                     return EQUAL;                                             }
+true                      { DEBUG_LEXER("BOOL_LITERAL(true)");        yylval.boolValue  = true;           return BOOL_LITERAL;  }
+false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       yylval.boolValue  = false;          return BOOL_LITERAL;  }
+[0-9][0-9]*               { DEBUG_LEXER("INT_LITERAL(%s)", yytext);   yylval.intValue   = atoi(yytext);   return INT_LITERAL;   }
+[0-9][0-9]*.[0-9][0-9]*   { DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); yylval.floatValue = atof(yytext);   return FLOAT_LITERAL; }
+[a-zA-Z][a-zA-Z0-9_]*     { DEBUG_LEXER("ID(%s)", yytext);            yylval.strValue   = strdup(yytext); return ID;            }
+"&&"                      { DEBUG_LEXER("AND");                       return AND;                                               }
+"||"                      { DEBUG_LEXER("OR");                        return OR;                                                }
+"+"                       { DEBUG_LEXER("+");                         return '+';                                               }
+"-"                       { DEBUG_LEXER("-");                         return '-';                                               }
+"*"                       { DEBUG_LEXER("*");                         return '*';                                               }
+"/"                       { DEBUG_LEXER("/");                         return '/';                                               }
+"%"                       { DEBUG_LEXER("%%");                        return '%';                                               }
+"<"                       { DEBUG_LEXER("<");                         return '<';                                               }
+">"                       { DEBUG_LEXER(">");                         return '>';                                               }
+"!"                       { DEBUG_LEXER("!");                         return '!';                                               }
+"="                       { DEBUG_LEXER("=");                         return '=';                                               }
+"("                       { DEBUG_LEXER("(");                         return '(';                                               }
+")"                       { DEBUG_LEXER(")");                         return ')';                                               }
+"{"                       { DEBUG_LEXER("{");                         return '{';                                               }
+"}"                       { DEBUG_LEXER("}");                         return '}';                                               }
+";"                       { DEBUG_LEXER(";");                         return ';';                                               }
+","                       { DEBUG_LEXER(",");                         return ',';                                               }
+[ \n\t]+                  { /* ignorar espacios, new line y tab */                                                              }
+"//".*                    { DEBUG_LEXER("LINE_COMMENT(%s)", yytext);                                                            }
+"/*"                      { processMultilineComment();                                                                          }
+.                         { ERROR_LEXER("invalid token '%s' (line: %d)", yytext, yylineno)                                      }
 %%
 
 // input() es una funcion de flex que retorna el caracter que esta 
