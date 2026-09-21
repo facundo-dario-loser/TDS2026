@@ -30,11 +30,34 @@ Stage getArgumentStage(int argc, char *argv[]) {
     ERROR_ARGUMENT("invalid stage '%s'\n", argv[2])
 }
 
+void checkFileName(int argcIndex, char *argv[]) {
+    char *fileName;  // nombre del archivo
+    char *extension; // nombre de la extension
+
+    // si es un path busca la ultima ocurrencia '/'
+    fileName = strrchr(argv[argcIndex], '/');
+
+    if (fileName) {
+        fileName++; // avanza una posicion porque el primer caracter es '/'
+    } else {
+        fileName = argv[argcIndex];
+    }
+
+    if (fileName[0] == '-') ERROR_ARGUMENT("the name of the file provided starts with '-' (%s)", fileName)
+
+    // busca la ultima ocurrencia de '.'
+    extension = strrchr(fileName, '.');
+
+    if (!extension) ERROR_ARGUMENT("the file has no extension (the extension must be '.ctds')")
+    if (!stringEquals(extension, ".ctds")) ERROR_ARGUMENT("the file extension must be '.ctds' (%s)", fileName)
+}
+
 void processOptionO(int argc, char *argv[]) {
     if (argc < 3) ERROR_ARGUMENT("the name of the executable file was not specified")
     char *outputFileName = argv[2];
 
     if (argc < 4) ERROR_ARGUMENT("the path to the source file was not provided")
+    checkFileName(3, argv);
     yyin = fopen(argv[3], "r");
 
     if (!yyin) {
@@ -56,6 +79,7 @@ void processOptionTarget(int argc, char *argv[]) {
     char *outputFileName = "a"; // por default
 
     if (argc < 4) ERROR_ARGUMENT("the path to the source file was not provided")
+    checkFileName(3, argv);
     yyin = fopen(argv[3], "r");
 
     if (!yyin) {
@@ -91,6 +115,7 @@ void processOptionDebug(int argc, char *argv[]) {
     char *outputFileName = "a"; // default executable name
 
     if (argc < 3) ERROR_ARGUMENT("the path to the source file was not provided")
+    checkFileName(2, argv);
     yyin = fopen(argv[2], "r");
 
     if (!yyin) {

@@ -36,6 +36,8 @@ bool stringEquals(char *str1, char *str2); // retorna true sii str1 == str2 y fa
 Option getArgumentOption(int argc, char *argv[]); // dada una opcion en los argumentos de invocacion, retorna un valor del enumerado 'Option'
 Stage  getArgumentStage(int argc, char *argv[]);  // dada la opcion '-target' en los argumentos de invocacion, retorna un valor del enumerado 'Stage'
 
+void checkFileName(int argcIndex, char *argv[]); // chequea que el nombre del archivo no comience con '-' y que su extension sea '.ctds'
+
 void processOptionO(int argc, char *argv[]);      // ejecuta el compilador con la opcion '-o <nombre_ejecutable>'
 void processOptionTarget(int argc, char *argv[]); // ejecuta el compilador con la opcion '-target <etapa>'
 void processOptionOpt(int argc, char *argv[]);    // ejecuta el compilador con la opcion '-opt'
