@@ -66,6 +66,8 @@ Ejemplo para ejecutar en la terminal:<br>
 
 `./proyecto/build/c-tds -debug path_to_file/main.ctds`
 
+**Nota:** si se ejecuta el compilador con la opcion `-o <salida>` o `-target <etapa>` no se producira ninguna salida (a excepción de los errores). Solamente con `-debug` se pueden visualizar los logs de cada etapa.
+
 ## Ejecución automática de tests
 El proyecto cuenta con un script de python y reglas en el Makefile que permiten ejecutar tests automaticamente. Debera contar obligatoriamente con Make y un interprete de python instalados.
 
