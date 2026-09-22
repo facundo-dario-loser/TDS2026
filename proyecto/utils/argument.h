@@ -9,6 +9,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include "debug.h"
+#include "../tads/ast.h"
+#include "dot.h"
 
 // opciones del compilador
 typedef enum Option {
@@ -26,10 +28,11 @@ typedef enum Stage {
     STAGE_ASSEMBLY, // para frenar en la generacion de assembly 
 } Stage;
 
-extern FILE *yyin;
-extern bool debugFlag;
-extern int  yyparse();
-extern int  yylex(void);
+extern FILE    *yyin;
+extern bool    debugFlag;
+extern AstNode *root;
+extern int     yyparse();
+extern int     yylex(void);
 
 bool stringEquals(char *str1, char *str2); // retorna true sii str1 == str2 y false en otro caso
 

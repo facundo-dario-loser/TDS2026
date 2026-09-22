@@ -71,6 +71,9 @@ void processOptionO(int argc, char *argv[]) {
     } else {
         ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
+    
+    // TODO: sacarlo de aca y hacerlo solo si se debugea
+    astToDot(root);
 }
 
 void processOptionTarget(int argc, char *argv[]) {

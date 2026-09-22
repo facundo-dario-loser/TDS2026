@@ -4,6 +4,7 @@ PROGRAMAS_C =  frontend/analizador_lexico/lex.yy.c         \
 			   utils/debug.c							   \
 			   tads/ast.c 								   \
 			   tads/st.c 								   \
+			   utils/dot.c 								   \
 			   main.c
 
 main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y $(PROGRAMAS_C)
