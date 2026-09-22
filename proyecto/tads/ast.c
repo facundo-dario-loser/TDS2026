@@ -5,7 +5,8 @@ AstNode * newAstNode(AstNodeConfig *config) {
 
     if (!node) ERROR_AST("couldn't allocate memory for new node");
 
-    node->type = config->type;
+    node->type            = config->type;
+    node->declarationType = config->declarationType;
 
     if (config->type == AST_NODE_TYPE_ID) {
         node->value.strValue = strdup(config->value.strValue);

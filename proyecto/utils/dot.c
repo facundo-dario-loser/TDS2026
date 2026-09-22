@@ -10,14 +10,22 @@ void getNodeLabel(AstNode *node, char label[256]) {
         case AST_NODE_TYPE_METHOD_DECL_LIST:    snprintf(label, 256, "METHOD_DECL_LIST"); break;
         case AST_NODE_TYPE_METHOD_DECL:         snprintf(label, 256, "METHOD_DECL");      break;
         case AST_NODE_TYPE_LIST_ID:             snprintf(label, 256, "LIST_ID");          break;
-        case AST_NODE_TYPE_ID:                  snprintf(label, 256, "ID");               break;
+        case AST_NODE_TYPE_ID:                  snprintf(label, 256, "%s", node->value.strValue); break;
         case AST_NODE_TYPE_PARAMS:              snprintf(label, 256, "PARAMS");           break;
         case AST_NODE_TYPE_BLOCK:               snprintf(label, 256, "BLOCK");            break;
         case AST_NODE_TYPE_VOID:                snprintf(label, 256, "VOID");             break;
         case AST_NODE_TYPE_PARAM:               snprintf(label, 256, "PARAM");            break;
         case AST_NODE_TYPE_BLOCK_ELEMS:         snprintf(label, 256, "BLOCK_ELEMS");      break;
         case AST_NODE_TYPE_STATEMENTS:          snprintf(label, 256, "STATEMENTS");       break;
-        case AST_NODE_TYPE_TYPE:                snprintf(label, 256, "TYPE");             break;
+        case AST_NODE_TYPE_TYPE:                {
+                                                    char *type;
+                                                    switch (node->declarationType) {
+                                                        case AST_NODE_DECLARATION_TYPE_INT:     type = "INT";     break;
+                                                        case AST_NODE_DECLARATION_TYPE_FLOAT:   type = "FLOAT";   break;
+                                                        case AST_NODE_DECLARATION_TYPE_BOOLEAN: type = "BOOLEAN"; break;
+                                                    }
+                                                    snprintf(label, 256, "%s", type);
+                                                }                                         break;
         case AST_NODE_TYPE_STATEMENT:           snprintf(label, 256, "STATEMENT");        break;
         case AST_NODE_TYPE_ASSIGNMENT:          snprintf(label, 256, "ASSIGMENT");        break;
         case AST_NODE_TYPE_METHOD_CALL:         snprintf(label, 256, "METHOD_CALL");      break;
@@ -25,9 +33,12 @@ void getNodeLabel(AstNode *node, char label[256]) {
         case AST_NODE_TYPE_WHILE:               snprintf(label, 256, "WHILE");            break;
         case AST_NODE_TYPE_RETURN:              snprintf(label, 256, "RETURN");           break;
         case AST_NODE_TYPE_LIST_EXPR:           snprintf(label, 256, "LIST_EXPR");        break;
-        case AST_NODE_TYPE_INT_LITERAL:         snprintf(label, 256, "INT_LITERAL");      break;
-        case AST_NODE_TYPE_FLOAT_LITERAL:       snprintf(label, 256, "FLOAT_LITERAL");    break;
-        case AST_NODE_TYPE_BOOL_LITERAL:        snprintf(label, 256, "BOOL_LITERAL");     break;
+        case AST_NODE_TYPE_INT_LITERAL:         snprintf(label, 256, "%d", node->value.intValue);   break;
+        case AST_NODE_TYPE_FLOAT_LITERAL:       snprintf(label, 256, "%f", node->value.floatValue); break;
+        case AST_NODE_TYPE_BOOL_LITERAL:        {
+                                                    char *boolLiteral = node->value.booleanValue ? "true" : "false";
+                                                    snprintf(label, 256, "%s", boolLiteral);
+                                                }                                         break;
         case AST_NODE_TYPE_ADDITION:            snprintf(label, 256, "+");                break;
         case AST_NODE_TYPE_SUBTRACTION:         snprintf(label, 256, "-");                break;
         case AST_NODE_TYPE_MULTIPLICATION:      snprintf(label, 256, "*");                break;

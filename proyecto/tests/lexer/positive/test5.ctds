@@ -1,0 +1,8 @@
+float x;
+
+void main() {
+    float y;
+    x = 8.0;
+
+    y = x + 2.6;
+}
