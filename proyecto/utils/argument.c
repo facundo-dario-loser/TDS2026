@@ -71,9 +71,6 @@ void processOptionO(int argc, char *argv[]) {
     } else {
         ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
-    
-    // TODO: sacarlo de aca y hacerlo solo si se debugea
-    astToDot(root);
 }
 
 void processOptionTarget(int argc, char *argv[]) {
@@ -132,4 +129,22 @@ void processOptionDebug(int argc, char *argv[]) {
     } else {
         ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
+
+    // obtener el nombre 
+    char *aux = strrchr(argv[2], '/');
+    if (aux) aux++;
+    if (!aux) aux = argv[2];
+
+    // cambiar la extension .ctds por .dot
+    char fileName[256];
+    int i = 0;
+
+    while (aux[i] != '.') {
+        fileName[i] = aux[i]; 
+        i++;
+    }
+    
+    strcat(fileName, ".dot");
+
+    AST_TO_DOT(root, fileName)
 }

@@ -7,6 +7,5 @@
 
 [TABLA SIMBOLOS] no contar el campo next de symbol como una referencia mas a otro simbolo (solo se usa en la tabla de simbolos eso)
 
-[LEXER] pasar los valores desde el lexer al parser (de los tokens)
-
-[AST] imprimirlo con Graphviz (DOT)
+generar el svg:
+dot -Tsvg file.dot -o ast.svg

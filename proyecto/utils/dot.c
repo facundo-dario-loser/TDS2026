@@ -48,7 +48,7 @@ void astToDotAux(AstNode *root, FILE *f) {
 
     char label[256];
     getNodeLabel(root, label);
-    fprintf(f, "\t\"node_%p\" [label=\"%s\", style=filled, fillcolor=\"#E8F0FE\", shape=ellipse, style=\"rounded,filled\"];\n", (void*)root, label);
+    fprintf(f, "  \"node_%p\" [label=\"%s\", style=filled, fillcolor=\"#E8F0FE\", shape=ellipse, style=\"rounded,filled\"];\n", (void*)root, label);
 
     AstNode *children[4] = { root->children1, root->children2, root->children3, root->children4 };
 
@@ -59,13 +59,12 @@ void astToDotAux(AstNode *root, FILE *f) {
     }
 }
 
-void astToDot(AstNode *root) {
-    FILE *f = fopen("dot_files/file.dot", "w");
+void astToDot(AstNode *root, char *fileName) {
+    char filePath[256] = "dot_files/";
+    strcat(filePath, fileName);
+    FILE *f = fopen(filePath, "w");
 
-    if (!f) {
-        printf("[ERROR_DOT]: couldn't open file 'dot_files/file.dot'\n");
-        exit(EXIT_FAILURE);
-    }
+    if (!f) ERROR_DOT("couldn't open file 'dot_files/file.dot'")
 
     fprintf(f, "digraph AST {\n");
     fprintf(f, "  node [fontname=\"Arial\"];\n");

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../tads/st.h"
+//#include "dot.h" ???? problema de dependencia circular
 
 // enum para saber la fuente o de donde viene un mensaje/printf
 typedef enum MessageSource {
@@ -19,6 +20,7 @@ typedef enum MessageSource {
     MESSAGE_SOURCE_ASSEMBLY_GENERATION, // proviene de la generacion de assembly
     MESSAGE_SOURCE_AST,                 // proviene del arbol sintactico abstracto
     MESSAGE_SOURCE_SYMBOL_TABLE,        // proviene de la tabla de simbolos
+    MESSAGE_SOURCE_DOT,                 // proviene del modulo dot.h
 } MessageSource;
 
 extern bool debugFlag;
@@ -79,7 +81,10 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define ERROR_ASSEMBLY(...) ERROR(MESSAGE_SOURCE_ASSEMBLY_GENERATION, __VA_ARGS__)
 #define ERROR_AST(...)      ERROR(MESSAGE_SOURCE_AST, __VA_ARGS__)
 #define ERROR_ST(...)       ERROR(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
+#define ERROR_DOT(...)      ERROR(MESSAGE_SOURCE_DOT, __VA_ARGS__)
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
+
+#define AST_TO_DOT(root, fileName) { if (debugFlag) astToDot(root, fileName); } 
 
 #endif // DEBUG_H

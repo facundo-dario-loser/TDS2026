@@ -11,6 +11,7 @@ char * getMessageSourceString(MessageSource msgSrc) {
         case MESSAGE_SOURCE_ASSEMBLY_GENERATION: return "ASSEMBLY_GENERATION"; break;
         case MESSAGE_SOURCE_AST:                 return "AST";                 break;
         case MESSAGE_SOURCE_SYMBOL_TABLE:        return "SYMBOL_TABLE";        break;
+        case MESSAGE_SOURCE_DOT:                 return "DOT";
         default:                                 return "";                    break;
     }
 }

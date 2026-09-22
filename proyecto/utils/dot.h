@@ -6,10 +6,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "debug.h"
 #include "../tads/ast.h"
 
 void getNodeLabel(AstNode *node, char label[256]);
 void astToDotAux(AstNode *root, FILE *f);
-void astToDot(AstNode *root);
+void astToDot(AstNode *root, char *fileName);
 
 #endif // DOT_H
