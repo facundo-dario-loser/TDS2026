@@ -85,6 +85,4 @@ char * getMessageSourceString(MessageSource msgSrc);
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
 
-#define AST_TO_DOT(root, fileName) { if (debugFlag) astToDot(root, fileName); } 
-
 #endif // DEBUG_H

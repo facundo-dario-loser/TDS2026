@@ -33,6 +33,9 @@ gcc frontend/analizador_lexico/lex.yy.c         \
 	frontend/analizador_sintactico/parser.tab.c \
 	utils/argument.c							\
 	utils/debug.c							    \
+    tads/ast.c 								    \
+    tads/st.c 								    \
+	utils/dot.c 								\
 	main.c -o build/c-tds
 ```
 
@@ -46,8 +49,14 @@ Ejemplo para ejecutar en la terminal:<br>
 - `-o <salida>` Renombra el archivo ejecutable a `<salida>`.
 - `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (implementado parcialmente).
 - `-opt` Aplicar optimizaciones (todavia no esta implementado).
-- `-debug` Ejecuta el compilador con logs e información útil en la terminal.
+- `-debug` Ejecuta el compilador con logs e información útil en la terminal. También genera un archivo `.dot` con el mismo nombre que el archivo con el programa fuente y lo guarda en la carpeta `/dot_files`.<br>
+    Luego es posible crear una imagen `.svg` a partir del archivo `.dot` ejecutando el siguiente comando:
 
+    ```
+    cd dot_files
+    dot -Tsvg fileName.dot -o fileName.svg
+    ```
+    **Nota:** debe contar Graphviz instalado.
 <br>
 
 **Etapas**
@@ -122,6 +131,15 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 - `/utils` contiene archivos con utilidades.
     - `argument.h/.c` tiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.
     - `debug.h/.c` tiene funciones y macros para debugear e imprimir errores.
+    - `dot.h/.c` tiene funciones para generar un archivo `.dot` a partir de un ast.
+
+- `/tads` contiene la implementacion de tipos abstractos de datos.
+    - `ast.h/.c` es la implementacion del arbol sintactico abstracto.
+    - `st.h/.c` es la implementacion de la tabla de simbolos.
+
+- `/dot_files` aca se guardan los archivos `.dot` generados.
+
+**Nota**: los archivos `.dot` solamente se generan si se ejecuta el compilador con la opcion `-debug`.
 
 **Archivos:**
 

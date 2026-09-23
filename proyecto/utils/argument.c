@@ -146,5 +146,5 @@ void processOptionDebug(int argc, char *argv[]) {
     
     strcat(fileName, ".dot");
 
-    AST_TO_DOT(root, fileName)
+    astToDot(root, fileName);
 }

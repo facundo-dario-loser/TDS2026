@@ -7,5 +7,9 @@
 
 [TABLA SIMBOLOS] no contar el campo next de symbol como una referencia mas a otro simbolo (solo se usa en la tabla de simbolos eso)
 
+[AST] sacar del enum los tipos de nodos que no use (y de dot.h/.c)
+
+[AST] meter el nro de linea en cada nodo
+
 generar el svg:
 dot -Tsvg file.dot -o ast.svg

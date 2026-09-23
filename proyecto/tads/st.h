@@ -61,7 +61,7 @@ void     closeLevel(SymbolTable *st);
 bool     insertSymbol(SymbolTable *st, SymbolConfig *config);
 Symbol * searchSymbol(SymbolTable *st, char *name);
 void     printSymbolTable(SymbolTable *st);
-void     freeSymbolTable(SymbolTable *st); // creo que era al pedo
+void     freeSymbolTable(SymbolTable *st);
 void     freeSymbol(Symbol *s);
 
 #endif // ST_h

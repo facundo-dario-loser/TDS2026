@@ -1,199 +1,190 @@
-# Documentación correspondiente a la entrega del analizador sintáctico y léxico (Scanner y Parser)
+# Documentación correspondiente a la entrega de la tabla de simbolos y el árbol sintáctico abstracto (TS y AST)
 
-## Análisis léxico (Scanner)
-El lexer se encuentra en el path `/proyecto/frontend/analizador_lexico/lexer.l`.<br> 
-A continuación se detallan los tokens del lenguaje reconocidos con flex indicando la expresión regular y el token que se retorna:
+## Tabla de simbolos (TS)
+Su implementacion se encuentra dentro de `/proyecto/tads` en los archivos `st.h/.c`.
 
-- **Palabras reservadas:** 
-    - `int` (retorna el token `INT`)
-    - `boolean` (retorna el token `BOOLEAN`)
-    - `void` (retorna el token `VOID`)
-    - `float` (retorna el token `FLOAT`)
-    - `if` (retorna el token `IF`)
-    - `else` (retorna el token `ELSE`)
-    - `while` (retorna el token `WHILE`)
-    - `return` (retorna el token `RETURN`)
-
-- **Operadores binarios aritmeticos:**
-    - `+` (retorna el token `'+'`)
-    - `-` (retorna el token `'-'`)
-    - `*` (retorna el token `'*'`)
-    - `/` (retorna el token `'/'`)
-    - `%` (retorna el token `'%'`)
-
-- **Operadores binarios relacionales:**
-    - `>` (retorna el token `'>'`)
-    - `<` (retorna el token `'<'`)
-    - `==` (retorna el token `EQUAL`)
-
-- **Operadores binarios logicos:**
-    - `&&` (retorna el token `AND`)
-    - `||` (retorna el token `OR`)
-
-- **Operador de asignacion:**
-    - `=` (retorna el token `'='`)
-
-- **Operadores unarios:**
-    - `!` (retorna el token `'!'`)
-    - `-` (retorna el token `'-'`)
-
-- **Constantes enteras:**
-    - `[0-9][0-9]*` (retorna el token `INT_LITERAL`)
-
-- **Constantes float:** 
-    - `[0-9][0-9]*.[0-9][0-9]*` (retorna el token `FLOAT_LITERAL`)
-
-- **Constantes booleanas:**
-    - `true` (retorna el token `BOOL_LITERAL`)
-    - `false` (retorna el token `BOOL_LITERAL`)
-
-- **Delimitadores:**
-    - `(` (retorna el token `'('`)
-    - `)` (retorna el token `')'`)
-    - `{` (retorna el token `'{'`)
-    - `}` (retorna el token `'}'`)
-    - `;` (retorna el token `';'`)
-    - `,` (retorna el token `','`)
-
-- **Comentarios de una linea:**
-    - `"//".*` (no retorna ningun token)
- 
-- **Identificadores:** 
-    - `[a-zA-Z][a-zA-Z0-9_]*` (retorna el token `ID`)
-
-- **Comentarios multilinea:** para esto primero se reconoce con flex  el inicio del comentario `/*` y luego se salta a la función `void processMultilineComment(void)` que se encarga manualmente de reconocer el comentario.
-
-## Análisis sintáctico (Parser)
-El parser en encuentra en el path `/proyecto/frontend/analizador_sintactico`. 
-
-**Precedencia de operadores y asociatividad**<br>
-Los operadores estan ordenados de menor a mayor prioridad:<br>
-- `OR` (asociativo a izquierda) <-- menor prioridad<br> 
-- `AND` (asociativo a izquierda) <br> 
-- `EQUAL` (no es asociativo)<br>  
-- `<, >` (tienen la misma precedencia y no son asociativos)<br> 
-- `-, +` (tienen la misma precedencia y son asociativos a izquierda)<br>
-- `*, /, %` (tienen la misma precedencia y son asociativos a izquierda) <br>
-- `UMINUS, !` (tienen la misma precedencia) <-- maxima prioridad<br>
-
-## Gramática del lenguaje
-**Nota:** la gramatica aca no esta escrita con reglas de bison para que sea mas legible.<br>
-El archivo `parser.y` ubicado en el path `/proyecto/frontend/analizador_sintactico` contiene la gramatica descripta con reglas de bison.
+Los simbolos se definen como:
 
 ```
-p                -> global_decl_list
-
-global_decl_list -> var_decl global_decl_list
-global_decl_list -> method_decl_list
-
-method_decl_list -> method_decl method_decl_list
-method_decl_list -> λ
-
-var_decl         -> type list_id ';'
-
-list_id          -> ID
-list_id          -> ID ',' list_id
-
-method_decl      -> type ID '(' params ')' block
-method_decl      -> type ID '(' ')' block
-method_decl      -> VOID ID '(' params ')' block
-method_decl      -> VOID ID '(' ')' block
-
-params           -> param ',' params
-params           -> param
-
-param            -> type ID
-
-block            -> '{' block_elems '}'
-
-block_elems      -> var_decl block_elems
-block_elems      -> statements
-
-type             -> INT
-type             -> BOOLEAN
-type             -> FLOAT
-
-statements       -> statement statements
-statements       -> λ
-
-statement        -> ID '=' expr ';'
-statement        -> method_call ';'
-statement        -> IF '(' expr ')' block
-statement        -> IF '(' expr ')' block ELSE block
-statement        -> WHILE '(' expr ')' block
-statement        -> RETURN expr ';'
-statement        -> RETURN ';' 
-statement        -> ';'
-statement        -> block
-
-method_call      -> ID '(' ')'
-method_call      -> ID '(' list_expr ')'
-
-list_expr        -> expr ',' list_expr
-list_expr        -> expr
-
-expr             -> ID
-expr             -> method_call
-expr             -> literal
-expr             -> INT_LITERAL
-expr             -> FLOAT_LITERAL
-expr             -> BOOL_LITERAL
-expr             -> expr '+' expr
-expr             -> expr '-' expr 
-expr             -> expr '*' expr 
-expr             -> expr '/' expr
-expr             -> expr '%' expr
-expr             -> expr '<' expr
-expr             -> expr '>' expr
-expr             -> expr EQUAL expr
-expr             -> expr AND expr
-expr             -> expr OR expr
-expr             -> '-' expr
-expr             -> '!' expr
-expr             -> '(' expr ')'
+typedef struct Symbol {
+    SymbolType         type;
+    char               *name;
+    SymbolSemanticType semanticType;
+    SymbolValue        value;
+    struct Symbol      *parameters;
+    struct Symbol      *next;       
+    int                referenceCount;
+    int                offset;
+    bool               offsetSet;
+} Symbol;
 ```
+
+- `type` es el tipo de simbolo. Los simbolos pueden ser de tipo variable, metodo/funcion o constate. Para el caso de los simbolos correspondientes a parametros de funciones los voy a tratar como variables locales.
+
+- `name` es el nombre del simbolo (que viene dado por el nombre de la varaible, funcion o parametro). En el caso de constantes su nombre es el string de su valor y para el caso de valores temporales su nombre es ti donde i es un entero natural.
+
+- `semanticType` es el tipo semantico del simbolo (int, boolean, float). En el caso de funciones que retornan algo representa el tipo de la expresion que retorna.
+
+- `value` permite guardar el valor del simbolo que puede ser un int, float o booleano. Este campo es una union entre int, float y bool. Es util para constantes.
+
+- `parameters` es una lista enlazada de simbolos que representan los parametros de una funcion. Este campo solo se usa si el tipo del simbolo es funcion.
+
+- `next` puntero a otro simbolo. permite crear una lista enlazada de simbolos. Es util para crear la lista de parametros de una funcion y para crear la lista de simbolos de un nivel en la pila de la tabla de simbolos.
+
+- `referenceCount` contador de punteros hacen referencia al simbolo. Es util a la hora de liberar el AST ya que varios nodos pueden apuntar a un mismo simbolo.
+
+- `offset` es el offset del simbolo respecto del registro base rbp. Este campo es util en la etapa de generacion de assembly.
+
+- `offsetSet` flag para saber si a un simbolo ya se le seteo cual va a ser su offset o no.
+
+**Nota**: Para el caso de los simbolos correspondientes a parametros de funciones los voy a tratar como variables locales.
+
+
+La tabla de simbolos se implementa como una pila de niveles en donde cada nivel tiene una lista enlazada de simbolos.
+La pila de niveles tambien esta implementada como una lista enlazada.
+
+**Nivel:**<br>
+El campo `head` es un puntero a la cabeza de la lista enlazada de simbolos del nivel correspondiente.<br>
+`next` es un puntero al siguiente nivel (inferior). 
+```
+typedef struct Level {
+    Symbol       *head;
+    struct Level *next;
+} Level;
+```
+
+**Tabla de simbolos:**<br>
+Contiene simplemente el puntero al tope de la pila (que es la cabeza de la lista enlazada de niveles). Cada vez que se inserta un nuevo nivel se hace a la cabeza de la lista.
+```
+typedef struct SymbolTable {
+    Level *top;
+} SymbolTable;
+```
+
+<br>**Funciones de la tabla de simbolos:**<br><br>
+Apila un nuevo nivel en el tope insertando el nivel a la cabeza de la lista enlazada de la pila.
+```
+void newLevel(SymbolTable *st);
+```
+
+Elimina el nivel del tope de la pila.
+```
+void closeLevel(SymbolTable *st);
+```
+
+Dada la configuracion de un simbolo, crea el simbolo y lo inserta en el nivel actual de la pila. Retorna true sii lo pudo insertar y false en otro caso (por ejemplo cuando ya existe el simbolo entonces no lo puede volver a insertar).
+```
+bool insertSymbol(SymbolTable *st, SymbolConfig *config);
+```
+
+Dado el nombre de un simbolo lo busca en toda la pila y retorna un puntero al mismo. Si no lo encuentra retorna NULL.
+```
+Symbol * searchSymbol(SymbolTable *st, char *name);
+```
+
+Printea la tabla de simbolos en la terminal.
+```
+void printSymbolTable(SymbolTable *st);
+```
+
+Libera la memoria de la pila de la tabla de simbolos. No elimina los simbolos de cada nivel ya que estos quedan apuntados por nodos del ast.
+```
+void freeSymbolTable(SymbolTable *st);
+```
+
+Libera la memoria para de un simbolo.
+```
+void freeSymbol(Symbol *s);
+```
+
+## Árbol sintáctico abstracto (AST)
+Su implementacion se encuentra dentro de `/proyecto/tads` en los archivos `ast.h/.c`.
+
+El ast se define como:
+```
+typedef struct AstNode {
+    AstNodeType            type;
+    AstNodeDeclarationType declarationType;
+    AstNodeValue           value;
+    Symbol                 *symbol;
+    struct AstNode         *children1;
+    struct AstNode         *children2;
+    struct AstNode         *children3;
+    struct AstNode         *children4;
+    bool                   hasReturn;
+    int                    line;
+} AstNode;
+```
+
+- `type` tipo de nodo del ast. Es un valor el enum `AstNodeType`.
+
+- `declarationType` puede ser (int, float, boolean). En mi ast tengo un tipo de nodo que es: `AST_NODE_TYPE_TYPE` el cual es para el tipo de las declaraciones de variables o funciones. Entonces `declarationType` permite saber dado un nodo de type si es int, float o boolean.
+
+- `value` permite guardar un int, float, boolean o string. Es util para guardar el valor de las constantes de manera temporal ya que luego durante el analisis semantico al crear los simbolos guardare este valor en los mismos.  
+
+- `symbol` es un puntero a un simbolo de la tabla de simbolos.
+
+- `children1`, `children2`, `children3`, `children4` son punteros a nodos hijos del ast. 
+
+- `hasReturn` flag que es util para saber si una funcion que en el perfil indica que tiene retorna algo, entonces chequear que en el cuerpo efectivamente tenga return's;
+
+- `line` guarda la linea de una declaracion, sentencia, etc. Sirve para indicar la linea cuando hay un error semantico. 
 
 ## Decisiones de diseño
-- No se permiten comentarios multilinea anidados `/*../*...*/...*/`. Pero es posible meter un comentario de una linea dentro de un comentario de varias lineas `/*...//...*/`.
 
-- El procesamiento de comentarios multilinea decidi hacerlo manualmente ya que era complejo dar una expresion regular para los mismos.
-Basicamente flex se encargar de reconocer la apertura del comentario `/*` y luego salta a mi propia función para consumir el resto del comentario: <br>`void processMultilineComment(void)`.<br>
-La misma utiliza por abajo la funcion `input()` y la macro `unput(c)` de flex.<br>
+- La creacion de los simbolos la decidi postergar para el analisis semantico. Si bien es posible crear todos los simbolos en el mismo parser a medida que se construye el ast, considere que no seria muy limpio dado que estaria obligado a hacerlo en el mismo archivo `parser.y` ya que necesito acceder a las variables de bison ($1, $2, ...).
 
-    Flex internamente lo que hace al abrir un archivo es ir cargando partes del mismo en un buffer en lugar de ir leyendo caracter por caracter del archivo directamente.
-Entonces:<br>
-    - `input()` es una función que retorna el caracter que esta leyendo actualmente el cabezal de lectura en el buffer y luego avanza en una posicion el cabezal.
+- Tanto en `ast.h` como en `st.h` cree estructuras de 'configuracion' para los simbolos y nodos del ast:
 
-    - `unput(c)` es una macro que vuelve a pushear en el buffer de lectura el caracter 'c' y mueve el cabezal de lectura una posicion para atras. Esta macro expande en la funcion 'yyunput'.
+```
+typedef struct SymbolConfig {
+    SymbolType         type;
+    char               *name;
+    SymbolSemanticType semanticType;
+    SymbolValue        value;
+    struct Symbol      *parameters;
+} SymbolConfig;
 
-    La función `void processMultilineComment(void)` va leyendo el proximo caracter con `input()` para saber si lo proximo es el cierre del comentario `*/` y por ende terminar la lectura o si se esta intentado abrir otro comentario anidado dentro `/*` lo cual es un error. Ademas va guardando los caracteres que lee en un arreglo ya que `yytext` no esta guardando la cadena leida. <br>La implementación de esta función se encuentra en el archivo `/proyecto/frontend/analizador_lexico/lexer.l`. Puede consultar el mismo para mas detalles.
+typedef struct AstNodeConfig {
+    AstNodeType            type;
+    AstNodeDeclarationType declarationType;
+    AstNodeValue           value;
+    AstNode                *children1;
+    AstNode                *children2;
+    AstNode                *children3;
+    AstNode                *children4;
+    int                    line;
+} AstNodeConfig;
+```
 
-- Toda la funcionalidad para hacer logs (utiles para debugear) e información de errores estan implementada en los archivos `debug.h/.c` en la carpeta `/proyecto/utils/`. Decidi crear el módulo porque es mucho mas limpio para manejar los logs y errores asi que con un printf() o exit()  directamente.
-Dentro del mismo tenemos las macros:
-    - `TODO(msg)`: se utiliza en en funciones o partes del programa que aun no cuentan con una implementación. Permite hacer implementaciones parciales e informar si entramos en la rama/bloque sin implementar. Luego finaliza el programa terminando el proceso con exit().
+El objetivo de las mismas es para hacer mas facil el diseño de las funciones que permiten crear simbolos y nodos del ast.<br>
+`SymbolConfig` y `AstNodeConfig` contienen todos los campos que se podrian llegar a setear en la creacion de un nuevo simbolo o nodo del ast.
 
-    - `LOG(msgSrc, ...)`: permite hacer un print normal si se ejecuto el compilador con la opcion `-debug`. Se le debe pasar un valor de un enumerado indicando de donde proviene el mensaje.
+```
+bool      insertSymbol(SymbolTable *st, SymbolConfig *config);
+AstNode * newAstNode(AstNodeConfig *config);
+```
+este diseño permite que solo tenga una unica funcion para crear nodos y lo mismo para crear nuevos simbolos. La razon por la cual ambas funciones toman un puntero a las configuraciones es por una cuestion de eficiencia (para evitar que se copie todo el struct).
 
-    - `ERROR(msgSrc, ...)`: permite hacer un log de un mensaje indicando que ocurrio un error y mostrando de donde proviene el error. Luego finaliza el programa terminando el proceso con exit().
+Por ejemplo en el caso del ast en lugar de tener varias funciones para crear diferentes tipos de nodos o tener 1 sola funcion con muchos parametros, entonces le paso solo 1 estructura con los campos que me interesen setear.<br>
+En el archivo `/proyecto/frontend/analizador_sintactico/parser.y` a su vez cuando llamo a newAstNode creo la estructura en la misma invocacion.<br> 
+Esta forma de crear e inicializar structs en C se llama `designated initializers`. Los campos que no setee por defecto se setean en 0 para numeros y NULL para punteros.<br>
+De esta manera logro 'simular' funciones que toman un numero variable de parametros y ademas en cualquier orden.
+Esta practica la aprendi de api's y bibliotecas modernas de C que lo suelen hacer.
 
-    La razon por la cual decidí usar macros y no funciones es por el hecho que necesitaba en si hacer wrappers alrededor de printf() y como uno podria pasar un numero variable de argumentos, entonces me resultaba mucho mas facil y rapido de implementar con una macro variadica en lugar de con una función variadica. Con una función variadica se debe acceder a cada argumento reccoriendo con un puntero en un ciclo. En cambio en una macro variadica se puede utilizar la macro `__VA_ARGS__` que reemplaza justamente `__VA_ARGS__` por todos los argumentos pasados en `...` (argumentos variables).<br>
-    Si bien abusar de macros en C no es buena practica, en este caso facilitaba la implementacion y mantenia la legibilidad del codigo.
+**Ejemplo**<br>
+A continuacion muestro como crear diferentes tipos de nodos del ast usando la misma funcion y llenando solo los campos que me interesan en la configuracion. Los mismos fueron sacados del archivo `parser.y`.<br>
 
-- El manejo de argumentos pasados por la linea de comandos se implementa en los archivos `argument.h/.c` que se encuentran en la carpeta `/proyecto/utils/`. Este modulo ofrece funciones para obtener los argumentos pasados al compilador (que son la 'opcion' y la 'etapa' en caso de haber usado la opcion `-target`). Luego provee 4 funciones que permiten ejecutar el compilador de acuerdo a la opcion elegida.
+Para los nodos de tipo `ID` llamo a newNode asi:
+```
+newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $1});
+``` 
 
-    - `void processOptionO(int argc, char *argv[]);`: para ejecutar el compilador con la opcion `-o <nombre_ejecutable>`.
-
-    - `void processOptionTarget(int argc, char *argv[]);`: para ejecutar el compilador con la opcion `-target <etapa>` (solo se implementaron las etapas 'scan' y 'parse'). 
-
-    - `void processOptionOpt(int argc, char *argv[]);`: para ejecutar el compilador con la opcion `-opt` (no implementado aun).
-
-    - `void processOptionDebug(int argc, char *argv[]);`: para ejecutar el compilador con la opcion `-debug`.
-
+Para los nodos de tipo `IF_ELSE` llamo a newNode asi:
+```
+newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = $3, .children2 = $5, .children3 = $7});
+```
+donde children 1 es la condicion, children2 es el nodo del bloque que se ejecuta si se cumple la condicion y children3 es el nodo del else.
 
 ## Problemas que tuve
-- Tuve dificultad para dar una expresión regular para los comentarios multilinea. Al principio solo permitia hacer comentarios que contuvieran letras y numeros con la expresion regular `"/*"[a-zA-Z0-9]*"*/"` pero era muy limitada y ademas no era capaz de dar un mensaje de error apropiado en caso de que en el programa se abriera un comentario multilinea con `/*` pero nunca se cerrara y entonces termine creando la funcion `void processMultilineComment(void)` como se explico anteriormente.
-
-- Otro problema menor fue que tuve que diferenciar de alguna forma el `-(menos binario)` del `-(menos unario)` y entonces en la gramática escrita en el parser use la directiva de bison `%precedence UMINUS` para crear un 'pseudotoken' y luego indique en la regla de las expresiones: `expr: '-' expr %prec UMINUS` para que cuando se entre por esa regla se use la precedencia del menos unario.<br> 
-**Aclaración:** 'UMINUS' es por 'UNARY MINUS' (menos unario).
-
-
+- ??

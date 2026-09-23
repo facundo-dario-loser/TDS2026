@@ -1,0 +1,11 @@
+void main() {
+    int a, b, c, d, e, f;
+
+    a = 2;
+    b = 4;
+    c = 8;
+    d = 16;
+    e = 24;
+    
+    f = (a + b) + c + (d + e);
+}

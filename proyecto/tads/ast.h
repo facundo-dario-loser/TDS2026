@@ -11,19 +11,17 @@
 typedef enum AstNodeType {
     AST_NODE_TYPE_P,                   // todo el programa
     AST_NODE_TYPE_GLOBAL_DECL_LIST,    // declaraciones de todo el programa
-    AST_NODE_TYPE_VAR_DECL,            // declaracion de varaible
+    AST_NODE_TYPE_VAR_DECL,            // declaracion de variable
     AST_NODE_TYPE_METHOD_DECL_LIST,    // declaracion de metodo/funcion
     AST_NODE_TYPE_METHOD_DECL,         // tipo de una variable o valor de retorno de una funcion
     AST_NODE_TYPE_LIST_ID,             // lista de identificadores (para declaracion de variables)
     AST_NODE_TYPE_ID,                  // identificador de variable o metodo/funcion
     AST_NODE_TYPE_PARAMS,              // lista de parametros para una funcion
-    AST_NODE_TYPE_BLOCK,               // bloque { }
     AST_NODE_TYPE_VOID,                // tipo void (porque estaba aparte de 'type' en la gramatica)
     AST_NODE_TYPE_PARAM,               // parametro de una funcion
     AST_NODE_TYPE_BLOCK_ELEMS,         // elementos de un bloque
     AST_NODE_TYPE_STATEMENTS,          // sentencias
     AST_NODE_TYPE_TYPE,                // quedo redundadnte/confuso pero es por el tipo de un var o retorno de funcion
-    AST_NODE_TYPE_STATEMENT,           // una sentencia
     AST_NODE_TYPE_ASSIGNMENT,          // asignacion
     AST_NODE_TYPE_METHOD_CALL,         // llamada a metodo/funcion
     AST_NODE_TYPE_IF_ELSE,             // condicional if-else
