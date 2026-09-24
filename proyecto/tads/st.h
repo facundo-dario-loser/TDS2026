@@ -46,22 +46,22 @@ typedef struct SymbolConfig {
     struct Symbol      *parameters;
 } SymbolConfig;
 
+// pila de niveles
 typedef struct Level {
-    Symbol       *head;
-    struct Level *next;
+    Symbol       *head; // lista de simbolos del nivel
+    struct Level *next; // proximo nivel (inferior)
 } Level;
 
-// pila de niveles (implementada usando una lista enlazada)
 typedef struct SymbolTable {
-    Level *top;
+    Level *top; // tope de la pila
 } SymbolTable;
 
-void     newLevel(SymbolTable *st);
-void     closeLevel(SymbolTable *st);
-bool     insertSymbol(SymbolTable *st, SymbolConfig *config);
-Symbol * searchSymbol(SymbolTable *st, char *name);
-void     printSymbolTable(SymbolTable *st);
-void     freeSymbolTable(SymbolTable *st);
-void     freeSymbol(Symbol *s);
+void     newLevel(SymbolTable *st);                           // crea un nuevo nivel y lo apila en el tope
+void     closeLevel(SymbolTable *st);                         // elimina el nivel del tope
+bool     insertSymbol(SymbolTable *st, SymbolConfig *config); // inserta un simbolo en el nivel actual
+Symbol * searchSymbol(SymbolTable *st, char *name);           // busca un simbolo en toda la pila de niveles. Si lo encuentra retorna un puntero al mismo y si no retorna NULL
+void     printSymbolTable(SymbolTable *st);                   // printea la tabla de simbolos en la terminal
+void     freeSymbolTable(SymbolTable *st);                    // libera la memoria de la tabal de simbolos
+void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
 
 #endif // ST_h

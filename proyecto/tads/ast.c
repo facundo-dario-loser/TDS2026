@@ -18,7 +18,7 @@ AstNode * newAstNode(AstNodeConfig *config) {
     node->children2 = config->children2;
     node->children3 = config->children3;
     node->children4 = config->children4;
-    node->symbol    = NULL;           // los simbolos los creo en el analisis semantico
+    node->symbol    = NULL; // los simbolos los creo en el analisis semantico
     node->hasReturn = false;
     node->line      = config->line;
 

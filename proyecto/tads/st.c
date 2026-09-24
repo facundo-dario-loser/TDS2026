@@ -88,9 +88,21 @@ void printSymbolTable(SymbolTable *st) {
     }
 }
 
-// creo que no es necesaria esta funcion
+// No es necesaria esta funcion ya que al terminar el analisis semantico 
+// los niveles se fueron cerrando eventualmente hasta que no quedo ninguno
 void freeSymbolTable(SymbolTable *st) {
-    TODO("freeSymbolTable() not yet implemented")
+    if (!st)      ERROR_ST("st in NULL in freeSymbolTable()")
+    if (!st->top) ERROR_ST("st has no levels in freeSymbolTable()")
+
+    Level *aux = st->top;
+
+    while (aux) {
+        Level *auxNext = aux->next;
+        free(aux);
+        aux = auxNext;
+    }
+
+    // deberia liberar st solo si fue creado dinamicamente
 }
 
 void freeSymbol(Symbol *s) {
