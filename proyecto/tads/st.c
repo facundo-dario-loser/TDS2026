@@ -23,14 +23,25 @@ void closeLevel(SymbolTable *st) {
 bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     if (!st) ERROR_ST("the symbol table is null (insertSymbol)")
 
-    // primero chequear que no exista el simbolo en el nivel corriente
+    // chequear que no exista el simbolo en el nivel corriente
     Symbol *aux = st->top->head;
 
     while (aux) {
         if (strcmp(aux->name, config->name) == 0) {
-            return false; // la variable ya fue declarada
+            return false; // ya existe el simbolo
         }
+        
         aux = aux->next;
+    }
+
+    // chequear que el nombre del simbolo no colisione con algun param si esta dentro de una funcion
+    if (config->functionWhichBelongs) {
+        Symbol *paramList = config->functionWhichBelongs->parameters;
+
+        while (paramList) {
+            if (strcmp(paramList->name, config->name) == 0) return false;
+            paramList = paramList->next;
+        }
     }
 
     Symbol *s         = (Symbol*)malloc(sizeof(Symbol));

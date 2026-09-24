@@ -11,5 +11,18 @@
 
 [AST] meter el nro de linea en cada nodo
 
+[DUDA_ANALISIS_SEMANTICO]: deberia cortar luego de encontrar el primer error? o deberia agarrar todos los errores e informarlos?
+
+[TENER EN CUENTA] los simbolos de los parametros de una funcion deberian ir emtidos un scope mas adentro que la funcion (un nivel mas adentro)
+                  podria crear los simbolos de los parametros para cada param pero no insertarlos aun en la tabla (solo dejarlos apuntados por nodos del ast). Luego los recolecto y armos la lista para params del metodo (parece mejor idea).
+                  los simbolos de los parametros no se deben isnertar directamente en la tabal de simbolos. van en el campo aprams del metodo.
+
+[PARSER] agregar las lineas en el parser 
+
+[ANALISIS FUNCIONES]: ver una mejor forma de analizar los returns. Capaz le puedo decir al hijo del cuerpo de alguna forma que en su bloque debe haber un return y que se encarga el hijo de chequearlo.
+
+[REDEFINICION DE VARIABLES] ver como ahcer para chequear que no se intente declarar una variable con el mismo nombre que un parametro
+                            podria ahcer que los simbolos tengan un punteor al simbolo de la funcion del cual son parte?
+                            
 generar el svg:
 dot -Tsvg file.dot -o ast.svg

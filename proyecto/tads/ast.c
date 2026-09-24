@@ -14,13 +14,14 @@ AstNode * newAstNode(AstNodeConfig *config) {
         node->value = config->value;
     }
 
-    node->children1 = config->children1;
-    node->children2 = config->children2;
-    node->children3 = config->children3;
-    node->children4 = config->children4;
-    node->symbol    = NULL; // los simbolos los creo en el analisis semantico
-    node->hasReturn = false;
-    node->line      = config->line;
+    node->children1      = config->children1;
+    node->children2      = config->children2;
+    node->children3      = config->children3;
+    node->children4      = config->children4;
+    node->symbol         = NULL; // los simbolos los creo en el analisis semantico
+    node->hasReturnExpr  = false;
+    node->hasReturnEmpty = false;
+    node->line           = config->line;
 
     return node;
 }

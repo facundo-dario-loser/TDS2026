@@ -71,6 +71,9 @@ void processOptionO(int argc, char *argv[]) {
     } else {
         ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
+
+    semanticAnalysis(root);
+    DEBUG("semantic analysis done")
 }
 
 void processOptionTarget(int argc, char *argv[]) {
@@ -148,4 +151,7 @@ void processOptionDebug(int argc, char *argv[]) {
 
     astToDot(root, fileName);
     DEBUG("'%s' file generated in folder /dot_files", fileName)
+
+    semanticAnalysis(root);
+    DEBUG("semantic analysis done")
 }

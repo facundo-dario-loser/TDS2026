@@ -1,16 +1,17 @@
-PROGRAMAS_C =  frontend/analizador_lexico/lex.yy.c         \
-			   frontend/analizador_sintactico/parser.tab.c \
-			   utils/argument.c							   \
-			   utils/debug.c							   \
-			   tads/ast.c 								   \
-			   tads/st.c 								   \
-			   utils/dot.c 								   \
-			   main.c
+C_PROGRAMS =  frontend/analizador_lexico/lex.yy.c         		\
+			  frontend/analizador_sintactico/parser.tab.c 		\
+			  utils/argument.c							   		\
+			  utils/debug.c							   		    \
+			  tads/ast.c 								   		\
+			  tads/st.c 								   		\
+			  utils/dot.c 								   		\
+			  frontend/analizador_semantico/semantic_analysis.c \
+			  main.c
 
 main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y $(PROGRAMAS_C)
 	make -C frontend/analizador_lexico/
 	make -C frontend/analizador_sintactico/ 
-	gcc $(PROGRAMAS_C) -o build/c-tds
+	gcc $(C_PROGRAMS) -o build/c-tds
 
 
 # reglas para ejecutar cada etapa del compilador:

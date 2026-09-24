@@ -69,8 +69,10 @@ typedef struct AstNode {
     struct AstNode         *children2;
     struct AstNode         *children3;
     struct AstNode         *children4;
-    bool                   hasReturn;
-    int                    line;            // linea donde se ubica en el archivo fuente
+    bool                   hasReturnExpr;  // para saber si en un bloque se retorna algo: return expr;
+    bool                   hasReturnEmpty; // para saber si en un bloque se ahce un return sin nada: return ;
+    Symbol                 *functionWhichBelongs; // para nodos que esten dentro de una funcion.
+    int                    line;           // linea donde se ubica en el archivo fuente
 } AstNode;
 
 typedef struct AstNodeConfig {

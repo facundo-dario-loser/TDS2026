@@ -18,6 +18,7 @@ typedef enum SymbolSemanticType {
     SYMBOL_SEMANTIC_TYPE_INT,
     SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     SYMBOL_SEMANTIC_TYPE_FLOAT,
+    SYMBOL_SEMANTIC_TYPE_VOID, // se usa en funciones que no retornan nada
 } SymbolSemanticType;
 
 typedef struct SymbolValue {
@@ -44,6 +45,7 @@ typedef struct SymbolConfig {
     SymbolSemanticType semanticType;
     SymbolValue        value;
     struct Symbol      *parameters;
+    struct Symbol      *functionWhichBelongs; // no es un campo del Symbol, pero sirve para saber si el simbolo esta dentro de una funcion (y tener el puntero al simbolo de la funcion)
 } SymbolConfig;
 
 // pila de niveles

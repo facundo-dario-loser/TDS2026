@@ -11,6 +11,7 @@
 #include "debug.h"
 #include "../tads/ast.h"
 #include "dot.h"
+#include "../frontend/analizador_semantico/semantic_analysis.h"
 
 // opciones del compilador
 typedef enum Option {
