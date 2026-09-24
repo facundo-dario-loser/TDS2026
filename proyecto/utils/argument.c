@@ -125,7 +125,7 @@ void processOptionDebug(int argc, char *argv[]) {
     int parseResult = yyparse();
     
     if (parseResult == 0) {
-        DEBUG("sintax analysis done\n")
+        DEBUG("sintax analysis done")
     } else {
         ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
     }
@@ -147,4 +147,5 @@ void processOptionDebug(int argc, char *argv[]) {
     strcat(fileName, ".dot");
 
     astToDot(root, fileName);
+    DEBUG("'%s' file generated in folder /dot_files", fileName)
 }

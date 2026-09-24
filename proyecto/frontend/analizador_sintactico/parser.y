@@ -52,26 +52,26 @@ AstNode *root = NULL;
 
 %%
 p: global_decl_list {
-                        $$   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children3 = $1});
+                        $$   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children1 = $1});
                         root = $$;
                     }
  ;
 
-global_decl_list: var_decl global_decl_list { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = $1, .children3 = $2}); }
+global_decl_list: var_decl global_decl_list { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = $1, .children2 = $2}); }
                 | method_decl_list          { $$ = $1; }
                 ;
 
-method_decl_list: method_decl method_decl_list { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = $1, .children3 = $2}); }
+method_decl_list: method_decl method_decl_list { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = $1, .children2 = $2}); }
                 | %empty                       { $$ = NULL; }
                 ;
 
-var_decl: type list_id ';' { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = $1, .children3 = $2}); } 
+var_decl: type list_id ';' { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = $1, .children2 = $2}); } 
         ;
 
 list_id: ID             { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $1}); }
        | ID ',' list_id {   
                             AstNode *aux = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $1});
-                            $$           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children3 = $3}); 
+                            $$           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children2 = $3}); 
                         } 
        ;
 

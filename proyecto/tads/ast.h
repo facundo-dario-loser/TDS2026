@@ -65,10 +65,10 @@ typedef struct AstNode {
     AstNodeDeclarationType declarationType; // solo para nodos 'AST_NODE_TYPE_TYPE'
     AstNodeValue           value;           // guarda temporalmente valores para luego darselos a los simbolos
     Symbol                 *symbol;
-    struct AstNode         *children1;      // left
-    struct AstNode         *children2;      // middle
-    struct AstNode         *children3;      // right
-    struct AstNode         *children4;      // right-most
+    struct AstNode         *children1;
+    struct AstNode         *children2;
+    struct AstNode         *children3;
+    struct AstNode         *children4;
     bool                   hasReturn;
     int                    line;            // linea donde se ubica en el archivo fuente
 } AstNode;

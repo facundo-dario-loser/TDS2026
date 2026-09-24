@@ -1430,7 +1430,7 @@ yyreduce:
   case 2: /* p: global_decl_list  */
 #line 54 "parser.y"
                     {
-                        (yyval.node)   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children3 = (yyvsp[0].node)});
+                        (yyval.node)   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children1 = (yyvsp[0].node)});
                         root = (yyval.node);
                     }
 #line 1437 "parser.tab.c"
@@ -1438,7 +1438,7 @@ yyreduce:
 
   case 3: /* global_decl_list: var_decl global_decl_list  */
 #line 60 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = (yyvsp[-1].node), .children3 = (yyvsp[0].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
 #line 1443 "parser.tab.c"
     break;
 
@@ -1450,7 +1450,7 @@ yyreduce:
 
   case 5: /* method_decl_list: method_decl method_decl_list  */
 #line 64 "parser.y"
-                                               { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = (yyvsp[-1].node), .children3 = (yyvsp[0].node)}); }
+                                               { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
 #line 1455 "parser.tab.c"
     break;
 
@@ -1462,7 +1462,7 @@ yyreduce:
 
   case 7: /* var_decl: type list_id ';'  */
 #line 68 "parser.y"
-                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = (yyvsp[-2].node), .children3 = (yyvsp[-1].node)}); }
+                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[-1].node)}); }
 #line 1467 "parser.tab.c"
     break;
 
@@ -1476,7 +1476,7 @@ yyreduce:
 #line 72 "parser.y"
                         {   
                             AstNode *aux = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-2].strValue)});
-                            (yyval.node)           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children3 = (yyvsp[0].node)}); 
+                            (yyval.node)           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children2 = (yyvsp[0].node)}); 
                         }
 #line 1482 "parser.tab.c"
     break;
