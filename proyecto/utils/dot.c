@@ -14,6 +14,7 @@ void getNodeLabel(AstNode *node, char label[256]) {
         case AST_NODE_TYPE_PARAMS:              snprintf(label, 256, "PARAMS");                                   break;
         case AST_NODE_TYPE_VOID:                snprintf(label, 256, "VOID");                                     break;
         case AST_NODE_TYPE_PARAM:               snprintf(label, 256, "PARAM");                                    break;
+        case AST_NODE_TYPE_BLOCK:               snprintf(label, 256, "BLOCK");                                    break;
         case AST_NODE_TYPE_BLOCK_ELEMS:         snprintf(label, 256, "BLOCK_ELEMS");                              break;
         case AST_NODE_TYPE_STATEMENTS:          snprintf(label, 256, "STATEMENTS");                               break;
         case AST_NODE_TYPE_TYPE:                {

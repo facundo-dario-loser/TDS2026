@@ -1,0 +1,35 @@
+digraph AST {
+  node [fontname="Arial"];
+  edge [arrowsize=0.8, color="#555555"];
+  "node_0x60912f3e7e90" [label="P", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7e90" -> "node_0x60912f3e7e40";
+  "node_0x60912f3e7e40" [label="METHOD_DECL_LIST", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7e40" -> "node_0x60912f3e7df0";
+  "node_0x60912f3e7df0" [label="METHOD_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7df0" -> "node_0x60912f3e7d30";
+  "node_0x60912f3e7d30" [label="VOID", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7df0" -> "node_0x60912f3e7d80";
+  "node_0x60912f3e7d80" [label="main", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7df0" -> "node_0x60912f3e7ce0";
+  "node_0x60912f3e7ce0" [label="BLOCK", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7ce0" -> "node_0x60912f3e7c90";
+  "node_0x60912f3e7c90" [label="BLOCK_ELEMS", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7c90" -> "node_0x60912f3e7a20";
+  "node_0x60912f3e7a20" [label="VAR_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7a20" -> "node_0x60912f3e7940";
+  "node_0x60912f3e7940" [label="INT", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7a20" -> "node_0x60912f3e79b0";
+  "node_0x60912f3e79b0" [label="x", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7c90" -> "node_0x60912f3e7c40";
+  "node_0x60912f3e7c40" [label="STATEMENTS", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7c40" -> "node_0x60912f3e7bf0";
+  "node_0x60912f3e7bf0" [label="BLOCK", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7bf0" -> "node_0x60912f3e7ba0";
+  "node_0x60912f3e7ba0" [label="BLOCK_ELEMS", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7ba0" -> "node_0x60912f3e7b50";
+  "node_0x60912f3e7b50" [label="VAR_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7b50" -> "node_0x60912f3e7a70";
+  "node_0x60912f3e7a70" [label="INT", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x60912f3e7b50" -> "node_0x60912f3e7ae0";
+  "node_0x60912f3e7ae0" [label="y", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+}

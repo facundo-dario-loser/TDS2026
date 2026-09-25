@@ -19,6 +19,7 @@ void analysisNodeId(AstNode *node, SymbolTable *st);
 void analysisNodeParams(AstNode *node, SymbolTable *st);
 void analysisNodeVoid(AstNode *node, SymbolTable *st);
 void analysisNodeParam(AstNode *node, SymbolTable *st);
+void analysisNodeBlock(AstNode *node, SymbolTable *st);
 void analysisNodeBlockElems(AstNode *node, SymbolTable *st);
 void analysisNodeStatements(AstNode *node, SymbolTable *st);
 void analysisNodeType(AstNode *node, SymbolTable *st);
@@ -43,6 +44,8 @@ void analysisNodeAnd(AstNode *node, SymbolTable *st);
 void analysisNodeOr(AstNode *node, SymbolTable *st);
 void analysisNodeMinus(AstNode *node, SymbolTable *st);
 void analysisNodeNegation(AstNode *node, SymbolTable *st);
+
+bool checkIfFunctionHasReturn(AstNode *node);
 
 //void analysisNode(AstNode *node, SymbolTable *st);
 #endif // SEMANTIC_ANALYSIS_H

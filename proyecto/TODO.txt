@@ -21,8 +21,56 @@
 
 [ANALISIS FUNCIONES]: ver una mejor forma de analizar los returns. Capaz le puedo decir al hijo del cuerpo de alguna forma que en su bloque debe haber un return y que se encarga el hijo de chequearlo.
 
-[REDEFINICION DE VARIABLES] ver como ahcer para chequear que no se intente declarar una variable con el mismo nombre que un parametro
+[REDEFINICION DE VARIABLES] ver como hacer para chequear que no se intente declarar una variable con el mismo nombre que un parametro
                             podria ahcer que los simbolos tengan un punteor al simbolo de la funcion del cual son parte?
                             
+[ST]: insertSymbol() podria retorna un enum indicando si se inserto ok, si hay redeclaracion de varaible o si colisiona con algun parametro.
+
+[DUDA]: el casteo entre int's y float's deberia hacerlo en el analisis semantico? o luego?
+
 generar el svg:
 dot -Tsvg file.dot -o ast.svg
+
+
+
+
+
+
+
+Para analisis de metodos
+
+La bandera de "Al menos un return":Para cumplir con el 
+requerimiento mínimo de que al menos haya un return, puedes 
+añadir un campo booleano hasAtLeastOneReturn dentro del símbolo 
+de la función (Symbol).Cada vez que analysisNodeReturn se ejecute 
+con éxito, setea st->currentMethod->hasAtLeastOneReturn = true;.
+
+
+Monitorear el nivel en SymbolTable:En tu estructura SymbolTable, añade un entero currentLevel:ctypedef struct {
+    Symbol *top;
+    int currentLevel; // <--- Añadir esto
+    Symbol *currentMethod;
+} SymbolTable;
+Use code with caution.(Nota: Al inicializar la tabla de símbolos en semanticAnalysis, pon st.currentLevel = 0;).
+
+
+
+esto es valido
+
+int random(int x, int y) {
+    int z;
+
+    {
+        int x = 4;
+    }
+}
+
+void random(int x) {
+    if (x > 40) {
+        int x = 80;
+    }
+}
+
+[DUDA]: consultar por el tema de shadowing de variables 
+
+

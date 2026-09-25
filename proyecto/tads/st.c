@@ -131,3 +131,13 @@ void freeSymbol(Symbol *s) {
 
     free(s);
 }
+
+char * getSemanticTypeString(SymbolSemanticType semanticType) {
+    switch (semanticType) {
+        case SYMBOL_SEMANTIC_TYPE_INT:     return "int";
+        case SYMBOL_SEMANTIC_TYPE_FLOAT:   return "float";
+        case SYMBOL_SEMANTIC_TYPE_BOOLEAN: return "boolean";
+        case SYMBOL_SEMANTIC_TYPE_VOID:    return "void";
+        default:                           return "";
+    }
+}

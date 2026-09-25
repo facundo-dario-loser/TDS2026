@@ -19,6 +19,7 @@ typedef enum AstNodeType {
     AST_NODE_TYPE_PARAMS,              // lista de parametros para una funcion
     AST_NODE_TYPE_VOID,                // tipo void (porque estaba aparte de 'type' en la gramatica)
     AST_NODE_TYPE_PARAM,               // parametro de una funcion
+    AST_NODE_TYPE_BLOCK,               // un bloque { }
     AST_NODE_TYPE_BLOCK_ELEMS,         // elementos de un bloque
     AST_NODE_TYPE_STATEMENTS,          // sentencias
     AST_NODE_TYPE_TYPE,                // quedo redundadnte/confuso pero es por el tipo de un var o retorno de funcion
@@ -69,8 +70,6 @@ typedef struct AstNode {
     struct AstNode         *children2;
     struct AstNode         *children3;
     struct AstNode         *children4;
-    bool                   hasReturnExpr;  // para saber si en un bloque se retorna algo: return expr;
-    bool                   hasReturnEmpty; // para saber si en un bloque se ahce un return sin nada: return ;
     Symbol                 *functionWhichBelongs; // para nodos que esten dentro de una funcion.
     int                    line;           // linea donde se ubica en el archivo fuente
 } AstNode;

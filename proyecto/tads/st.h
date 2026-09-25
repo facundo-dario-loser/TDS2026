@@ -65,5 +65,6 @@ Symbol * searchSymbol(SymbolTable *st, char *name);           // busca un simbol
 void     printSymbolTable(SymbolTable *st);                   // printea la tabla de simbolos en la terminal
 void     freeSymbolTable(SymbolTable *st);                    // libera la memoria de la tabal de simbolos
 void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
+char *   getSemanticTypeString(SymbolSemanticType semanticType);
 
 #endif // ST_h

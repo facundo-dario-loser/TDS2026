@@ -1,0 +1,31 @@
+digraph AST {
+  node [fontname="Arial"];
+  edge [arrowsize=0.8, color="#555555"];
+  "node_0x6362805ecdf0" [label="P", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecdf0" -> "node_0x6362805ecda0";
+  "node_0x6362805ecda0" [label="METHOD_DECL_LIST", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecda0" -> "node_0x6362805ecd50";
+  "node_0x6362805ecd50" [label="METHOD_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecd50" -> "node_0x6362805ec920";
+  "node_0x6362805ec920" [label="INT", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecd50" -> "node_0x6362805ecce0";
+  "node_0x6362805ecce0" [label="main", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecd50" -> "node_0x6362805ecc90";
+  "node_0x6362805ecc90" [label="BLOCK", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecc90" -> "node_0x6362805ecc40";
+  "node_0x6362805ecc40" [label="BLOCK_ELEMS", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecc40" -> "node_0x6362805eca70";
+  "node_0x6362805eca70" [label="VAR_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805eca70" -> "node_0x6362805ec990";
+  "node_0x6362805ec990" [label="INT", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805eca70" -> "node_0x6362805eca00";
+  "node_0x6362805eca00" [label="x", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecc40" -> "node_0x6362805ecbf0";
+  "node_0x6362805ecbf0" [label="BLOCK_ELEMS", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecbf0" -> "node_0x6362805ecba0";
+  "node_0x6362805ecba0" [label="VAR_DECL", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecba0" -> "node_0x6362805ecac0";
+  "node_0x6362805ecac0" [label="INT", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+  "node_0x6362805ecba0" -> "node_0x6362805ecb30";
+  "node_0x6362805ecb30" [label="y", style=filled, fillcolor="#E8F0FE", shape=ellipse, style="rounded,filled"];
+}

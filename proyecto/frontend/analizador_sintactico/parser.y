@@ -105,7 +105,7 @@ param: type ID {
                }
      ;
 
-block: '{' block_elems '}' { $$ = $2; }
+block: '{' block_elems '}' { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK, .children1 = $2}); }
      ;
 
 block_elems: var_decl block_elems { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK_ELEMS, .children1 = $1, .children2 = $2}); }

@@ -1542,7 +1542,7 @@ yyreduce:
 
   case 17: /* block: '{' block_elems '}'  */
 #line 108 "parser.y"
-                           { (yyval.node) = (yyvsp[-1].node); }
+                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK, .children1 = (yyvsp[-1].node)}); }
 #line 1547 "parser.tab.c"
     break;
 

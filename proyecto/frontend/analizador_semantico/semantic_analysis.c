@@ -23,6 +23,7 @@ void semanticAnalysisAux(AstNode *root, SymbolTable *st) {
         case AST_NODE_TYPE_PARAMS:              analysisNodeParams(root, st);             break;              
         case AST_NODE_TYPE_VOID:                analysisNodeVoid(root, st);               break;               
         case AST_NODE_TYPE_PARAM:               analysisNodeParam(root, st);              break;               
+        case AST_NODE_TYPE_BLOCK:               analysisNodeBlock(root, st);              break;
         case AST_NODE_TYPE_BLOCK_ELEMS:         analysisNodeBlockElems(root, st);         break;         
         case AST_NODE_TYPE_STATEMENTS:          analysisNodeStatements(root, st);         break;          
         case AST_NODE_TYPE_TYPE:                analysisNodeType(root, st);               break;                
@@ -51,6 +52,7 @@ void semanticAnalysisAux(AstNode *root, SymbolTable *st) {
 }
 
 void analysisNodeP(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node P visited")
     newLevel(st); // scope global
     if (node->children1) semanticAnalysisAux(node->children1, st);
     closeLevel(st); // cerrar el scope global
@@ -61,9 +63,28 @@ void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
-    AstNodeDeclarationType declarationType;
+    DEBUG_SEMANTIC("node VarDecl visited")
+    SymbolSemanticType     symbolSemanticType;
+    AstNodeDeclarationType nodeDeclarationType;
+    char                   *strSemanticType;
 
-    if (node->children1) declarationType = node->children1->declarationType;
+    if (node->children1) {
+        nodeDeclarationType = node->children1->declarationType;
+        switch (nodeDeclarationType) {
+            case AST_NODE_DECLARATION_TYPE_INT:     {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_INT;
+                                                        strSemanticType    = "int";
+                                                    } break;
+            case AST_NODE_DECLARATION_TYPE_FLOAT:   {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+                                                        strSemanticType    = "float";
+                                                    } break;
+            case AST_NODE_DECLARATION_TYPE_BOOLEAN: {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+                                                        strSemanticType    = "boolean";
+                                                    } break;
+        }
+    }
 
     if (!node->children2) return;
 
@@ -72,42 +93,53 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
             .name                 = node->children2->value.strValue,
-            .semanticType         = declarationType,
-            .functionWhichBelongs = node->functionWhichBelongs,    
+            .semanticType         = symbolSemanticType,
+            .functionWhichBelongs = node->functionWhichBelongs, // lo arrastra de arriba   
         };
 
         bool res = insertSymbol(st, &varSymbolConfig);
 
-        if (!res) ERROR_SEMANTIC("redeclared variable")
+        if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
-        // arrastrar el tipo de la declaracion en la lista
-        node->children2->declarationType = declarationType;
+        // arrastrar el tipo de la declaracion en la lista y la funcion dentro de la cual estan
+        node->children2->declarationType      = nodeDeclarationType;
+        node->children2->functionWhichBelongs = node->functionWhichBelongs;
         semanticAnalysisAux(node->children2, st);
     }
 }
 
 void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node MethodDeclList visited")
     if (node->children1) semanticAnalysisAux(node->children1, st);
     if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node MethodDecl visited")
     SymbolSemanticType returnType;
     char               *methodName;
     bool               hasReturn; // para saber si la funcion retorna algo
+    char               *strReturnType;
 
     hasReturn = false;
 
     // tipo de retorno de la funcion
-    //semanticAnalysisAux(node->children1, st); // hace falta?
-
     if (node->children1->type == AST_NODE_TYPE_TYPE) {
         switch (node->children1->declarationType) {
-            case AST_NODE_DECLARATION_TYPE_INT:     returnType = SYMBOL_SEMANTIC_TYPE_INT;     break;
-            case AST_NODE_DECLARATION_TYPE_FLOAT:   returnType = SYMBOL_SEMANTIC_TYPE_FLOAT;   break;
-            case AST_NODE_DECLARATION_TYPE_BOOLEAN: returnType = SYMBOL_SEMANTIC_TYPE_BOOLEAN; break;
+            case AST_NODE_DECLARATION_TYPE_INT:     {
+                                                        returnType    = SYMBOL_SEMANTIC_TYPE_INT;
+                                                        strReturnType = "int";
+                                                    } break;
+            case AST_NODE_DECLARATION_TYPE_FLOAT:   {
+                                                        returnType    = SYMBOL_SEMANTIC_TYPE_FLOAT;
+                                                        strReturnType = "float"; 
+                                                    }   break;
+            case AST_NODE_DECLARATION_TYPE_BOOLEAN: {
+                                                        returnType    = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+                                                        strReturnType = "boolean";
+                                                    } break;
         }
         hasReturn = true;
     }
@@ -124,6 +156,9 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
     Symbol *paramList = NULL;
     
     if (node->children3) {
+        // main no puede tener ningun param
+        if (strcmp(methodName, "main") == 0) ERROR_SEMANTIC("main can't have any parameters (line %d)", node->line)
+
         semanticAnalysisAux(node->children3, st);
         AstNode *aux = node->children3;
 
@@ -132,8 +167,8 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
             if (aux->children1) {
                 // inserta siempre a la cabeza
                 Symbol *paramSymbol = aux->children1->symbol;
-                paramSymbol->next = paramList;
-                paramList = paramSymbol;
+                paramSymbol->next   = paramList;
+                paramList           = paramSymbol;
             }
             aux = aux->children2;
         }
@@ -149,10 +184,13 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     bool res = insertSymbol(st, &methodSymbolConfig);
 
-    if (!res) ERROR_SEMANTIC("redeclared function")
+    if (!res) ERROR_SEMANTIC("redeclared function '%s' (line: %d)", methodName, node->line)
 
     Symbol *functionSymbol = searchSymbol(st, methodSymbolConfig.name);
 
+    node->children2->symbol = functionSymbol; // solo los nodos ID apuntan a simbolos
+                                              // aunque no haria falta guardar en la declaracion
+                                              
     // cuerpo de la funcion
     if (node->children4) {
         // las declaraciones de variables y sentencias del bloque pertencen a esta funcion
@@ -161,16 +199,14 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
     }
 
     // TODO:
-    /*if (hasReturn) {
-        // chequear que no tenga un return ; (vacio)
-        if (node->children4->hasReturnEmpty) ERROR_SEMANTIC(".")
-        
+    if (hasReturn) {
         // chequear si no retorna nada
-        if (!node->children4->hasReturnExpr) ERROR_SEMANTIC(".")
-    } else {
-        // chequear que no intente retornar algo
-        if (node->children4->hasReturnExpr) ERROR_SEMANTIC(".")
-    }*/
+        if (!checkIfFunctionHasReturn(node->children4)) 
+            ERROR_SEMANTIC("function signature of '%s' says it returns an '%s', but the body miss return's statatements (line: %d)", functionSymbol->name, strReturnType, node->line)
+    }
+
+    // si la funcion no retorna nada el chequeo de que no intente retornar
+    // algo se hace en la funcion de analisis del nodo return
 }
 
 void analysisNodeListId(AstNode *node, SymbolTable *st) {
@@ -193,7 +229,18 @@ void analysisNodeParam(AstNode *node, SymbolTable *st) {
     TODO("analysisNodeParam not implemented yet")
 }
 
+void analysisNodeBlock(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node Block visited")
+    newLevel(st);
+    if (node->children1) {
+        node->children1->functionWhichBelongs = node->functionWhichBelongs; // baja la funcion
+        semanticAnalysisAux(node->children1, st);
+    }
+    closeLevel(st); 
+}
+
 void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node BlockElems visited")
     if (node->children1) {
         node->children1->functionWhichBelongs = node->functionWhichBelongs;
         semanticAnalysisAux(node->children1, st);
@@ -206,8 +253,16 @@ void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeStatements(AstNode *node, SymbolTable *st) {
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    DEBUG_SEMANTIC("node Statements visited")
+    if (node->children1) {
+        node->children1->functionWhichBelongs = node->functionWhichBelongs;
+        semanticAnalysisAux(node->children1, st);
+    }
+
+    if (node->children2) {
+        node->children2->functionWhichBelongs = node->functionWhichBelongs;
+        semanticAnalysisAux(node->children2, st);
+    }
 }
 
 void analysisNodeType(AstNode *node, SymbolTable *st) {
@@ -215,25 +270,32 @@ void analysisNodeType(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
+    DEBUG_SEMANTIC("node Assigment visited")
     // ver que el tipo de la expresion de la derecha tenga el mismo tipo que el id de la izquierda
     SymbolSemanticType idType;
     SymbolSemanticType exprType;
+    char               *idTypeStr;
+    char               *exprTypeStr;
 
-    if (node->children1) {
-        Symbol *idSymbol = searchSymbol(st, node->children1->value.strValue);
-        idType = idSymbol->semanticType;
-    }
+    semanticAnalysisAux(node->children1, st);
+    idType    = node->children1->symbol->semanticType;
+    idTypeStr = getSemanticTypeString(idType);
 
     semanticAnalysisAux(node->children2, st);
     if (node->children2) {
-        exprType = node->children2->symbol->semanticType;
+        exprType    = node->children2->symbol->semanticType;
+        exprTypeStr = getSemanticTypeString(exprType);
     }
 
     if (idType != exprType) {
-        ERROR_SEMANTIC("invalid assigment")
+        if ((idType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (exprType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            // castear int a float
+        } else if ((idType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (exprType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            // castear float a int
+        } else {
+            ERROR_SEMANTIC("invalid assigment -> '%s' type is %s, but the right expression type is %s (line: %d)", node->children1->value.strValue, idTypeStr, exprTypeStr, node->line)
+        }
     }
-
-    // TODO: si a un float le asigno un int, castear 
 }
 
 void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
@@ -314,4 +376,43 @@ void analysisNodeMinus(AstNode *node, SymbolTable *st) {
 
 void analysisNodeNegation(AstNode *node, SymbolTable *st) {
     TODO("analysisNodeNegation not implemented yet")
+}
+
+// chequea que haya un return en todas las ramas
+bool checkIfFunctionHasReturn(AstNode *node) {
+    if (!node) return false;
+
+    switch (node->type) {
+        case AST_NODE_TYPE_BLOCK: {
+            if (node->children1) return checkIfFunctionHasReturn(node->children1);
+            return false;
+        } break;
+
+        case AST_NODE_TYPE_BLOCK_ELEMS: {
+            // el hijo izq es una declaracion y por ende la ignoramos
+            if (node->children2) return checkIfFunctionHasReturn(node->children2);
+            return false;
+        } break;
+
+        case AST_NODE_TYPE_STATEMENTS: {
+            bool leftChildrenHasReturn  = false;
+            bool rightChildrenHasReturn = false;
+            if (node->children1) leftChildrenHasReturn  = checkIfFunctionHasReturn(node->children1);
+            if (node->children2) rightChildrenHasReturn = checkIfFunctionHasReturn(node->children2);
+            return leftChildrenHasReturn || rightChildrenHasReturn;  
+        } break;
+
+        // debe haber return en ambas ramas. En un 'if' solo sin 'else' se retornaria false
+        case AST_NODE_TYPE_IF_ELSE: {
+            bool leftChildrenHasReturn  = false;
+            bool rightChildrenHasReturn = false;
+            if (node->children2) leftChildrenHasReturn  = checkIfFunctionHasReturn(node->children2);
+            if (node->children3) rightChildrenHasReturn = checkIfFunctionHasReturn(node->children3);
+            return leftChildrenHasReturn && rightChildrenHasReturn;
+        } break;
+
+        case AST_NODE_TYPE_RETURN: return true;
+
+        default: return false;
+    }
 }
