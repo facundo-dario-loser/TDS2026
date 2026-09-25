@@ -1,0 +1,7 @@
+void random(int x) {
+    if (x > 40) {
+        int x;
+    }
+}
+
+void main() {}

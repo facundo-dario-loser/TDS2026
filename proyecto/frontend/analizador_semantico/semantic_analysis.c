@@ -55,6 +55,21 @@ void analysisNodeP(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node P visited")
     newLevel(st); // scope global
     if (node->children1) semanticAnalysisAux(node->children1, st);
+
+    // chequear que exista un metodo llamado main
+    Symbol *aux = st->top->head;
+    bool flagMainExists = false;
+
+    while (aux) {
+        if (strcmp(aux->name, "main") == 0) {
+            flagMainExists = true;
+            break;
+        }
+        aux = aux->next;
+    }
+
+    if (!flagMainExists) ERROR_SEMANTIC("no method main was declared")
+
     closeLevel(st); // cerrar el scope global
 }
 
@@ -160,18 +175,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
         if (strcmp(methodName, "main") == 0) ERROR_SEMANTIC("main can't have any parameters (line %d)", node->line)
 
         semanticAnalysisAux(node->children3, st);
-        AstNode *aux = node->children3;
-
-        // recorro los parametros
-        while (aux) {
-            if (aux->children1) {
-                // inserta siempre a la cabeza
-                Symbol *paramSymbol = aux->children1->symbol;
-                paramSymbol->next   = paramList;
-                paramList           = paramSymbol;
-            }
-            aux = aux->children2;
-        }
+        getSymbolParamList(node->children3, &paramList);
     }
 
     // primero inserta el simbolo de la funcion y luego agregar los parametros 
@@ -190,7 +194,9 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     node->children2->symbol = functionSymbol; // solo los nodos ID apuntan a simbolos
                                               // aunque no haria falta guardar en la declaracion
-                                              
+     
+    PRINT_SYMBOL_METHOD_PARAM_LIST(functionSymbol)
+
     // cuerpo de la funcion
     if (node->children4) {
         // las declaraciones de variables y sentencias del bloque pertencen a esta funcion
@@ -210,15 +216,22 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeListId(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeListId not implemented yet")
+    TODO("analysisNodeListIdVoid not implemented yet")
 }
 
 void analysisNodeId(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeId not implemented yet")
+    DEBUG_SEMANTIC("node Id visited")
+    Symbol *idSymbol = searchSymbol(st, node->value.strValue);
+
+    if (!idSymbol) ERROR_SEMANTIC("variable '%s' was not declared (line: %d)", node->value.strValue, node->line)
+    
+    node->symbol = idSymbol;
 }
 
 void analysisNodeParams(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeParams not implemented yet")
+    DEBUG_SEMANTIC("node Params visited")
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeVoid(AstNode *node, SymbolTable *st) {
@@ -226,14 +239,35 @@ void analysisNodeVoid(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeParam(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeParam not implemented yet")
+    DEBUG_SEMANTIC("node Param visited")
+    SymbolSemanticType symbolSemanticType;
+
+    switch (node->children1->declarationType) {
+        case AST_NODE_DECLARATION_TYPE_INT:     symbolSemanticType = SYMBOL_SEMANTIC_TYPE_INT;     break;
+        case AST_NODE_DECLARATION_TYPE_FLOAT:   symbolSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;   break;
+        case AST_NODE_DECLARATION_TYPE_BOOLEAN: symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN; break;
+    }
+
+    char *symbolName = node->children2->value.strValue;
+
+    SymbolConfig config = (SymbolConfig){
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = symbolName,
+        .semanticType = symbolSemanticType,
+    };
+
+    Symbol *paramSymbol = newSymbol(&config);
+    node->children2->symbol = paramSymbol;
 }
 
 void analysisNodeBlock(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Block visited")
     newLevel(st);
     if (node->children1) {
-        node->children1->functionWhichBelongs = node->functionWhichBelongs; // baja la funcion
+        // solamente abjo la funcion si el hijo es un block elems (porque se que puede haber mas decl de var)
+        if (!(node->children1->type == AST_NODE_TYPE_STATEMENTS)) {
+            node->children1->functionWhichBelongs = node->functionWhichBelongs; // baja la funcion
+        }
         semanticAnalysisAux(node->children1, st);
     }
     closeLevel(st); 
@@ -247,7 +281,10 @@ void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
     }
 
     if (node->children2) {
-        node->children2->functionWhichBelongs = node->functionWhichBelongs;
+        // solamente abjo la funcion si el hijo es un block elems (porque se que puede haber mas decl de var)
+        if (!(node->children2->type == AST_NODE_TYPE_STATEMENTS)) {
+            node->children2->functionWhichBelongs = node->functionWhichBelongs;
+        }
         semanticAnalysisAux(node->children2, st);
     }
 }
@@ -255,12 +292,10 @@ void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
 void analysisNodeStatements(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Statements visited")
     if (node->children1) {
-        node->children1->functionWhichBelongs = node->functionWhichBelongs;
         semanticAnalysisAux(node->children1, st);
     }
 
     if (node->children2) {
-        node->children2->functionWhichBelongs = node->functionWhichBelongs;
         semanticAnalysisAux(node->children2, st);
     }
 }
@@ -319,7 +354,18 @@ void analysisNodeListExpr(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeIntLiteral not implemented yet")
+    DEBUG_SEMANTIC("node IntLiteral visited")
+    char *intLiteralName = "const";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_CONSTANT,
+        .name         = intLiteralName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_INT,
+        .value        = node->value.intValue,
+    };
+
+    Symbol *intLiteralSymbol = newSymbol(&config);
+    node->symbol             = intLiteralSymbol;
 }
 
 void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st) {
@@ -331,7 +377,43 @@ void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeAddition(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeAddition not implemented yet")
+    DEBUG_SEMANTIC("node Addition visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    // casteos
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of additon (+) is boolean (line: %d)", node->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of additon (+) is boolean (line: %d)", node->line)
+    }
+
+    // siempre casteo a float si son distintos
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprAdditionSymbol = newSymbol(&config);
+    node->symbol = exprAdditionSymbol;
 }
 
 void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {
@@ -415,4 +497,38 @@ bool checkIfFunctionHasReturn(AstNode *node) {
 
         default: return false;
     }
+}
+
+void getSymbolParamList(AstNode *node, Symbol **symbolParamList) {
+    if (!node) return;
+
+    switch (node->type) {
+        case AST_NODE_TYPE_PARAM: {
+            // inserta a la cabeza
+            node->children2->symbol->next = *symbolParamList;
+            *symbolParamList = node->children2->symbol;
+        } break;
+
+        case AST_NODE_TYPE_PARAMS: {
+            getSymbolParamList(node->children1, symbolParamList);
+            getSymbolParamList(node->children2, symbolParamList);
+        } break;
+        
+        default: return;
+    }
+}
+
+void printMethodParamList(Symbol *methodSymbol) {
+    if (!(methodSymbol->type == SYMBOL_TYPE_METHOD)) return;
+
+    printf("%s params: ", methodSymbol->name);
+
+    Symbol *aux = methodSymbol->parameters;
+
+    while (aux) {
+        printf("[%s] -> ", aux->name);
+        aux = aux->next;
+    }
+
+    printf("NULL\n");
 }

@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "../tads/st.h"
+
 //#include "dot.h" ???? problema de dependencia circular
 
 // enum para saber la fuente o de donde viene un mensaje/printf
@@ -84,5 +85,7 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define ERROR_DOT(...)      ERROR(MESSAGE_SOURCE_DOT, __VA_ARGS__)
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
+
+#define PRINT_SYMBOL_METHOD_PARAM_LIST(methodSymbol) { printf("[LOG_SEMANTIC_ANALYSIS]: "); if (debugFlag) printMethodParamList(methodSymbol); }
 
 #endif // DEBUG_H

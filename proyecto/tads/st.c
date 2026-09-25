@@ -64,13 +64,29 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
 Symbol * searchSymbol(SymbolTable *st, char *name) {
     if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
 
-    Level *currentLevel = st->top;
+    bool flagFirstFunctionFound = false;
+    Level *currentLevel         = st->top;
 
     while (currentLevel) {
         Symbol *aux = currentLevel->head;
 
         while (aux) {
             if (strcmp(aux->name, name) == 0) return aux;
+            
+            // ESTO PUEDE FALLAR!!!!
+            if ((aux->type == SYMBOL_TYPE_METHOD) && !flagFirstFunctionFound) {
+                // la primer funcion que me encontre debe contener al simbolo
+                // entonces buscar en sus parametros
+                flagFirstFunctionFound = true;
+
+                Symbol *paramsAux = aux->parameters;
+
+                while (paramsAux) {
+                    if (strcmp(paramsAux->name, name) == 0) return paramsAux;
+                    paramsAux = paramsAux->next;
+                }
+            }
+
             aux = aux->next;
         }
 
@@ -81,7 +97,7 @@ Symbol * searchSymbol(SymbolTable *st, char *name) {
 }
 
 void printSymbolTable(SymbolTable *st) {
-    printf("****TS****\n");
+    printf("****SymbolTable****\n");
     Level *levelAux = st->top;
     Symbol *symbolAux;
 
@@ -140,4 +156,20 @@ char * getSemanticTypeString(SymbolSemanticType semanticType) {
         case SYMBOL_SEMANTIC_TYPE_VOID:    return "void";
         default:                           return "";
     }
+}
+
+Symbol * newSymbol(SymbolConfig *config) {
+    if (!config) return NULL;
+
+    Symbol *s = (Symbol*)malloc(sizeof(Symbol));
+
+    if (!s) ERROR_ST("couldn't allocate memory for s in newSymbol")
+
+    s->type         = config->type;
+    s->name         = config->name;
+    s->semanticType = config->semanticType;
+    s->value        = config->value;
+    s->parameters   = config->parameters;
+
+    return s;
 }

@@ -71,6 +71,35 @@ void random(int x) {
     }
 }
 
+deberia permitir esto ultimo?
+
 [DUDA]: consultar por el tema de shadowing de variables 
 
 
+[SEMANTICO] diferenciar entre varaible redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
+
+[ST]: al buscar un simbolo debe buscar en los parametros de la funcion tambien si no lo encuentra
+
+
+mi searchSymbol para parametros puede fallar
+
+si tengo
+
+boolean bigger(int x, int y) {
+    return (x > y);
+}
+
+void main() {
+    int a;
+    int b;
+
+    a = 8;
+    b = 4;
+
+    while(bigger(x,y)) {
+        x = x - 1;
+    }
+}
+
+
+otra cosa: un parametro o variable local de una funcion no puede tener el mismo nombre que la funcion 

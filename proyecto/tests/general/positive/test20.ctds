@@ -1,0 +1,15 @@
+boolean bigger(int x, int y) {
+    return (x > y);
+}
+
+void main() {
+    int a;
+    int b;
+
+    a = 8;
+    b = 4;
+
+    while(bigger(x,y)) {
+        x = x - 1;
+    }
+}

@@ -1,0 +1,5 @@
+void random(int x, int y, boolean a, boolean b) {
+    // empty
+}
+
+void main () {}

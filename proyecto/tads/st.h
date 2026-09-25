@@ -66,5 +66,6 @@ void     printSymbolTable(SymbolTable *st);                   // printea la tabl
 void     freeSymbolTable(SymbolTable *st);                    // libera la memoria de la tabal de simbolos
 void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
 char *   getSemanticTypeString(SymbolSemanticType semanticType);
+Symbol * newSymbol(SymbolConfig *config);
 
-#endif // ST_h
+#endif // ST_H
