@@ -1430,7 +1430,7 @@ yyreduce:
   case 2: /* p: global_decl_list  */
 #line 54 "parser.y"
                     {
-                        (yyval.node)   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children1 = (yyvsp[0].node)});
+                        (yyval.node)   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_P, .children1 = (yyvsp[0].node), .line = yylineno});
                         root = (yyval.node);
                     }
 #line 1437 "parser.tab.c"
@@ -1438,7 +1438,7 @@ yyreduce:
 
   case 3: /* global_decl_list: var_decl global_decl_list  */
 #line 60 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_GLOBAL_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1443 "parser.tab.c"
     break;
 
@@ -1450,7 +1450,7 @@ yyreduce:
 
   case 5: /* method_decl_list: method_decl method_decl_list  */
 #line 64 "parser.y"
-                                               { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
+                                               { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL_LIST, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1455 "parser.tab.c"
     break;
 
@@ -1462,21 +1462,21 @@ yyreduce:
 
   case 7: /* var_decl: type list_id ';'  */
 #line 68 "parser.y"
-                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[-1].node)}); }
+                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VAR_DECL, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[-1].node), .line = yylineno}); }
 #line 1467 "parser.tab.c"
     break;
 
   case 8: /* list_id: ID  */
 #line 71 "parser.y"
-                        { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue)}); }
+                        { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue), .line = yylineno}); }
 #line 1473 "parser.tab.c"
     break;
 
   case 9: /* list_id: ID ',' list_id  */
 #line 72 "parser.y"
                         {   
-                            AstNode *aux = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-2].strValue)});
-                            (yyval.node)           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children2 = (yyvsp[0].node)}); 
+                            AstNode *aux = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-2].strValue), .line = yylineno});
+                            (yyval.node)           = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_ID, .children1 = aux, .children2 = (yyvsp[0].node), .line = yylineno}); 
                         }
 #line 1482 "parser.tab.c"
     break;
@@ -1484,8 +1484,8 @@ yyreduce:
   case 10: /* method_decl: type ID '(' params ')' block  */
 #line 78 "parser.y"
                                           { 
-                                            AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-4].strValue)});
-                                            (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = (yyvsp[-5].node), .children2 = auxID, .children3 = (yyvsp[-2].node), .children4 = (yyvsp[0].node)}); 
+                                            AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-4].strValue), .line = yylineno});
+                                            (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = (yyvsp[-5].node), .children2 = auxID, .children3 = (yyvsp[-2].node), .children4 = (yyvsp[0].node), .line = yylineno}); 
                                           }
 #line 1491 "parser.tab.c"
     break;
@@ -1493,8 +1493,8 @@ yyreduce:
   case 11: /* method_decl: type ID '(' ')' block  */
 #line 82 "parser.y"
                                           {
-                                            AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue)});
-                                            (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = (yyvsp[-4].node), .children2 = auxID, .children4 = (yyvsp[0].node)});
+                                            AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue), .line = yylineno});
+                                            (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = (yyvsp[-4].node), .children2 = auxID, .children4 = (yyvsp[0].node), .line = yylineno});
                                           }
 #line 1500 "parser.tab.c"
     break;
@@ -1502,9 +1502,9 @@ yyreduce:
   case 12: /* method_decl: VOID ID '(' params ')' block  */
 #line 86 "parser.y"
                                           {
-                                            AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID });
-                                            AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-4].strValue)});
-                                            (yyval.node)               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children3 = (yyvsp[-2].node), .children4 = (yyvsp[0].node)}); 
+                                            AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID, .line = yylineno});
+                                            AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-4].strValue), .line = yylineno});
+                                            (yyval.node)               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children3 = (yyvsp[-2].node), .children4 = (yyvsp[0].node), .line = yylineno}); 
                                           }
 #line 1510 "parser.tab.c"
     break;
@@ -1512,16 +1512,16 @@ yyreduce:
   case 13: /* method_decl: VOID ID '(' ')' block  */
 #line 91 "parser.y"
                                           {
-                                            AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID });
-                                            AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue)});
-                                            (yyval.node)               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children4 = (yyvsp[0].node)});
+                                            AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID, .line = yylineno});
+                                            AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue), .line = yylineno});
+                                            (yyval.node)               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children4 = (yyvsp[0].node), .line = yylineno});
                                           }
 #line 1520 "parser.tab.c"
     break;
 
   case 14: /* params: param ',' params  */
 #line 98 "parser.y"
-                         { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_PARAMS, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                         { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_PARAMS, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1526 "parser.tab.c"
     break;
 
@@ -1534,21 +1534,21 @@ yyreduce:
   case 16: /* param: type ID  */
 #line 102 "parser.y"
                { 
-                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue)});
-                (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_PARAM, .children1 = (yyvsp[-1].node), .children2 = auxID}); 
+                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue), .line = yylineno});
+                (yyval.node)             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_PARAM, .children1 = (yyvsp[-1].node), .children2 = auxID, .line = yylineno}); 
                }
 #line 1541 "parser.tab.c"
     break;
 
   case 17: /* block: '{' block_elems '}'  */
 #line 108 "parser.y"
-                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK, .children1 = (yyvsp[-1].node)}); }
+                           { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK, .children1 = (yyvsp[-1].node), .line = yylineno}); }
 #line 1547 "parser.tab.c"
     break;
 
   case 18: /* block_elems: var_decl block_elems  */
 #line 111 "parser.y"
-                                  { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK_ELEMS, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
+                                  { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BLOCK_ELEMS, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1553 "parser.tab.c"
     break;
 
@@ -1560,25 +1560,25 @@ yyreduce:
 
   case 20: /* type: INT  */
 #line 115 "parser.y"
-              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_INT}); }
+              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_INT, .line = yylineno}); }
 #line 1565 "parser.tab.c"
     break;
 
   case 21: /* type: BOOLEAN  */
 #line 116 "parser.y"
-              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_BOOLEAN}); }
+              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_BOOLEAN, .line = yylineno}); }
 #line 1571 "parser.tab.c"
     break;
 
   case 22: /* type: FLOAT  */
 #line 117 "parser.y"
-              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_FLOAT}); }
+              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_TYPE, .declarationType = AST_NODE_DECLARATION_TYPE_FLOAT, .line = yylineno}); }
 #line 1577 "parser.tab.c"
     break;
 
   case 23: /* statements: statement statements  */
 #line 120 "parser.y"
-                                 { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_STATEMENTS, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node)}); }
+                                 { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_STATEMENTS, .children1 = (yyvsp[-1].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1583 "parser.tab.c"
     break;
 
@@ -1591,8 +1591,8 @@ yyreduce:
   case 25: /* statement: ID '=' expr ';'  */
 #line 124 "parser.y"
                                             {
-                                                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue)});
-                                                (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ASSIGNMENT, .children1 = auxID, .children2 = (yyvsp[-1].node)});
+                                                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue), .line = yylineno});
+                                                (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ASSIGNMENT, .children1 = auxID, .children2 = (yyvsp[-1].node), .line = yylineno});
                                             }
 #line 1598 "parser.tab.c"
     break;
@@ -1605,31 +1605,31 @@ yyreduce:
 
   case 27: /* statement: IF '(' expr ')' block  */
 #line 129 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = (yyvsp[-2].node)->line}); }
 #line 1610 "parser.tab.c"
     break;
 
   case 28: /* statement: IF '(' expr ')' block ELSE block  */
 #line 130 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = (yyvsp[-4].node), .children2 = (yyvsp[-2].node), .children3 = (yyvsp[0].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = (yyvsp[-4].node), .children2 = (yyvsp[-2].node), .children3 = (yyvsp[0].node), .line = (yyvsp[-4].node)->line}); }
 #line 1616 "parser.tab.c"
     break;
 
   case 29: /* statement: WHILE '(' expr ')' block  */
 #line 131 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_WHILE, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_WHILE, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = (yyvsp[-2].node)->line}); }
 #line 1622 "parser.tab.c"
     break;
 
   case 30: /* statement: RETURN expr ';'  */
 #line 132 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_RETURN, .children1 = (yyvsp[-1].node)}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_RETURN, .children1 = (yyvsp[-1].node), .line = yylineno}); }
 #line 1628 "parser.tab.c"
     break;
 
   case 31: /* statement: RETURN ';'  */
 #line 133 "parser.y"
-                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_RETURN}); }
+                                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_RETURN, .line = yylineno}); }
 #line 1634 "parser.tab.c"
     break;
 
@@ -1648,8 +1648,8 @@ yyreduce:
   case 34: /* method_call: ID '(' ')'  */
 #line 138 "parser.y"
                                   { 
-                                    AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-2].strValue)});
-                                    (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_CALL, .children1 = auxID}); 
+                                    AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-2].strValue), .line = yylineno});
+                                    (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_CALL, .children1 = auxID, .line = yylineno}); 
                                   }
 #line 1655 "parser.tab.c"
     break;
@@ -1657,15 +1657,15 @@ yyreduce:
   case 35: /* method_call: ID '(' list_expr ')'  */
 #line 142 "parser.y"
                                   {
-                                    AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue)});
-                                    (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_CALL, .children1 = auxID, .children2 = (yyvsp[-1].node)}); 
+                                    AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[-3].strValue), .line = yylineno});
+                                    (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_CALL, .children1 = auxID, .children2 = (yyvsp[-1].node), .line = yylineno}); 
                                   }
 #line 1664 "parser.tab.c"
     break;
 
   case 36: /* list_expr: expr ',' list_expr  */
 #line 148 "parser.y"
-                              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_EXPR, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                              { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_LIST_EXPR, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1670 "parser.tab.c"
     break;
 
@@ -1677,7 +1677,7 @@ yyreduce:
 
   case 38: /* expr: ID  */
 #line 152 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = (yyvsp[0].strValue), .line = yylineno}); }
 #line 1682 "parser.tab.c"
     break;
 
@@ -1689,91 +1689,91 @@ yyreduce:
 
   case 40: /* expr: INT_LITERAL  */
 #line 154 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_INT_LITERAL, .value.intValue = (yyvsp[0].intValue)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_INT_LITERAL, .value.intValue = (yyvsp[0].intValue), .line = yylineno}); }
 #line 1694 "parser.tab.c"
     break;
 
   case 41: /* expr: FLOAT_LITERAL  */
 #line 155 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_FLOAT_LITERAL, .value.floatValue = (yyvsp[0].floatValue)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_FLOAT_LITERAL, .value.floatValue = (yyvsp[0].floatValue), .line = yylineno}); }
 #line 1700 "parser.tab.c"
     break;
 
   case 42: /* expr: BOOL_LITERAL  */
 #line 156 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BOOL_LITERAL, .value.booleanValue = (yyvsp[0].boolValue)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_BOOL_LITERAL, .value.booleanValue = (yyvsp[0].boolValue), .line = yylineno}); }
 #line 1706 "parser.tab.c"
     break;
 
   case 43: /* expr: expr '+' expr  */
 #line 157 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ADDITION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ADDITION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1712 "parser.tab.c"
     break;
 
   case 44: /* expr: expr '-' expr  */
 #line 158 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_SUBTRACTION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_SUBTRACTION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1718 "parser.tab.c"
     break;
 
   case 45: /* expr: expr '*' expr  */
 #line 159 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MULTIPLICATION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MULTIPLICATION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1724 "parser.tab.c"
     break;
 
   case 46: /* expr: expr '/' expr  */
 #line 160 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_DIVISION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_DIVISION, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1730 "parser.tab.c"
     break;
 
   case 47: /* expr: expr '%' expr  */
 #line 161 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MOD, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MOD, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1736 "parser.tab.c"
     break;
 
   case 48: /* expr: expr '<' expr  */
 #line 162 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_SMALLER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_SMALLER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1742 "parser.tab.c"
     break;
 
   case 49: /* expr: expr '>' expr  */
 #line 163 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_GREATER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_GREATER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1748 "parser.tab.c"
     break;
 
   case 50: /* expr: expr EQUAL expr  */
 #line 164 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EQUAL, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EQUAL, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1754 "parser.tab.c"
     break;
 
   case 51: /* expr: expr AND expr  */
 #line 165 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_AND, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_AND, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1760 "parser.tab.c"
     break;
 
   case 52: /* expr: expr OR expr  */
 #line 166 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_OR, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_OR, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1766 "parser.tab.c"
     break;
 
   case 53: /* expr: '-' expr  */
 #line 167 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MINUS, .children1 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MINUS, .children1 = (yyvsp[0].node), .line = yylineno}); }
 #line 1772 "parser.tab.c"
     break;
 
   case 54: /* expr: '!' expr  */
 #line 168 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_NEGATION, .children1 = (yyvsp[0].node)}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_NEGATION, .children1 = (yyvsp[0].node), .line = yylineno}); }
 #line 1778 "parser.tab.c"
     break;
 

@@ -1,0 +1,16 @@
+int max(int x, int y) {
+    if (x > y) {
+        return x;
+    } else {
+        return y;
+    }
+}
+
+void main() {
+    int x;
+    x = 40;
+
+    while (max(x, 20)) {
+        x = x - 1;
+    }
+}

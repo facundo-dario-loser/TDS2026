@@ -124,3 +124,5 @@ void random(int x) {
 }
 
 aca el int x no shadowea al param x. deberia haber un error teoricamente?
+
+- while tira mal la linea de error 

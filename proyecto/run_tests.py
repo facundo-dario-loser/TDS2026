@@ -46,7 +46,7 @@ for file_name in test_files:
     print("\n")
 
     if FLAG_COMPILER == "-o":
-        print(f"Running: {COMPILER} -debug {file_path}")
+        print(f"Running: {COMPILER} -o {file_path}")
         result = subprocess.run([COMPILER, "-o", "a", file_path])
         if (result.returncode == 0): 
             tests_passed.append(file_name)
@@ -71,7 +71,7 @@ for file_name in test_files:
         print("[TODO_PYTHON_SCRIPT]: option -opt no yet implemented")
 
     elif FLAG_COMPILER == "-target":
-        print(f"Running: {COMPILER} -debug {file_path}")
+        print(f"Running: {COMPILER} -target {file_path}")
         result = subprocess.run([COMPILER, "-target", STAGE, file_path])
         if (result.returncode == 0): 
             tests_passed.append(file_name)

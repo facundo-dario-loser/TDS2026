@@ -1,0 +1,8 @@
+void main() {
+    int x;
+    x = 4;
+
+    if (x) {
+        x = x - 1;
+    }
+}
