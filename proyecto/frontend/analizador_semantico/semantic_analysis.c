@@ -68,7 +68,7 @@ void analysisNodeP(AstNode *node, SymbolTable *st) {
         aux = aux->next;
     }
 
-    if (!flagMainExists) ERROR_SEMANTIC("no method main was declared")
+    if (!flagMainExists) ERROR_SEMANTIC("method main was not declared")
 
     closeLevel(st); // cerrar el scope global
 }
@@ -109,7 +109,6 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
             .type                 = SYMBOL_TYPE_VARIABLE,
             .name                 = node->children2->value.strValue,
             .semanticType         = symbolSemanticType,
-            .functionWhichBelongs = node->functionWhichBelongs, // lo arrastra de arriba   
         };
 
         bool res = insertSymbol(st, &varSymbolConfig);
@@ -118,9 +117,8 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
-        // arrastrar el tipo de la declaracion en la lista y la funcion dentro de la cual estan
-        node->children2->declarationType      = nodeDeclarationType;
-        node->children2->functionWhichBelongs = node->functionWhichBelongs;
+        // arrastrar el tipo de la declaracion en la lista
+        node->children2->declarationType = nodeDeclarationType;
         semanticAnalysisAux(node->children2, st);
     }
 }
@@ -164,7 +162,6 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
     }
 
     // ID de la funcion
-    //semanticAnalysisAux(node->children2, st); // hace falta?
     if (node->children2) methodName = node->children2->value.strValue;
 
     // parametros de la funcion
@@ -199,14 +196,12 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     // cuerpo de la funcion
     if (node->children4) {
-        // las declaraciones de variables y sentencias del bloque pertencen a esta funcion
-        node->children4->functionWhichBelongs = functionSymbol;
+        node->children4->isFunctionBlock = true;
         semanticAnalysisAux(node->children4, st);
     }
 
-    // TODO:
+    // chequear que si la funcion retorna algo entonces en el cuerpo esten los respectivos return's
     if (hasReturn) {
-        // chequear si no retorna nada
         if (!checkIfFunctionHasReturn(node->children4)) 
             ERROR_SEMANTIC("function signature of '%s' says it returns an '%s', but the body miss return's statatements (line: %d)", functionSymbol->name, strReturnType, node->line)
     }
@@ -263,11 +258,19 @@ void analysisNodeParam(AstNode *node, SymbolTable *st) {
 void analysisNodeBlock(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Block visited")
     newLevel(st);
+    
+    if (node->isFunctionBlock) {
+        // meter los simbolos de los parametros en el nivel actual
+        // la primer funcion del nivel anterior es de la cual debemos
+        // extraer los parametros
+        Symbol *functionSymbol          = st->top->next->head;
+        Symbol *functionSymbolParamList = functionSymbol->parameters;
+
+        // si tenia algun param insertarlo en la tabla de simbolos
+        if (functionSymbolParamList) insertSymbolListInCurrenLevel(st, functionSymbolParamList);
+    }
+
     if (node->children1) {
-        // solamente abjo la funcion si el hijo es un block elems (porque se que puede haber mas decl de var)
-        if (!(node->children1->type == AST_NODE_TYPE_STATEMENTS)) {
-            node->children1->functionWhichBelongs = node->functionWhichBelongs; // baja la funcion
-        }
         semanticAnalysisAux(node->children1, st);
     }
     closeLevel(st); 
@@ -275,29 +278,14 @@ void analysisNodeBlock(AstNode *node, SymbolTable *st) {
 
 void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node BlockElems visited")
-    if (node->children1) {
-        node->children1->functionWhichBelongs = node->functionWhichBelongs;
-        semanticAnalysisAux(node->children1, st);
-    }
-
-    if (node->children2) {
-        // solamente abjo la funcion si el hijo es un block elems (porque se que puede haber mas decl de var)
-        if (!(node->children2->type == AST_NODE_TYPE_STATEMENTS)) {
-            node->children2->functionWhichBelongs = node->functionWhichBelongs;
-        }
-        semanticAnalysisAux(node->children2, st);
-    }
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeStatements(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Statements visited")
-    if (node->children1) {
-        semanticAnalysisAux(node->children1, st);
-    }
-
-    if (node->children2) {
-        semanticAnalysisAux(node->children2, st);
-    }
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeType(AstNode *node, SymbolTable *st) {
@@ -317,10 +305,8 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
     idTypeStr = getSemanticTypeString(idType);
 
     semanticAnalysisAux(node->children2, st);
-    if (node->children2) {
-        exprType    = node->children2->symbol->semanticType;
-        exprTypeStr = getSemanticTypeString(exprType);
-    }
+    exprType    = node->children2->symbol->semanticType;
+    exprTypeStr = getSemanticTypeString(exprType);
 
     if (idType != exprType) {
         if ((idType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (exprType == SYMBOL_SEMANTIC_TYPE_INT)) {
@@ -381,7 +367,6 @@ void analysisNodeAddition(AstNode *node, SymbolTable *st) {
     semanticAnalysisAux(node->children1, st);
     semanticAnalysisAux(node->children2, st);
 
-    // casteos
     Symbol *leftExprSymbol  = node->children1->symbol;
     Symbol *rightExprSymbol = node->children2->symbol;
     
@@ -396,10 +381,10 @@ void analysisNodeAddition(AstNode *node, SymbolTable *st) {
         ERROR_SEMANTIC("right expression of additon (+) is boolean (line: %d)", node->line)
     }
 
-    // siempre casteo a float si son distintos
     if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
         exprSemanticType = leftExprSymbol->semanticType;
     } else {
+        // siempre casteo a float si son distintos
         exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
     }
 
@@ -413,7 +398,7 @@ void analysisNodeAddition(AstNode *node, SymbolTable *st) {
     };
 
     Symbol *exprAdditionSymbol = newSymbol(&config);
-    node->symbol = exprAdditionSymbol;
+    node->symbol               = exprAdditionSymbol;
 }
 
 void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {

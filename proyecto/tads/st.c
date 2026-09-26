@@ -34,15 +34,9 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
         aux = aux->next;
     }
 
-    // chequear que el nombre del simbolo no colisione con algun param si esta dentro de una funcion
-    if (config->functionWhichBelongs) {
-        Symbol *paramList = config->functionWhichBelongs->parameters;
-
-        while (paramList) {
-            if (strcmp(paramList->name, config->name) == 0) return false;
-            paramList = paramList->next;
-        }
-    }
+    // TODO: chequear que no colisione con ningun parametro
+    // respuesta: esto ya se hace ya que los params son variables locales
+    // y por ende estan insertadas ene l nivel corriente
 
     Symbol *s         = (Symbol*)malloc(sizeof(Symbol));
     s->type           = config->type;
@@ -64,29 +58,13 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
 Symbol * searchSymbol(SymbolTable *st, char *name) {
     if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
 
-    bool flagFirstFunctionFound = false;
-    Level *currentLevel         = st->top;
+    Level *currentLevel = st->top;
 
     while (currentLevel) {
         Symbol *aux = currentLevel->head;
 
         while (aux) {
             if (strcmp(aux->name, name) == 0) return aux;
-            
-            // ESTO PUEDE FALLAR!!!!
-            if ((aux->type == SYMBOL_TYPE_METHOD) && !flagFirstFunctionFound) {
-                // la primer funcion que me encontre debe contener al simbolo
-                // entonces buscar en sus parametros
-                flagFirstFunctionFound = true;
-
-                Symbol *paramsAux = aux->parameters;
-
-                while (paramsAux) {
-                    if (strcmp(paramsAux->name, name) == 0) return paramsAux;
-                    paramsAux = paramsAux->next;
-                }
-            }
-
             aux = aux->next;
         }
 
@@ -172,4 +150,18 @@ Symbol * newSymbol(SymbolConfig *config) {
     s->parameters   = config->parameters;
 
     return s;
+}
+
+void insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList) {
+    if (!st || !symbolList) return;
+
+    Symbol *aux = symbolList;
+
+    // ir hasta el ultimo simbolo de la lista
+    while (aux->next != NULL) aux = aux->next;
+
+    aux->next     = st->top->head;
+    st->top->head = symbolList;
+    
+    PRINT_SYMBOL_TABLE(st)
 }

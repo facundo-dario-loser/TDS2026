@@ -45,7 +45,6 @@ typedef struct SymbolConfig {
     SymbolSemanticType semanticType;
     SymbolValue        value;
     struct Symbol      *parameters;
-    struct Symbol      *functionWhichBelongs; // no es un campo del Symbol, pero sirve para saber si el simbolo esta dentro de una funcion (y tener el puntero al simbolo de la funcion)
 } SymbolConfig;
 
 // pila de niveles
@@ -67,5 +66,6 @@ void     freeSymbolTable(SymbolTable *st);                    // libera la memor
 void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
 char *   getSemanticTypeString(SymbolSemanticType semanticType);
 Symbol * newSymbol(SymbolConfig *config);
+void     insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList);
 
 #endif // ST_H

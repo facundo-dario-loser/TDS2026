@@ -70,8 +70,9 @@ typedef struct AstNode {
     struct AstNode         *children2;
     struct AstNode         *children3;
     struct AstNode         *children4;
-    Symbol                 *functionWhichBelongs; // para nodos que esten dentro de una funcion.
-    int                    line;           // linea donde se ubica en el archivo fuente
+    bool                   isFunctionBlock; // para saber si un BLock es el principal de una funcion (solo se usa en nodos de tipo Block)
+                                            // function(...) { Block } (osea si es el bloque principal de la funcion)
+    int                    line;            // linea donde se ubica en el archivo fuente
 } AstNode;
 
 typedef struct AstNodeConfig {

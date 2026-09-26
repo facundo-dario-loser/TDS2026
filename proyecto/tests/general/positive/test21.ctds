@@ -1,0 +1,8 @@
+void random(int x, int y) {
+    int z;
+    x = 2;
+    y = 8;
+    z = x + y;
+}
+
+void main() {}
