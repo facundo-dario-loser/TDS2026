@@ -1,0 +1,13 @@
+int add(int x, int y) {
+    return x + y;
+}
+
+boolean and(boolean a, boolean b) {
+    return a && b;
+}
+
+void main() {
+    int x;
+    x = add(2, and(true, false));
+}
+

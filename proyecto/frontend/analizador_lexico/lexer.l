@@ -27,7 +27,7 @@ return                    { DEBUG_LEXER("RETURN");                    return RET
 true                      { DEBUG_LEXER("BOOL_LITERAL(true)");        yylval.boolValue  = true;           return BOOL_LITERAL;  }
 false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       yylval.boolValue  = false;          return BOOL_LITERAL;  }
 [0-9][0-9]*               { DEBUG_LEXER("INT_LITERAL(%s)", yytext);   yylval.intValue   = atoi(yytext);   return INT_LITERAL;   }
-[0-9][0-9]*.[0-9][0-9]*   { DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); yylval.floatValue = atof(yytext);   return FLOAT_LITERAL; }
+[0-9][0-9]*\.[0-9][0-9]*  { DEBUG_LEXER("FLOAT_LITERAL(%s)", yytext); yylval.floatValue = atof(yytext);   return FLOAT_LITERAL; }
 [a-zA-Z][a-zA-Z0-9_]*     { DEBUG_LEXER("ID(%s)", yytext);            yylval.strValue   = strdup(yytext); return ID;            }
 "&&"                      { DEBUG_LEXER("AND");                       return AND;                                               }
 "||"                      { DEBUG_LEXER("OR");                        return OR;                                                }

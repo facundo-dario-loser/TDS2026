@@ -1,0 +1,11 @@
+void main() {
+    boolean a;
+    int x;
+
+    a = true;
+    x = 2;
+
+    if (a || x) {
+        a = false;
+    }
+}

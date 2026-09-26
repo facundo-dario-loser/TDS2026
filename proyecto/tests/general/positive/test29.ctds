@@ -1,0 +1,5 @@
+int x, y, z;
+
+void main() {
+    boolean a, b, c;
+}

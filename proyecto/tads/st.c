@@ -153,6 +153,8 @@ Symbol * newSymbol(SymbolConfig *config) {
     return s;
 }
 
+// esto es seguro porque meto los params al comienzo a penas abro el nivel
+// pero si no podria modificar la lista de parametros
 void insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList) {
     if (!st || !symbolList) return;
 

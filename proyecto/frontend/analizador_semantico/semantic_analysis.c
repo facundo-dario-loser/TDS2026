@@ -74,7 +74,9 @@ void analysisNodeP(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeGlobalDeclList not implemented yet")
+    DEBUG_SEMANTIC("node GlobalDeclList visited")
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
@@ -211,7 +213,59 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeListId(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeListIdVoid not implemented yet")
+    DEBUG_SEMANTIC("node ListId visited")
+    SymbolSemanticType     symbolSemanticType;
+    AstNodeDeclarationType nodeDeclarationType;
+    char                   *strSemanticType;
+
+    if (node->children1) {
+        nodeDeclarationType = node->declarationType;
+        switch (nodeDeclarationType) {
+            case AST_NODE_DECLARATION_TYPE_INT:     {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_INT;
+                                                        strSemanticType    = "int";
+                                                    } break;
+            case AST_NODE_DECLARATION_TYPE_FLOAT:   {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+                                                        strSemanticType    = "float";
+                                                    } break;
+            case AST_NODE_DECLARATION_TYPE_BOOLEAN: {
+                                                        symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+                                                        strSemanticType    = "boolean";
+                                                    } break;
+        }
+
+        SymbolConfig varSymbolConfig = {
+            .type                 = SYMBOL_TYPE_VARIABLE,
+            .name                 = node->children1->value.strValue,
+            .semanticType         = symbolSemanticType,
+        };
+
+        bool res = insertSymbol(st, &varSymbolConfig);
+
+        if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
+    }
+
+    if (!node->children2) return;
+
+    if (node->children2->type == AST_NODE_TYPE_ID) {
+        // insertar el simbolo nuevo
+        SymbolConfig varSymbolConfig = {
+            .type                 = SYMBOL_TYPE_VARIABLE,
+            .name                 = node->children2->value.strValue,
+            .semanticType         = symbolSemanticType,
+        };
+
+        bool res = insertSymbol(st, &varSymbolConfig);
+
+        if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
+    }
+
+    if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
+        // arrastrar el tipo de la declaracion en la lista
+        node->children2->declarationType = nodeDeclarationType;
+        semanticAnalysisAux(node->children2, st);
+    }
 }
 
 void analysisNodeId(AstNode *node, SymbolTable *st) {
@@ -328,16 +382,69 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
     semanticAnalysisAux(node->children1, st);
     Symbol *methodSymbol = searchMethodSymbol(st, node->children1->value.strValue);
 
-    semanticAnalysisAux(node->children2, st);
-    // chequear que se pasen argumetnos de los mismos tipos que los 
+    if (node->children2) semanticAnalysisAux(node->children2, st);
+
+    // chequear que se pasen argumentos de los mismos tipos que los 
     // parametros y misma cantidad
+    AstNode *aux         = node;
+    Symbol  *paramList   = methodSymbol->parameters;
+    int     currentArg   = 1; // argumento actual que se tiene que chequear
 
+    while (aux) {
+        
+        switch (aux->type) {
+            case AST_NODE_TYPE_METHOD_CALL: {
+                if (!aux->children2 && paramList) 
+                    ERROR_SEMANTIC("method '%s' was called without any arguments (line: %d)", methodSymbol->name, node->line)
 
+                if (aux->children2 && !paramList)
+                    ERROR_SEMANTIC("method '%s' doesn't have any parameters, but it was called with arguments (line: %d)", methodSymbol->name, node->line)
 
-    // crear simbolo de temporal para guardar el valor leugo de llamar 
+                aux = aux->children2; // ir a al nodo list expr
+            } break;
+            
+            case AST_NODE_TYPE_LIST_EXPR: {
+                // chequear con la expr (hijo izq)
+                if (!paramList)
+                    ERROR_SEMANTIC("the method '%s' was called with more arguments than the number of parameters that it has (line: %d)", methodSymbol->name, node->line)
+
+                if (aux->children1->symbol->semanticType != paramList->semanticType)
+                    ERROR_SEMANTIC("the type of parameter number %d in method '%s' is %s, but the argument passed is of type %s (line: %d)", currentArg, methodSymbol->name, getSemanticTypeString(paramList->semanticType), getSemanticTypeString(aux->children1->symbol->semanticType), node->line)
+                
+                paramList = paramList->next;
+                currentArg++;
+                aux = aux->children2; // ir al prox nodo list expr o expr
+            } break;
+            
+            // es una expr (es el ultimo argumetno pasado)
+            default: {
+                if (!paramList)
+                    ERROR_SEMANTIC("the method '%s' was called with more arguments than the number of parameters that it has (line: %d)", methodSymbol->name, node->line)
+
+                if (aux->symbol->semanticType != paramList->semanticType)
+                    ERROR_SEMANTIC("the type of parameter number %d in method '%s' is %s, but the argument passed is of type %s (line: %d)", currentArg, methodSymbol->name, getSemanticTypeString(paramList->semanticType), getSemanticTypeString(aux->symbol->semanticType), node->line)
+                
+                paramList = paramList->next;
+                aux       = NULL; // ya no hay mas argumentos
+
+                // este deberia de haber sido el ultimo arg pasado y por ende ultimo param
+                if (paramList)
+                    ERROR_SEMANTIC("method '%s' was called without enough arguments (line: %d)", methodSymbol->name, node->line)
+            } break;
+        }
+    }
+
+    // crear simbolo del temporal para guardar el valor luego de llamar 
     // al metodo si es que tiene retorno
 
-    // TODO ...
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = "temp",
+        .semanticType = methodSymbol->semanticType,
+    };
+
+    Symbol *methodCallSymbol = newSymbol(&config);
+    node->symbol             = methodCallSymbol;
 }
 
 void analysisNodeIfElse(AstNode *node, SymbolTable *st) {
@@ -353,7 +460,14 @@ void analysisNodeIfElse(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeWhile(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeWhile not implemented yet")
+    DEBUG_SEMANTIC("node While visited")
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+
+    // chequear que la expr de la condicion sea boolean
+    if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
+        ERROR_SEMANTIC("the expression on the condition in the while statement must be boolean, but it is %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
+
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeReturn(AstNode *node, SymbolTable *st) {
@@ -407,7 +521,10 @@ void analysisNodeReturn(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeListExpr(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeListExpr not implemented yet")
+    DEBUG_SEMANTIC("node ListExpr visited")
+
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
 void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
@@ -415,10 +532,10 @@ void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
     char *intLiteralName = "const";
 
     SymbolConfig config = {
-        .type         = SYMBOL_TYPE_CONSTANT,
-        .name         = intLiteralName,
-        .semanticType = SYMBOL_SEMANTIC_TYPE_INT,
-        .value        = node->value.intValue,
+        .type           = SYMBOL_TYPE_CONSTANT,
+        .name           = intLiteralName,
+        .semanticType   = SYMBOL_SEMANTIC_TYPE_INT,
+        .value.intValue = node->value.intValue,
     };
 
     Symbol *intLiteralSymbol = newSymbol(&config);
@@ -426,11 +543,33 @@ void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeFloatLiteral not implemented yet")
+    DEBUG_SEMANTIC("node FloatLiteral visited")
+    char *intLiteralName = "const";
+
+    SymbolConfig config = {
+        .type             = SYMBOL_TYPE_CONSTANT,
+        .name             = intLiteralName,
+        .semanticType     = SYMBOL_SEMANTIC_TYPE_FLOAT,
+        .value.floatValue = node->value.floatValue,
+    };
+
+    Symbol *floatLiteralSymbol = newSymbol(&config);
+    node->symbol               = floatLiteralSymbol;
 }
 
 void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeBoolLiteral not implemented yet")
+    DEBUG_SEMANTIC("node BoolLiteral visited")
+    char *intLiteralName = "const";
+
+    SymbolConfig config = {
+        .type               = SYMBOL_TYPE_CONSTANT,
+        .name               = intLiteralName,
+        .semanticType       = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+        .value.booleanValue = node->value.booleanValue,
+    };
+
+    Symbol *boolLiteralSymbol = newSymbol(&config);
+    node->symbol              = boolLiteralSymbol;
 }
 
 void analysisNodeAddition(AstNode *node, SymbolTable *st) {
@@ -473,23 +612,194 @@ void analysisNodeAddition(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeSubtraction not implemented yet")
+    DEBUG_SEMANTIC("node Subtraction visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of subtraction (-) is boolean (line: %d)", node->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of subtraction (-) is boolean (line: %d)", node->line)
+    }
+
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        // siempre casteo a float si son distintos
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprSubtractionSymbol = newSymbol(&config);
+    node->symbol                  = exprSubtractionSymbol;
 }
 
 void analysisNodeMultiplication(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeMultiplication not implemented yet")
+    DEBUG_SEMANTIC("node Multiplication visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of multiplication (*) is boolean (line: %d)", node->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of multiplication (*) is boolean (line: %d)", node->line)
+    }
+
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        // siempre casteo a float si son distintos
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprMultiplicationSymbol = newSymbol(&config);
+    node->symbol                     = exprMultiplicationSymbol;
 }
 
 void analysisNodeDivision(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeDivision not implemented yet")
+    DEBUG_SEMANTIC("node Division visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of division (/) is boolean (line: %d)", node->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of division (/) is boolean (line: %d)", node->line)
+    }
+
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        // siempre casteo a float si son distintos
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprDivisionSymbol = newSymbol(&config);
+    node->symbol               = exprDivisionSymbol;
 }
 
 void analysisNodeMod(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeMod not implemented yet")
+    // deberia dejar que los operandos puedan ser float?
+    DEBUG_SEMANTIC("node Mod visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of mod (%%) is boolean (line: %d)", node->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of mod (%%) is boolean (line: %d)", node->line)
+    }
+
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        // siempre casteo a float si son distintos
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprModSymbol = newSymbol(&config);
+    node->symbol          = exprModSymbol;
 }
 
 void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeComparisionSmaller not implemented yet")
+    DEBUG_SEMANTIC("node ComparisionSmaller visited")
+
+    // chequear que ambas expresiones sean int's o float's 
+    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
+    // y necesitamos directamente numeros literales o id's
+    semanticAnalysisAux(node->children1, st);
+    if (!((node->children1->type == AST_NODE_TYPE_ID)             || 
+          (node->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (node->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("left expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
+        }
+    
+    semanticAnalysisAux(node->children2, st);
+    if (!((node->children2->type == AST_NODE_TYPE_ID)             || 
+          (node->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (node->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("right expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
+        }
+
+    // crear el simbolo para el temporal
+    char *symbolName                      = "temp";
+    SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = symbolName,
+        .semanticType = symbolSemanticType,
+    };
+
+    Symbol *compSmallerSymbol = newSymbol(&config);
+    node->symbol              = compSmallerSymbol;
 }
 
 void analysisNodeComparisionGreater(AstNode *node, SymbolTable *st) {
@@ -527,23 +837,130 @@ void analysisNodeComparisionGreater(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeEqual(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeEqual not implemented yet")
+    DEBUG_SEMANTIC("node Equal visited")
+
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st);
+
+    // chequear que ambos operandos sean del mismo tipo
+    if (node->children1->symbol->semanticType != node->children2->symbol->semanticType)
+        ERROR_SEMANTIC("in '==' left expr is of type %s and the right expr is of type %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), getSemanticTypeString(node->children2->symbol->semanticType), node->line)
+
+    // crear el simbolo temporal para guardar luego el resultado
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+    };
+
+    Symbol *equalSymbol = newSymbol(&config);
+    node->symbol        = equalSymbol;
 }
 
 void analysisNodeAnd(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeAnd not implemented yet")
+    DEBUG_SEMANTIC("node And visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+
+    // chequear que ninguna expresion sea int/float
+    if (leftExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of and (&&) is '%s' (line: %d)", getSemanticTypeString(leftExprSymbol->semanticType), node->line)
+    }
+
+    if (rightExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of and (&&) is '%s' (line: %d)", getSemanticTypeString(rightExprSymbol->semanticType), node->line)
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+    };
+
+    Symbol *exprAndSymbol = newSymbol(&config);
+    node->symbol          = exprAndSymbol;
 }
 
 void analysisNodeOr(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeOr not implemented yet")
+    DEBUG_SEMANTIC("node Or visited")
+    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children2, st);
+
+    Symbol *leftExprSymbol  = node->children1->symbol;
+    Symbol *rightExprSymbol = node->children2->symbol;
+
+    // chequear que ninguna expresion sea int/float
+    if (leftExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of or (||) is '%s' (line: %d)", getSemanticTypeString(leftExprSymbol->semanticType), node->line)
+    }
+
+    if (rightExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of or (||) is '%s' (line: %d)", getSemanticTypeString(rightExprSymbol->semanticType), node->line)
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+    };
+
+    Symbol *exprOrSymbol = newSymbol(&config);
+    node->symbol         = exprOrSymbol;
 }
 
 void analysisNodeMinus(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeMinus not implemented yet")
+    DEBUG_SEMANTIC("node Minus visited")
+
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+
+    // chequear que el operando sea int o float
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)
+        ERROR_SEMANTIC("in '-' (unary) the operand must be int or float, but it's boolean (line: %d)", node->line)
+
+    // crear simbolo para el temporal que guarda el resultado
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = node->children1->symbol->semanticType,
+    };
+
+    Symbol *minusSymbol = newSymbol(&config);
+    node->symbol        = minusSymbol;
 }
 
 void analysisNodeNegation(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeNegation not implemented yet")
+    DEBUG_SEMANTIC("node Negation visited")
+
+    if (node->children1) semanticAnalysisAux(node->children1, st);
+
+    // chequear que el operando sea int o float
+    if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
+        ERROR_SEMANTIC("in '!' the operand must be boolean, but it's %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
+
+    // crear simbolo para el temporal que guarda el resultado
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+    };
+
+    Symbol *negationSymbol = newSymbol(&config);
+    node->symbol           = negationSymbol;
 }
 
 // chequea que haya un return en todas las ramas
@@ -619,14 +1036,3 @@ void printMethodParamList(Symbol *methodSymbol) {
     printf("NULL\n");
 }
 
-void checkMethodArgList(Symbol *method, AstNode *nodeMethodCall) {
-    if (!nodeMethodCall->children2 && method->parameters)
-        ERROR_SEMANTIC("method '%s' was called without arguments (line: %d)", method->name, nodeMethodCall->line)
-
-    checkMethodArgListAux(method, method->parameters, nodeMethodCall->children2, 1);
-}
-
-// ya se llama directamente con la list expr
-void checkMethodArgListAux(Symbol *method, Symbol *methodParamList, AstNode *node, int currentArg) {
-    //if (node->symbol->semanticType != )
-}

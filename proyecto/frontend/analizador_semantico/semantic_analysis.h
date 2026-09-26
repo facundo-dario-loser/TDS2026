@@ -48,8 +48,6 @@ void analysisNodeNegation(AstNode *node, SymbolTable *st);
 bool checkIfFunctionHasReturn(AstNode *node);
 void getSymbolParamList(AstNode *node, Symbol **symbolParamList);
 void printMethodParamList(Symbol *methodSymbol);
-void checkMethodArgList(Symbol *method, AstNode *nodeMethodCall);
-void checkMethodArgListAux(Symbol *method, Symbol *methodParamList, AstNode *node, int currentArg);
 
 //void analysisNode(AstNode *node, SymbolTable *st);
 #endif // SEMANTIC_ANALYSIS_H

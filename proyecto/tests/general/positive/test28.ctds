@@ -1,0 +1,12 @@
+int x;
+
+int add(int x, int y) {
+    return x + y;
+}
+
+void main() {
+    int y;
+
+    x = 4;
+    y = add(x, 2);
+}

@@ -21,7 +21,7 @@ typedef enum SymbolSemanticType {
     SYMBOL_SEMANTIC_TYPE_VOID, // se usa en funciones que no retornan nada
 } SymbolSemanticType;
 
-typedef struct SymbolValue {
+typedef union SymbolValue {
     int   intValue;
     float floatValue;
     bool  booleanValue;

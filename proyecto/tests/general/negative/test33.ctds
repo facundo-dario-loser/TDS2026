@@ -1,0 +1,11 @@
+void main() {
+    int x;
+    boolean a;
+
+    x = 8;
+    a = true;
+
+    if (x == a) {
+        x = 1;
+    }
+}

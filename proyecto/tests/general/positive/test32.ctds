@@ -1,0 +1,10 @@
+void main() {
+    int x;
+    int y;
+    boolean a;
+
+    x = 4;
+    y = 2;
+
+    a = (x == y);
+}
