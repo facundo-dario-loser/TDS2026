@@ -177,10 +177,10 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     // primero inserta el simbolo de la funcion y luego agregar los parametros 
     SymbolConfig methodSymbolConfig = {
-        .type         = SYMBOL_TYPE_METHOD,
-        .name         = methodName,
-        .parameters   = paramList,
-        .semanticType = returnType,
+        .type           = SYMBOL_TYPE_METHOD,
+        .name           = methodName,
+        .parameters     = paramList,
+        .semanticType   = returnType,
     };
 
     bool res = insertSymbol(st, &methodSymbolConfig);
@@ -320,11 +320,36 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeMethodCall not implemented yet")
+    DEBUG_SEMANTIC("node MethodCall visited")
+
+    // buscar el simbolo de la primer funcion con el nombre dado
+    // en la tabla de simbolos (explorando hacia afuera)
+
+    semanticAnalysisAux(node->children1, st);
+    Symbol *methodSymbol = searchMethodSymbol(st, node->children1->value.strValue);
+
+    semanticAnalysisAux(node->children2, st);
+    // chequear que se pasen argumetnos de los mismos tipos que los 
+    // parametros y misma cantidad
+
+
+
+    // crear simbolo de temporal para guardar el valor leugo de llamar 
+    // al metodo si es que tiene retorno
+
+    // TODO ...
 }
 
 void analysisNodeIfElse(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeIfElse not implemented yet")
+    DEBUG_SEMANTIC("node IfElse visited")
+
+    // chequear que la expr de la condicion sea booleana
+    semanticAnalysisAux(node->children1, st);
+    if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
+        ERROR_SEMANTIC("condition in the if statement must be a logic/boolean expression (line: %d)", node->line)
+    
+    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children3) semanticAnalysisAux(node->children3, st);
 }
 
 void analysisNodeWhile(AstNode *node, SymbolTable *st) {
@@ -332,7 +357,53 @@ void analysisNodeWhile(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeReturn(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeReturn not implemented yet")
+    DEBUG_SEMANTIC("node Return visited")
+
+    SymbolSemanticType returnExprSemanticType;
+    SymbolSemanticType methodSemanticType;
+
+    // chequear si retorna una expr y el tipo de la expr que retorna
+    if (node->children1) {
+        semanticAnalysisAux(node->children1, st);
+        returnExprSemanticType = node->children1->symbol->semanticType;
+    } else {
+        returnExprSemanticType = SYMBOL_SEMANTIC_TYPE_VOID;
+    }
+
+    // ver si la funcion retorna una expr y su tipo
+    // la funcion debe ser la primera que nos encontremos si recorremos
+    // la tabla de simbolos avanzando hacia niveles inferiores (exteriores)
+
+    Level *aux       = st->top;
+    bool methodFound = false;
+    char *methodName;
+
+    while (aux && !methodFound) {
+        if (aux->head && (aux->head->type == SYMBOL_TYPE_METHOD)) {
+            methodName         = aux->head->name;
+            methodSemanticType = aux->head->semanticType;
+            break;
+        }
+        aux = aux->next;
+    }
+
+    // chequear si conciden los tipos
+    if ((methodSemanticType == SYMBOL_SEMANTIC_TYPE_VOID) && 
+        (returnExprSemanticType != SYMBOL_SEMANTIC_TYPE_VOID)) {
+            ERROR_SEMANTIC("method %s doesn't return anything but there's a return with an '%s' expression (line: %d)", methodName, getSemanticTypeString(returnExprSemanticType), node->line)
+        }
+    
+    if ((methodSemanticType != SYMBOL_SEMANTIC_TYPE_VOID) && 
+        (returnExprSemanticType == SYMBOL_SEMANTIC_TYPE_VOID)) {
+            ERROR_SEMANTIC("method '%s' returns an expression of type %s, but there's an empty return (line: %d)", methodName, getSemanticTypeString(methodSemanticType), node->line)
+        }
+
+    if ((methodSemanticType != SYMBOL_SEMANTIC_TYPE_VOID) &&
+        (returnExprSemanticType != SYMBOL_SEMANTIC_TYPE_VOID)) {
+            if (methodSemanticType != returnExprSemanticType) {
+                ERROR_SEMANTIC("method '%s' returns an expression of type %s, but there's a return with an expression of type %s (line: %d)", methodName, getSemanticTypeString(methodSemanticType), getSemanticTypeString(returnExprSemanticType), node->line)
+            }
+        }
 }
 
 void analysisNodeListExpr(AstNode *node, SymbolTable *st) {
@@ -422,7 +493,37 @@ void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
 }
 
 void analysisNodeComparisionGreater(AstNode *node, SymbolTable *st) {
-    TODO("analysisNodeComparisionGreater not implemented yet")
+    DEBUG_SEMANTIC("node ComparisionGreater visited")
+
+    // chequear que ambas expresiones sean int's o float's 
+    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
+    // y necesitamos directamente numeros literales o id's
+    semanticAnalysisAux(node->children1, st);
+    if (!((node->children1->type == AST_NODE_TYPE_ID)             || 
+          (node->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (node->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("left expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
+        }
+    
+    semanticAnalysisAux(node->children2, st);
+    if (!((node->children2->type == AST_NODE_TYPE_ID)             || 
+          (node->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (node->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("right expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
+        }
+
+    // crear el simbolo para el temporal
+    char *symbolName                      = "temp";
+    SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = symbolName,
+        .semanticType = symbolSemanticType,
+    };
+
+    Symbol *compGreaterSymbol = newSymbol(&config);
+    node->symbol              = compGreaterSymbol;
 }
 
 void analysisNodeEqual(AstNode *node, SymbolTable *st) {
@@ -516,4 +617,16 @@ void printMethodParamList(Symbol *methodSymbol) {
     }
 
     printf("NULL\n");
+}
+
+void checkMethodArgList(Symbol *method, AstNode *nodeMethodCall) {
+    if (!nodeMethodCall->children2 && method->parameters)
+        ERROR_SEMANTIC("method '%s' was called without arguments (line: %d)", method->name, nodeMethodCall->line)
+
+    checkMethodArgListAux(method, method->parameters, nodeMethodCall->children2, 1);
+}
+
+// ya se llama directamente con la list expr
+void checkMethodArgListAux(Symbol *method, Symbol *methodParamList, AstNode *node, int currentArg) {
+    //if (node->symbol->semanticType != )
 }

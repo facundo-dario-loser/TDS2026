@@ -109,6 +109,18 @@ otra cosa: un parametro o variable local de una funcion no puede tener el mismo 
 
 - insertSymbol: chequear que no colisione la declaracion con algun parametro 
 - insertar los simbolos de los parametros de la funciones en el nivel del bloque de la funcion en la tabla de simbolos 
+- hacer que se le pueda pasar a search symbol si se busca una variable o funcion 
 
 [DUDA]: siempre que tengo una exp arit tipo (left + right) y tienen dif tipos -> casteo el resultado a float. Es correcto?
 
+- segun el enunciado solo abro un nuevo nivel cuando hay un block
+
+por ejemplo:
+
+void random(int x) {
+    if (x > 40) {
+        int x;
+    }
+}
+
+aca el int x no shadowea al param x. deberia haber un error teoricamente?

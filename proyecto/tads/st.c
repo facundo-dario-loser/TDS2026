@@ -75,7 +75,7 @@ Symbol * searchSymbol(SymbolTable *st, char *name) {
 }
 
 void printSymbolTable(SymbolTable *st) {
-    printf("****SymbolTable****\n");
+    printf("\n****SymbolTable****\n");
     Level *levelAux = st->top;
     Symbol *symbolAux;
 
@@ -91,6 +91,7 @@ void printSymbolTable(SymbolTable *st) {
         printf("|\n");
         levelAux = levelAux->next;
     }
+    printf("\n");
 }
 
 // No es necesaria esta funcion ya que al terminar el analisis semantico 
@@ -164,4 +165,23 @@ void insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList) {
     st->top->head = symbolList;
     
     PRINT_SYMBOL_TABLE(st)
+}
+
+Symbol * searchMethodSymbol(SymbolTable *st, char *name) {
+    if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
+
+    Level *currentLevel = st->top;
+
+    while (currentLevel) {
+        Symbol *aux = currentLevel->head;
+
+        while (aux) {
+            if ((strcmp(aux->name, name) == 0) && (aux->type == SYMBOL_TYPE_METHOD)) return aux;
+            aux = aux->next;
+        }
+
+        currentLevel = currentLevel->next;
+    }
+
+    return NULL;
 }
