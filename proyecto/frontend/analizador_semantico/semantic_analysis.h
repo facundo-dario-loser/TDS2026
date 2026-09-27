@@ -45,9 +45,13 @@ void analysisNodeOr(AstNode *node, SymbolTable *st);
 void analysisNodeMinus(AstNode *node, SymbolTable *st);
 void analysisNodeNegation(AstNode *node, SymbolTable *st);
 
+// funciones auxiliares
 bool checkIfFunctionHasReturn(AstNode *node);
 void getSymbolParamList(AstNode *node, Symbol **symbolParamList);
 void printMethodParamList(Symbol *methodSymbol);
 
-//void analysisNode(AstNode *node, SymbolTable *st);
+SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType);
+
+void setLiteralSymbolInAstNode(AstNode *nodeLiteral);
+
 #endif // SEMANTIC_ANALYSIS_H

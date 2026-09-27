@@ -1,0 +1,12 @@
+void random(int x, int y) {
+    int z;
+    z = x + y;
+}
+
+void main() {
+    boolean a;
+    
+    if (random(2, 4)) {
+        a = true;
+    }
+}
