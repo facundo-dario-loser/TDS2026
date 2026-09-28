@@ -46,40 +46,7 @@ de la función (Symbol).Cada vez que analysisNodeReturn se ejecute
 con éxito, setea st->currentMethod->hasAtLeastOneReturn = true;.
 
 
-Monitorear el nivel en SymbolTable:En tu estructura SymbolTable, añade un entero currentLevel:ctypedef struct {
-    Symbol *top;
-    int currentLevel; // <--- Añadir esto
-    Symbol *currentMethod;
-} SymbolTable;
-Use code with caution.(Nota: Al inicializar la tabla de símbolos en semanticAnalysis, pon st.currentLevel = 0;).
-
-
-
-esto es valido
-
-int random(int x, int y) {
-    int z;
-
-    {
-        int x = 4;
-    }
-}
-
-void random(int x) {
-    if (x > 40) {
-        int x = 80;
-    }
-}
-
-deberia permitir esto ultimo?
-
-[DUDA]: consultar por el tema de shadowing de variables 
-
-
 [SEMANTICO] diferenciar entre varaible redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
-
-[ST]: al buscar un simbolo debe buscar en los parametros de la funcion tambien si no lo encuentra
-
 
 mi searchSymbol para parametros puede fallar
 
@@ -101,28 +68,38 @@ void main() {
     }
 }
 
-
-otra cosa: un parametro o variable local de una funcion no puede tener el mismo nombre que la funcion 
-
-
-
-
-- insertSymbol: chequear que no colisione la declaracion con algun parametro 
-- insertar los simbolos de los parametros de la funciones en el nivel del bloque de la funcion en la tabla de simbolos 
 - hacer que se le pueda pasar a search symbol si se busca una variable o funcion 
 
 [DUDA]: siempre que tengo una exp arit tipo (left + right) y tienen dif tipos -> casteo el resultado a float. Es correcto?
 
-- segun el enunciado solo abro un nuevo nivel cuando hay un block
+- operador % no deberia ser solo entre int's?
 
-por ejemplo:
+- [SEMANTICO]: debo notificar todos los errores?
 
-void random(int x) {
-    if (x > 40) {
-        int x;
-    }
+- diferenciar var globales, param, var locales (VarType)
+
+
+
+
+
+
+
+
+si tengo:
+
+int f;
+
+int f() {
+    ....
+    return expr;
 }
 
-aca el int x no shadowea al param x. deberia haber un error teoricamente?
+void g() {
+    return f; // <-- aca chequear que si se busca id efectivamente buscar un id 
+}
 
-- while tira mal la linea de error 
+osea hacer que search symbol se le pueda pasar si quiero buscar un variable o funcion 
+
+- tirar warnings en casteos
+
+- [>, <]: cambiar comparission por -> comparison (lo escribi mal) 

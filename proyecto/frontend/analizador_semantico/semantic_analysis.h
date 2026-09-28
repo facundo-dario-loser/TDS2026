@@ -54,4 +54,8 @@ SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclar
 
 void setLiteralSymbolInAstNode(AstNode *nodeLiteral);
 
+void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st); // + - * / %
+void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);  // and, or
+void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);     // <, >
+
 #endif // SEMANTIC_ANALYSIS_H

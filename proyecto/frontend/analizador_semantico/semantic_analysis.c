@@ -317,7 +317,7 @@ void analysisNodeBlock(AstNode *node, SymbolTable *st) {
 
         // si tenia algun param insertarlo en la tabla de simbolos
         // nota: esto es seguro porque el nivel al inicio es NULL, si no podria modificar la lista de params de la funcion
-        if (functionSymbolParamList) insertSymbolListInCurrenLevel(st, functionSymbolParamList);
+        if (functionSymbolParamList) insertSymbolListInCurrentLevel(st, functionSymbolParamList);
     }
 
     if (node->children1) semanticAnalysisAux(node->children1, st);
@@ -577,41 +577,7 @@ void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st) {
 
 void analysisNodeAddition(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Addition visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-    
-    SymbolSemanticType exprSemanticType;
-
-    // chequear que ninguna expresion sea logica/booleana
-    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of additon (+) is boolean (line: %d)", node->line)
-    }
-
-    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of additon (+) is boolean (line: %d)", node->line)
-    }
-
-    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
-        exprSemanticType = leftExprSymbol->semanticType;
-    } else {
-        // siempre casteo a float si son distintos
-        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = exprSemanticType,
-    };
-
-    Symbol *exprAdditionSymbol = newSymbol(&config);
-    node->symbol               = exprAdditionSymbol;
+    analysisArithmeticBinaryOperator(node, st);
 }
 
 
@@ -619,41 +585,7 @@ void analysisNodeAddition(AstNode *node, SymbolTable *st) {
 
 void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Subtraction visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-    
-    SymbolSemanticType exprSemanticType;
-
-    // chequear que ninguna expresion sea logica/booleana
-    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of subtraction (-) is boolean (line: %d)", node->line)
-    }
-
-    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of subtraction (-) is boolean (line: %d)", node->line)
-    }
-
-    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
-        exprSemanticType = leftExprSymbol->semanticType;
-    } else {
-        // siempre casteo a float si son distintos
-        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = exprSemanticType,
-    };
-
-    Symbol *exprSubtractionSymbol = newSymbol(&config);
-    node->symbol                  = exprSubtractionSymbol;
+    analysisArithmeticBinaryOperator(node, st);
 }
 
 
@@ -661,41 +593,7 @@ void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {
 
 void analysisNodeMultiplication(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Multiplication visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-    
-    SymbolSemanticType exprSemanticType;
-
-    // chequear que ninguna expresion sea logica/booleana
-    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of multiplication (*) is boolean (line: %d)", node->line)
-    }
-
-    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of multiplication (*) is boolean (line: %d)", node->line)
-    }
-
-    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
-        exprSemanticType = leftExprSymbol->semanticType;
-    } else {
-        // siempre casteo a float si son distintos
-        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = exprSemanticType,
-    };
-
-    Symbol *exprMultiplicationSymbol = newSymbol(&config);
-    node->symbol                     = exprMultiplicationSymbol;
+    analysisArithmeticBinaryOperator(node, st);
 }
 
 
@@ -703,41 +601,7 @@ void analysisNodeMultiplication(AstNode *node, SymbolTable *st) {
 
 void analysisNodeDivision(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Division visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-    
-    SymbolSemanticType exprSemanticType;
-
-    // chequear que ninguna expresion sea logica/booleana
-    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of division (/) is boolean (line: %d)", node->line)
-    }
-
-    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of division (/) is boolean (line: %d)", node->line)
-    }
-
-    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
-        exprSemanticType = leftExprSymbol->semanticType;
-    } else {
-        // siempre casteo a float si son distintos
-        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = exprSemanticType,
-    };
-
-    Symbol *exprDivisionSymbol = newSymbol(&config);
-    node->symbol               = exprDivisionSymbol;
+    analysisArithmeticBinaryOperator(node, st);
 }
 
 
@@ -746,41 +610,7 @@ void analysisNodeDivision(AstNode *node, SymbolTable *st) {
 void analysisNodeMod(AstNode *node, SymbolTable *st) {
     // deberia dejar que los operandos puedan ser float?
     DEBUG_SEMANTIC("node Mod visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-    
-    SymbolSemanticType exprSemanticType;
-
-    // chequear que ninguna expresion sea logica/booleana
-    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of mod (%%) is boolean (line: %d)", node->line)
-    }
-
-    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of mod (%%) is boolean (line: %d)", node->line)
-    }
-
-    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
-        exprSemanticType = leftExprSymbol->semanticType;
-    } else {
-        // siempre casteo a float si son distintos
-        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = exprSemanticType,
-    };
-
-    Symbol *exprModSymbol = newSymbol(&config);
-    node->symbol          = exprModSymbol;
+    analysisArithmeticBinaryOperator(node, st);
 }
 
 
@@ -788,36 +618,7 @@ void analysisNodeMod(AstNode *node, SymbolTable *st) {
 
 void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node ComparisionSmaller visited")
-
-    // chequear que ambas expresiones sean int's o float's 
-    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
-    // y necesitamos directamente numeros literales o id's
-    semanticAnalysisAux(node->children1, st);
-    if (!((node->children1->type == AST_NODE_TYPE_ID)             || 
-          (node->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (node->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("left expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
-        }
-    
-    semanticAnalysisAux(node->children2, st);
-    if (!((node->children2->type == AST_NODE_TYPE_ID)             || 
-          (node->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (node->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("right expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
-        }
-
-    // crear el simbolo para el temporal
-    char *symbolName                      = "temp";
-    SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = symbolName,
-        .semanticType = symbolSemanticType,
-    };
-
-    Symbol *compSmallerSymbol = newSymbol(&config);
-    node->symbol              = compSmallerSymbol;
+    analysisComparisonOperator(node, st);
 }
 
 
@@ -825,36 +626,7 @@ void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
 
 void analysisNodeComparisionGreater(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node ComparisionGreater visited")
-
-    // chequear que ambas expresiones sean int's o float's 
-    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
-    // y necesitamos directamente numeros literales o id's
-    semanticAnalysisAux(node->children1, st);
-    if (!((node->children1->type == AST_NODE_TYPE_ID)             || 
-          (node->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (node->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("left expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
-        }
-    
-    semanticAnalysisAux(node->children2, st);
-    if (!((node->children2->type == AST_NODE_TYPE_ID)             || 
-          (node->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (node->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("right expr of '>' must be an int literal, float literal, int variable or float variable (line: %d)", node->line)
-        }
-
-    // crear el simbolo para el temporal
-    char *symbolName                      = "temp";
-    SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = symbolName,
-        .semanticType = symbolSemanticType,
-    };
-
-    Symbol *compGreaterSymbol = newSymbol(&config);
-    node->symbol              = compGreaterSymbol;
+    analysisComparisonOperator(node, st);
 }
 
 
@@ -888,32 +660,7 @@ void analysisNodeEqual(AstNode *node, SymbolTable *st) {
 
 void analysisNodeAnd(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node And visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-
-    // chequear que ninguna expresion sea int/float
-    if (leftExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of and (&&) is '%s' (line: %d)", getSemanticTypeString(leftExprSymbol->semanticType), node->line)
-    }
-
-    if (rightExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of and (&&) is '%s' (line: %d)", getSemanticTypeString(rightExprSymbol->semanticType), node->line)
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
-    };
-
-    Symbol *exprAndSymbol = newSymbol(&config);
-    node->symbol          = exprAndSymbol;
+    analysisLogicalBinaryOperator(node, st);
 }
 
 
@@ -921,32 +668,7 @@ void analysisNodeAnd(AstNode *node, SymbolTable *st) {
 
 void analysisNodeOr(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Or visited")
-    semanticAnalysisAux(node->children1, st);
-    semanticAnalysisAux(node->children2, st);
-
-    Symbol *leftExprSymbol  = node->children1->symbol;
-    Symbol *rightExprSymbol = node->children2->symbol;
-
-    // chequear que ninguna expresion sea int/float
-    if (leftExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("left expression of or (||) is '%s' (line: %d)", getSemanticTypeString(leftExprSymbol->semanticType), node->line)
-    }
-
-    if (rightExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-        ERROR_SEMANTIC("right expression of or (||) is '%s' (line: %d)", getSemanticTypeString(rightExprSymbol->semanticType), node->line)
-    }
-
-    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
-
-    SymbolConfig config = {
-        .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = tempName,
-        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
-    };
-
-    Symbol *exprOrSymbol = newSymbol(&config);
-    node->symbol         = exprOrSymbol;
+    analysisLogicalBinaryOperator(node, st);
 }
 
 
@@ -1021,8 +743,10 @@ bool checkIfFunctionHasReturn(AstNode *node) {
         case AST_NODE_TYPE_STATEMENTS: {
             bool leftChildrenHasReturn  = false;
             bool rightChildrenHasReturn = false;
+
             if (node->children1) leftChildrenHasReturn  = checkIfFunctionHasReturn(node->children1);
             if (node->children2) rightChildrenHasReturn = checkIfFunctionHasReturn(node->children2);
+            
             return leftChildrenHasReturn || rightChildrenHasReturn;  
         } break;
 
@@ -1030,9 +754,15 @@ bool checkIfFunctionHasReturn(AstNode *node) {
         case AST_NODE_TYPE_IF_ELSE: {
             bool leftChildrenHasReturn  = false;
             bool rightChildrenHasReturn = false;
+
             if (node->children2) leftChildrenHasReturn  = checkIfFunctionHasReturn(node->children2);
             if (node->children3) rightChildrenHasReturn = checkIfFunctionHasReturn(node->children3);
+            
             return leftChildrenHasReturn && rightChildrenHasReturn;
+        } break;
+
+        case AST_NODE_TYPE_WHILE: {
+            if (node->children2) return checkIfFunctionHasReturn(node->children1);
         } break;
 
         case AST_NODE_TYPE_RETURN: return true;
@@ -1081,6 +811,8 @@ void printMethodParamList(Symbol *methodSymbol) {
     printf("NULL\n");
 }
 
+
+
 SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType) {
     switch (declType) {
         case AST_NODE_DECLARATION_TYPE_INT:     return SYMBOL_SEMANTIC_TYPE_INT;
@@ -1088,6 +820,8 @@ SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclar
         case AST_NODE_DECLARATION_TYPE_BOOLEAN: return SYMBOL_SEMANTIC_TYPE_BOOLEAN;
     }
 }
+
+
 
 void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
     char *literalName = "const";
@@ -1116,4 +850,137 @@ void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
 
     Symbol *literalSymbol = newSymbol(&config);
     nodeLiteral->symbol   = literalSymbol;
+}
+
+
+
+
+void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) {
+    char *binOpStr;
+
+    switch (arithBinOpNode->type) {
+        case AST_NODE_TYPE_ADDITION:       binOpStr = "addition (+)";       break;
+        case AST_NODE_TYPE_SUBTRACTION:    binOpStr = "subtraction (-)";    break;
+        case AST_NODE_TYPE_MULTIPLICATION: binOpStr = "multiplication (*)"; break;
+        case AST_NODE_TYPE_DIVISION:       binOpStr = "division (/)";       break;
+        case AST_NODE_TYPE_MOD:            binOpStr = "mod (%%)";           break;
+    }
+    
+    semanticAnalysisAux(arithBinOpNode->children1, st);
+    semanticAnalysisAux(arithBinOpNode->children2, st);
+
+    Symbol *leftExprSymbol  = arithBinOpNode->children1->symbol;
+    Symbol *rightExprSymbol = arithBinOpNode->children2->symbol;
+    
+    SymbolSemanticType exprSemanticType;
+
+    // chequear que ninguna expresion sea logica/booleana
+    // TODO: tirar warnings de casteos
+    if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of %s is boolean (line: %d)", binOpStr, arithBinOpNode->line)
+    }
+
+    if (rightExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of %s is boolean (line: %d)", binOpStr, arithBinOpNode->line)
+    }
+
+    if (leftExprSymbol->semanticType == rightExprSymbol->semanticType) {
+        exprSemanticType = leftExprSymbol->semanticType;
+    } else {
+        // siempre casteo a float si son distintos
+        exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = exprSemanticType,
+    };
+
+    Symbol *exprArithBinOpSymbol = newSymbol(&config);
+    arithBinOpNode->symbol       = exprArithBinOpSymbol;
+}
+
+
+
+
+void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
+    char *binOpStr;
+
+    switch (logicalBinOpNode->type) {
+        case AST_NODE_TYPE_AND: binOpStr = "and (&&)"; break;
+        case AST_NODE_TYPE_OR:  binOpStr = "or (||)";  break;
+    }
+    
+    semanticAnalysisAux(logicalBinOpNode->children1, st);
+    semanticAnalysisAux(logicalBinOpNode->children2, st);
+
+    Symbol *leftExprSymbol  = logicalBinOpNode->children1->symbol;
+    Symbol *rightExprSymbol = logicalBinOpNode->children2->symbol;
+
+    // chequear que ninguna expresion sea int/float
+    if (leftExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("left expression of %s is '%s' (line: %d)", binOpStr, getSemanticTypeString(leftExprSymbol->semanticType), logicalBinOpNode->line)
+    }
+
+    if (rightExprSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+        ERROR_SEMANTIC("right expression of %s is '%s' (line: %d)", binOpStr, getSemanticTypeString(rightExprSymbol->semanticType), logicalBinOpNode->line)
+    }
+
+    // por ahora solo se llama temp, luego le pondre ti con i de 0..N
+    char *tempName = "temp";
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = tempName,
+        .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+    };
+
+    Symbol *exprLogicalBinOpSymbol = newSymbol(&config);
+    logicalBinOpNode->symbol       = exprLogicalBinOpSymbol;
+}
+
+
+
+
+void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
+    char *binOpStr;
+
+    switch (comparisonOpNode->type) {
+        case AST_NODE_TYPE_COMPARISION_GREATER: binOpStr = ">"; break;
+        case AST_NODE_TYPE_COMPARISION_SMALLER: binOpStr = "<"; break;
+    }
+    
+    // chequear que ambas expresiones sean int's o float's 
+    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
+    // y necesitamos directamente numeros literales o id's
+    semanticAnalysisAux(comparisonOpNode->children1, st);
+    if (!((comparisonOpNode->children1->type == AST_NODE_TYPE_ID)             || 
+          (comparisonOpNode->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (comparisonOpNode->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("left expr of '%s' must be an int literal, float literal, int variable or float variable (line: %d)", binOpStr, comparisonOpNode->line)
+        }
+    
+    semanticAnalysisAux(comparisonOpNode->children2, st);
+    if (!((comparisonOpNode->children2->type == AST_NODE_TYPE_ID)             || 
+          (comparisonOpNode->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
+          (comparisonOpNode->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
+            ERROR_SEMANTIC("right expr of '%s' must be an int literal, float literal, int variable or float variable (line: %d)", binOpStr, comparisonOpNode->line)
+        }
+
+    // crear el simbolo para el temporal
+    char *symbolName                      = "temp";
+    SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
+
+    SymbolConfig config = {
+        .type         = SYMBOL_TYPE_VARIABLE,
+        .name         = symbolName,
+        .semanticType = symbolSemanticType,
+    };
+
+    Symbol *comparisonSymbol = newSymbol(&config);
+    comparisonOpNode->symbol = comparisonSymbol;
 }

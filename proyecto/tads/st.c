@@ -155,7 +155,7 @@ Symbol * newSymbol(SymbolConfig *config) {
 
 // esto es seguro porque meto los params al comienzo a penas abro el nivel
 // pero si no podria modificar la lista de parametros
-void insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList) {
+void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList) {
     if (!st || !symbolList) return;
 
     Symbol *aux = symbolList;

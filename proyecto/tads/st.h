@@ -66,7 +66,7 @@ void     freeSymbolTable(SymbolTable *st);                    // libera la memor
 void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
 char *   getSemanticTypeString(SymbolSemanticType semanticType);
 Symbol * newSymbol(SymbolConfig *config);
-void     insertSymbolListInCurrenLevel(SymbolTable *st, Symbol *symbolList);
+void     insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList);
 Symbol * searchMethodSymbol(SymbolTable *st, char *name);
 
 #endif // ST_H
