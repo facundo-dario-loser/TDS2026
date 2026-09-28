@@ -94,7 +94,6 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define WARNING_SEMANTIC(...) WARNING(MESSAGE_SOURCE_SEMANTIC_ANALYSIS, __VA_ARGS__)
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
-
-#define PRINT_SYMBOL_METHOD_PARAM_LIST(methodSymbol) { printf("[LOG_SEMANTIC_ANALYSIS]: "); if (debugFlag) printMethodParamList(methodSymbol); }
+#define PRINT_SYMBOL(symbol)            { if (debugFlag) printSymbolInfo(symbol); }
 
 #endif // DEBUG_H

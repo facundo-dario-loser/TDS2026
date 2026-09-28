@@ -61,6 +61,12 @@ typedef enum AstNodeDeclarationType {
     AST_NODE_DECLARATION_TYPE_BOOLEAN,
 } AstNodeDeclarationType;
 
+typedef enum AstNodeVarDeclType { // ???????
+    AST_NODE_VAR_DECL_LOCAL,
+    AST_NODE_VAR_DECL_GLOBAL,
+    AST_NODE_VAR_DECL_PARAMETER,
+} AstNodeVarDeclType;
+
 typedef struct AstNode {
     AstNodeType            type;
     AstNodeDeclarationType declarationType;    // solo para nodos 'AST_NODE_TYPE_TYPE'
@@ -70,7 +76,7 @@ typedef struct AstNode {
     struct AstNode         *children2;
     struct AstNode         *children3;
     struct AstNode         *children4;
-    bool                   isFunctionBlock;   // para saber si un BLock es el principal de una funcion (solo se usa en nodos de tipo Block)
+    bool                   isFunctionBlock;   // para saber si un Block es el principal de una funcion (solo se usa en nodos de tipo Block)
                                               // function(...) { Block } (osea si es el bloque principal de la funcion)
     int                    line;              // linea donde se ubica en el archivo fuente
 } AstNode;

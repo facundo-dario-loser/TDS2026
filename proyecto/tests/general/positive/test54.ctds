@@ -1,0 +1,9 @@
+int f(int x, float y, boolean a) {
+    return 1;
+}
+
+void main() {
+    int z;
+
+    z = f(1, 2.6, true);
+}

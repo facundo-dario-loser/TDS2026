@@ -41,17 +41,20 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
 
     Symbol *s         = (Symbol*)malloc(sizeof(Symbol));
     s->type           = config->type;
+    s->variableType   = SYMBOL_VARIABLE_TYPE_LOCAL; // TODO: cambiar luego
     s->name           = config->name;
     s->semanticType   = config->semanticType;
     s->value          = config->value;
     s->parameters     = config->parameters;
     s->next           = NULL;
     s->referenceCount = 0;
+    s->offset         = 0; // por defecto
 
     s->next       = st->top->head;
     st->top->head = s;
     
     PRINT_SYMBOL_TABLE(st)
+    PRINT_SYMBOL(s)
     
     return true;
 }
@@ -168,4 +171,58 @@ void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList) {
     st->top->head = symbolList;
     
     PRINT_SYMBOL_TABLE(st)
+}
+
+void printSymbolInfo(Symbol *s) {
+    if (!s) return;
+
+    char *symbolTypeStr;
+    char *variableTypeStr = "none"; // por defecto
+    char valueStr[64];
+
+    switch (s->type) {
+        case SYMBOL_TYPE_VARIABLE: symbolTypeStr = "variable"; break;
+        case SYMBOL_TYPE_METHOD:   symbolTypeStr = "method";   break;
+        case SYMBOL_TYPE_CONSTANT: symbolTypeStr = "constant"; break;
+    }
+
+    if (s->type == SYMBOL_TYPE_VARIABLE) {
+        switch (s->variableType) {
+            case SYMBOL_VARIABLE_TYPE_LOCAL:     variableTypeStr = "local";     break;
+            case SYMBOL_VARIABLE_TYPE_GLOBAL:    variableTypeStr = "global";    break;
+            case SYMBOL_VARIABLE_TYPE_PARAMETER: variableTypeStr = "parameter"; break;
+        }
+    }
+
+    if (s->type != SYMBOL_TYPE_METHOD) {
+        switch (s->semanticType) {
+            case SYMBOL_SEMANTIC_TYPE_INT:     snprintf(valueStr, sizeof(valueStr), "%d", s->value.intValue);                break;
+            case SYMBOL_SEMANTIC_TYPE_FLOAT:   snprintf(valueStr, sizeof(valueStr), "%f", s->value.floatValue);              break;
+            case SYMBOL_SEMANTIC_TYPE_BOOLEAN: s->value.booleanValue ? strcpy(valueStr, "true") : strcpy(valueStr, "false"); break;
+            case SYMBOL_SEMANTIC_TYPE_VOID:    strcpy(valueStr, "none");                                                     break;
+        }
+    } else {
+        strcpy(valueStr, "none");
+    }
+
+    printf("\n****SymbolInfo****\n");
+    printf("type:           %s\n", symbolTypeStr);
+    printf("variable type:  %s\n", variableTypeStr);
+    printf("name:           %s\n", s->name);
+    printf("semantic type:  %s\n", getSemanticTypeString(s->semanticType));
+    printf("value:          %s\n", valueStr);
+
+    printf("parameters:     ");
+    
+    Symbol *aux = s->parameters;
+    
+    while (aux) {
+        printf("[%s %s] -> ", getSemanticTypeString(aux->semanticType), aux->name);
+        aux = aux->next;
+    }
+
+    printf("NULL\n");
+
+    printf("referenceCount: %d\n", s->referenceCount);
+    printf("offset:         %d\n\n", s->offset);
 }

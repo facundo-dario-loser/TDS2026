@@ -1,0 +1,7 @@
+void random(int x, boolean a) {
+    ;
+}
+
+void main() {
+    random(2, true);
+}

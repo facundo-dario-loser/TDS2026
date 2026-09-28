@@ -48,9 +48,8 @@ void analysisNodeNegation(AstNode *node, SymbolTable *st);
 // funciones auxiliares
 bool checkIfFunctionHasReturn(AstNode *node);                     // chequea que una funcion tenga return's en todas sus ramas
 void getSymbolParamList(AstNode *node, Symbol **symbolParamList); // retorna una lista enlazada de simbolso que son los parametros de un metodo/funcion
-void printMethodParamList(Symbol *methodSymbol);                  // printea la lista parametros de un metodo/funcion 
+void getSymbolParamListAux(AstNode *node, Symbol **symbolParamList, Symbol **tail);
 void setLiteralSymbolInAstNode(AstNode *nodeLiteral);             // crea un simbolo para un nodo de un literal (int, float o bool) y se lo asigna al nodo
-
 SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType); // retorna el tipo semantico del simbolo a partir del campo nodeDeclaration del nodo del ast
 
 // funciones para analizar diferentes tipos de operadores binarios
@@ -58,7 +57,7 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st);
 void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);  // and, or
 void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);     // <, >
 
-void setListIdVariablesToGlobal(AstNode *listIdNode);    // dada una lista de id de una decalracion de varaibles setea el campo tipo de variableType a global para todos los id en la lista
+void setListIdVariablesToGlobal(AstNode *listIdNode);     // dada una lista de id de una decalracion de varaibles setea el campo tipo de variableType a global para todos los id en la lista
 void setParamListVariablesToParameter(Symbol *paramList); // dada la lista de parametros de un metodo/funcion, setea el campo variableType de cada simbolo como parametro
 
 #endif // SEMANTIC_ANALYSIS_H

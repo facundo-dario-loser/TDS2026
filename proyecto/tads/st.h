@@ -77,5 +77,6 @@ void     freeSymbol(Symbol *s);                                               //
 char   * getSemanticTypeString(SymbolSemanticType semanticType);              // dado un valor del enum 'SymbolSemanticType' lo retorna en forma de string
 Symbol * newSymbol(SymbolConfig *config);                                     // crea un nuevo simbolo y lo retorna, pero no lo inserta en la tabla de simbolos. Retorna NULL si no pudo crear el simbolo
 void     insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList); // dada una lista enlazada de simbolos, la inserta en el nivel corriente de la tabla de simbolos
+void     printSymbolInfo(Symbol *s);
 
 #endif // ST_H

@@ -1,0 +1,17 @@
+void f(int x, int y) {
+    int z;
+    z = (x + y) - 4;
+}
+
+int g() {
+    return 1;
+}
+
+boolean h(boolean a) {
+    return true && a;
+}
+
+void main() {
+    int x;
+    int y;
+}

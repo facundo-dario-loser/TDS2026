@@ -194,8 +194,6 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     node->children2->symbol = functionSymbol; // solo los nodos ID apuntan a simbolos
                                               // aunque no haria falta guardar en la declaracion
-     
-    PRINT_SYMBOL_METHOD_PARAM_LIST(functionSymbol)
 
     // cuerpo de la funcion
     if (node->children4) {
@@ -785,41 +783,40 @@ bool checkIfFunctionHasReturn(AstNode *node) {
 
 
 void getSymbolParamList(AstNode *node, Symbol **symbolParamList) {
+    Symbol *tail = NULL;
+    getSymbolParamListAux(node, symbolParamList, &tail);
+    tail->next = NULL;
+}
+
+
+
+
+void getSymbolParamListAux(AstNode *node, Symbol **symbolParamList, Symbol **tail) {
     if (!node) return;
 
     switch (node->type) {
         case AST_NODE_TYPE_PARAM: {
-            // inserta a la cabeza
-            node->children2->symbol->next = *symbolParamList;
-            *symbolParamList = node->children2->symbol;
+            Symbol *paramSymbol = node->children2->symbol;
+
+            // inserta a la cola
+            if (!(*symbolParamList) && !(*tail)) {
+                *symbolParamList = paramSymbol;
+                *tail = paramSymbol;
+            } else {
+                (*tail)->next = paramSymbol;
+                *tail = paramSymbol;
+            }
         } break;
 
         case AST_NODE_TYPE_PARAMS: {
-            getSymbolParamList(node->children1, symbolParamList);
-            getSymbolParamList(node->children2, symbolParamList);
+            getSymbolParamListAux(node->children1, symbolParamList, tail);
+            getSymbolParamListAux(node->children2, symbolParamList, tail);
         } break;
         
         default: return;
     }
 }
 
-
-
-
-void printMethodParamList(Symbol *methodSymbol) {
-    if (!(methodSymbol->type == SYMBOL_TYPE_METHOD)) return;
-
-    printf("%s params: ", methodSymbol->name);
-
-    Symbol *aux = methodSymbol->parameters;
-
-    while (aux) {
-        printf("[%s] -> ", aux->name);
-        aux = aux->next;
-    }
-
-    printf("NULL\n");
-}
 
 
 
@@ -1000,6 +997,9 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
     comparisonOpNode->symbol = comparisonSymbol;
 }
 
+
+
+
 void setListIdVariablesToGlobal(AstNode *listIdNode) {
     if (!listIdNode) return;
 
@@ -1015,6 +1015,9 @@ void setListIdVariablesToGlobal(AstNode *listIdNode) {
         } break;
     }
 }
+
+
+
 
 void setParamListVariablesToParameter(Symbol *paramList) {
     if (!paramList) return;
