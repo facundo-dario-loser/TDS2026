@@ -58,4 +58,7 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st);
 void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);  // and, or
 void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);     // <, >
 
+void setListIdVariablesToGlobal(AstNode *listIdNode);    // dada una lista de id de una decalracion de varaibles setea el campo tipo de variableType a global para todos los id en la lista
+void setParamListVariablesToParameter(Symbol *paramList); // dada la lista de parametros de un metodo/funcion, setea el campo variableType de cada simbolo como parametro
+
 #endif // SEMANTIC_ANALYSIS_H

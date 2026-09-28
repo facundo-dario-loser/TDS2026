@@ -81,7 +81,13 @@ void analysisNodeP(AstNode *node, SymbolTable *st) {
 
 void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node GlobalDeclList visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    
+    if (node->children1) {
+        semanticAnalysisAux(node->children1, st);
+        AstNode *varDeclNode = node->children1;
+        setListIdVariablesToGlobal(varDeclNode); // seteamos las variables como globales
+    }
+
     if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
@@ -168,6 +174,9 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
         semanticAnalysisAux(node->children3, st);
         getSymbolParamList(node->children3, &paramList);
     }
+
+    // seteamos los simbolos de los aprametros para que sean variables de tipo 'parametro'
+    setParamListVariablesToParameter(paramList);
 
     // primero inserta el simbolo de la funcion y luego agregar los parametros 
     SymbolConfig methodSymbolConfig = {
@@ -989,4 +998,31 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
 
     Symbol *comparisonSymbol = newSymbol(&config);
     comparisonOpNode->symbol = comparisonSymbol;
+}
+
+void setListIdVariablesToGlobal(AstNode *listIdNode) {
+    if (!listIdNode) return;
+
+    switch (listIdNode->type) {
+        case AST_NODE_TYPE_LIST_ID: {
+            listIdNode->children1->symbol->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL;
+            if (listIdNode->children2) setListIdVariablesToGlobal(listIdNode->children2);
+        } break;
+
+        case AST_NODE_TYPE_ID: {
+            listIdNode->symbol->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL;
+            // aca termina la recursion
+        } break;
+    }
+}
+
+void setParamListVariablesToParameter(Symbol *paramList) {
+    if (!paramList) return;
+
+    Symbol *aux = paramList;
+
+    while (aux) {
+        aux->variableType = SYMBOL_VARIABLE_TYPE_PARAMETER;
+        aux = aux->next;
+    }
 }

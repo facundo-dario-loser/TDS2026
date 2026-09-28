@@ -63,16 +63,16 @@ typedef enum AstNodeDeclarationType {
 
 typedef struct AstNode {
     AstNodeType            type;
-    AstNodeDeclarationType declarationType; // solo para nodos 'AST_NODE_TYPE_TYPE'
-    AstNodeValue           value;           // guarda temporalmente valores para luego darselos a los simbolos
+    AstNodeDeclarationType declarationType;    // solo para nodos 'AST_NODE_TYPE_TYPE'
+    AstNodeValue           value;              // guarda temporalmente valores para luego darselos a los simbolos
     Symbol                 *symbol;
     struct AstNode         *children1;
     struct AstNode         *children2;
     struct AstNode         *children3;
     struct AstNode         *children4;
-    bool                   isFunctionBlock; // para saber si un BLock es el principal de una funcion (solo se usa en nodos de tipo Block)
-                                            // function(...) { Block } (osea si es el bloque principal de la funcion)
-    int                    line;            // linea donde se ubica en el archivo fuente
+    bool                   isFunctionBlock;   // para saber si un BLock es el principal de una funcion (solo se usa en nodos de tipo Block)
+                                              // function(...) { Block } (osea si es el bloque principal de la funcion)
+    int                    line;              // linea donde se ubica en el archivo fuente
 } AstNode;
 
 typedef struct AstNodeConfig {

@@ -14,6 +14,15 @@ typedef enum SymbolType {
     SYMBOL_TYPE_CONSTANT,
 } SymbolType;
 
+// permite saber el alcance de la variable (local, global, o si es un parametro de un metodo/funcion)
+// por defecto las variables van a ser locales y luego lo cambiare si lo necesito
+// en el analisis semantico
+typedef enum SymbolVariableType {
+    SYMBOL_VARIABLE_TYPE_LOCAL,
+    SYMBOL_VARIABLE_TYPE_GLOBAL,
+    SYMBOL_VARIABLE_TYPE_PARAMETER,
+} SymbolVariableType;
+
 typedef enum SymbolSemanticType {
     SYMBOL_SEMANTIC_TYPE_INT,
     SYMBOL_SEMANTIC_TYPE_BOOLEAN,
@@ -29,10 +38,11 @@ typedef union SymbolValue {
 
 typedef struct Symbol {
     SymbolType         type;
+    SymbolVariableType variableType;   // solo usado en simbolos de tipo variable
     char               *name;
     SymbolSemanticType semanticType;
     SymbolValue        value;
-    struct Symbol      *parameters;    // para funciones
+    struct Symbol      *parameters;    // para metodos/funciones
     struct Symbol      *next;          // proximo de la lista enlazada (en la tabla de simbolos)
     int                referenceCount; // contador de referencias para liberar el simbolo
     int                offset;         // es para la generacion de asm (offset respecto de rbp) 
