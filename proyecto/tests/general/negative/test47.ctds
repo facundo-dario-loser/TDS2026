@@ -1,0 +1,15 @@
+int random(int x, int y) {
+
+    while (x > y) {
+        
+        if (x < y) {
+            return x;
+        } else {
+            return y;
+        }
+        
+        x = x - 1;
+    }
+}
+
+void main () {}

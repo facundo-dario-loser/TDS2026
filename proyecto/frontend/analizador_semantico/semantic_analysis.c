@@ -371,8 +371,10 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
     if (idType != exprType) {
         if ((idType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (exprType == SYMBOL_SEMANTIC_TYPE_INT)) {
             // castear int a float
-        } else if ((idType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (exprType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            WARNING_SEMANTIC("casting right expression of the assignment '=' (which is of type int) to float (line: %d)", node->line)
+        } else if ((idType == SYMBOL_SEMANTIC_TYPE_INT) && (exprType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
             // castear float a int
+            WARNING_SEMANTIC("casting right expression of the assignment '=' (which is of type float) to int (line: %d)", node->line)
         } else {
             ERROR_SEMANTIC("invalid assigment -> '%s' type is %s, but the right expression type is %s (line: %d)", node->children1->value.strValue, idTypeStr, exprTypeStr, node->line)
         }
@@ -761,12 +763,9 @@ bool checkIfFunctionHasReturn(AstNode *node) {
             return leftChildrenHasReturn && rightChildrenHasReturn;
         } break;
 
-        case AST_NODE_TYPE_WHILE: {
-            if (node->children2) return checkIfFunctionHasReturn(node->children1);
-        } break;
-
         case AST_NODE_TYPE_RETURN: return true;
 
+        // en el caso de la sentencia while siempre retorno false, por que no necesariamente entro al mismo
         default: return false;
     }
 }
@@ -875,7 +874,6 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
     SymbolSemanticType exprSemanticType;
 
     // chequear que ninguna expresion sea logica/booleana
-    // TODO: tirar warnings de casteos
     if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
         ERROR_SEMANTIC("left expression of %s is boolean (line: %d)", binOpStr, arithBinOpNode->line)
     }
@@ -889,6 +887,12 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
     } else {
         // siempre casteo a float si son distintos
         exprSemanticType = SYMBOL_SEMANTIC_TYPE_FLOAT;
+
+        if (leftExprSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT)  {
+            WARNING_SEMANTIC("casting left expression of %s (which is of type int) to float (line: %d)", binOpStr, arithBinOpNode->line);
+        } else {
+            WARNING_SEMANTIC("casting right expression of %s (which is of type int) to float (line: %d)", binOpStr, arithBinOpNode->line);
+        }
     }
 
     // por ahora solo se llama temp, luego le pondre ti con i de 0..N

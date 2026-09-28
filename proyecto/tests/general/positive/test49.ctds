@@ -1,0 +1,10 @@
+void main() {
+    int x, y;
+    float z, w;
+
+    y = 2 + 6.5;
+    w = 4.7 + 9;
+
+    x = 2.5;
+    z = x;
+}

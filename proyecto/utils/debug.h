@@ -39,25 +39,32 @@ char * getMessageSourceString(MessageSource msgSrc);
 
 // macro para hacer logs y debuguear. Solo printea si se ejecuto el compilador con la opcion -debug.
 // printea el prefijo 'LOG_' junto al el source de donde viene el mensaje y finalmente el mensaje en si.
-#define LOG(msgSrc, ...) {                                                         \
-                            if (debugFlag) {                                       \
-                                char * msgSrcStr = getMessageSourceString(msgSrc); \
-                                printf("[LOG_%s]: ", msgSrcStr);                   \
-                                printf(__VA_ARGS__);                               \
-                                printf("\n");                                      \
-                            }                                                      \
-                         }                                                         \
+#define LOG(msgSrc, ...) {                                                        \
+                            if (debugFlag) {                                      \
+                                char *msgSrcStr = getMessageSourceString(msgSrc); \
+                                printf("[LOG_%s]: ", msgSrcStr);                  \
+                                printf(__VA_ARGS__);                              \
+                                printf("\n");                                     \
+                            }                                                     \
+                         }                                                        \
 
 // macro para informar un error.
 // printea el prefijo 'ERROR_' junto al el source de donde viene el mensaje y finalmente el mensaje en si.
 // luego mata al proceso finalizando su ejecucion.
-#define ERROR(msgSrc, ...) {                                                       \
-                                char * msgSrcStr = getMessageSourceString(msgSrc); \
-                                printf("[ERROR_%s]: ", msgSrcStr);                 \
-                                printf(__VA_ARGS__);                               \
-                                printf("\n");                                      \
-                                exit(EXIT_FAILURE);                                \
-                           }                                                       \
+#define ERROR(msgSrc, ...) {                                                      \
+                                char *msgSrcStr = getMessageSourceString(msgSrc); \
+                                printf("[ERROR_%s]: ", msgSrcStr);                \
+                                printf(__VA_ARGS__);                              \
+                                printf("\n");                                     \
+                                exit(EXIT_FAILURE);                               \
+                           }                                                      \
+
+#define WARNING(msgSrc, ...) {                                                    \
+                                char *msgSrcStr = getMessageSourceString(msgSrc); \
+                                printf("[WARNING_%s]: ", msgSrcStr);              \
+                                printf(__VA_ARGS__);                              \
+                                printf("\n");                                     \
+                            }                                                     \
 
 // macros que expanden en la macro LOG() invocando a la misma con el source correspondiente
 // es para evitar poner el source cada vez que invoco a LOG()
@@ -83,6 +90,8 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define ERROR_AST(...)      ERROR(MESSAGE_SOURCE_AST, __VA_ARGS__)
 #define ERROR_ST(...)       ERROR(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
 #define ERROR_DOT(...)      ERROR(MESSAGE_SOURCE_DOT, __VA_ARGS__)
+
+#define WARNING_SEMANTIC(...) WARNING(MESSAGE_SOURCE_SEMANTIC_ANALYSIS, __VA_ARGS__)
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
 
