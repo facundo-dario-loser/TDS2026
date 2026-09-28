@@ -28,6 +28,8 @@
 
 [DUDA]: el casteo entre int's y float's deberia hacerlo en el analisis semantico? o luego?
 
+[NOTA]: puedo tener una funcion/metodo global que se llame igual que una variable global 
+
 generar el svg:
 dot -Tsvg file.dot -o ast.svg
 
@@ -68,14 +70,6 @@ void main() {
     }
 }
 
-- hacer que se le pueda pasar a search symbol si se busca una variable o funcion 
-
-[DUDA]: siempre que tengo una exp arit tipo (left + right) y tienen dif tipos -> casteo el resultado a float. Es correcto?
-
-- operador % no deberia ser solo entre int's?
-
-- [SEMANTICO]: debo notificar todos los errores?
-
 - diferenciar var globales, param, var locales (VarType)
 
 
@@ -97,9 +91,5 @@ int f() {
 void g() {
     return f; // <-- aca chequear que si se busca id efectivamente buscar un id 
 }
-
-osea hacer que search symbol se le pueda pasar si quiero buscar un variable o funcion 
-
-- tirar warnings en casteos
 
 - [>, <]: cambiar comparission por -> comparison (lo escribi mal) 

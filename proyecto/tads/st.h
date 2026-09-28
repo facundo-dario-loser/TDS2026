@@ -57,16 +57,15 @@ typedef struct SymbolTable {
     Level *top; // tope de la pila
 } SymbolTable;
 
-void     newLevel(SymbolTable *st);                           // crea un nuevo nivel y lo apila en el tope
-void     closeLevel(SymbolTable *st);                         // elimina el nivel del tope
-bool     insertSymbol(SymbolTable *st, SymbolConfig *config); // inserta un simbolo en el nivel actual
-Symbol * searchSymbol(SymbolTable *st, char *name);           // busca un simbolo en toda la pila de niveles. Si lo encuentra retorna un puntero al mismo y si no retorna NULL
-void     printSymbolTable(SymbolTable *st);                   // printea la tabla de simbolos en la terminal
-void     freeSymbolTable(SymbolTable *st);                    // libera la memoria de la tabal de simbolos
-void     freeSymbol(Symbol *s);                               // libera la memoria de un simbolo
-char *   getSemanticTypeString(SymbolSemanticType semanticType);
-Symbol * newSymbol(SymbolConfig *config);
-void     insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList);
-Symbol * searchMethodSymbol(SymbolTable *st, char *name);
+void     newLevel(SymbolTable *st);                                           // crea un nuevo nivel y lo apila en el tope
+void     closeLevel(SymbolTable *st);                                         // elimina el nivel del tope
+bool     insertSymbol(SymbolTable *st, SymbolConfig *config);                 // inserta un simbolo en el nivel actual
+Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType);         // busca un simbolo en toda la pila de niveles. Si lo encuentra retorna un puntero al mismo y si no retorna NULL
+void     printSymbolTable(SymbolTable *st);                                   // printea la tabla de simbolos en la terminal
+void     freeSymbolTable(SymbolTable *st);                                    // libera la memoria de la tabal de simbolos
+void     freeSymbol(Symbol *s);                                               // libera la memoria de un simbolo
+char   * getSemanticTypeString(SymbolSemanticType semanticType);              // dado un valor del enum 'SymbolSemanticType' lo retorna en forma de string
+Symbol * newSymbol(SymbolConfig *config);                                     // crea un nuevo simbolo y lo retorna, pero no lo inserta en la tabla de simbolos. Retorna NULL si no pudo crear el simbolo
+void     insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList); // dada una lista enlazada de simbolos, la inserta en el nivel corriente de la tabla de simbolos
 
 #endif // ST_H

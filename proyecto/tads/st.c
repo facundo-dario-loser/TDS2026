@@ -27,7 +27,8 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     Symbol *aux = st->top->head;
 
     while (aux) {
-        if (strcmp(aux->name, config->name) == 0) {
+        // debe ser del mismo tipo ya que puedo tener por ej: una funcion y variable global con el mismo nombre
+        if ((strcmp(aux->name, config->name) == 0) && (aux->type == config->type)) {
             return false; // ya existe el simbolo
         }
         
@@ -55,7 +56,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     return true;
 }
 
-Symbol * searchSymbol(SymbolTable *st, char *name) {
+Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType) {
     if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
 
     Level *currentLevel = st->top;
@@ -64,7 +65,7 @@ Symbol * searchSymbol(SymbolTable *st, char *name) {
         Symbol *aux = currentLevel->head;
 
         while (aux) {
-            if (strcmp(aux->name, name) == 0) return aux;
+            if ((strcmp(aux->name, name) == 0) && (aux->type == sType)) return aux;
             aux = aux->next;
         }
 
@@ -167,23 +168,4 @@ void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList) {
     st->top->head = symbolList;
     
     PRINT_SYMBOL_TABLE(st)
-}
-
-Symbol * searchMethodSymbol(SymbolTable *st, char *name) {
-    if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
-
-    Level *currentLevel = st->top;
-
-    while (currentLevel) {
-        Symbol *aux = currentLevel->head;
-
-        while (aux) {
-            if ((strcmp(aux->name, name) == 0) && (aux->type == SYMBOL_TYPE_METHOD)) return aux;
-            aux = aux->next;
-        }
-
-        currentLevel = currentLevel->next;
-    }
-
-    return NULL;
 }

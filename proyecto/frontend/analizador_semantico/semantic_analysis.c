@@ -181,7 +181,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     if (!res) ERROR_SEMANTIC("redeclared function '%s' (line: %d)", methodName, node->line)
 
-    Symbol *functionSymbol = searchSymbol(st, methodSymbolConfig.name);
+    Symbol *functionSymbol = searchSymbol(st, methodSymbolConfig.name, SYMBOL_TYPE_METHOD);
 
     node->children2->symbol = functionSymbol; // solo los nodos ID apuntan a simbolos
                                               // aunque no haria falta guardar en la declaracion
@@ -256,7 +256,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st) {
 
 void analysisNodeId(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node Id visited")
-    Symbol *idSymbol = searchSymbol(st, node->value.strValue);
+    Symbol *idSymbol = searchSymbol(st, node->value.strValue, SYMBOL_TYPE_VARIABLE);
 
     if (!idSymbol) ERROR_SEMANTIC("variable '%s' was not declared (line: %d)", node->value.strValue, node->line)
     
@@ -387,11 +387,13 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
 void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node MethodCall visited")
 
-    // buscar el simbolo de la primer funcion con el nombre dado
-    // en la tabla de simbolos (explorando hacia afuera)
+    // el nodo id lo analizo a mano (porque si no va a buscar el simbolo como una variable y es una funcion)
+    Symbol *methodSymbol = searchSymbol(st, node->children1->value.strValue, SYMBOL_TYPE_METHOD);
 
-    semanticAnalysisAux(node->children1, st); // es necesario? ademas asi como estapodria no funcionar (si hay una var local que se llama igaul que la funcion por ej)
-    Symbol *methodSymbol = searchMethodSymbol(st, node->children1->value.strValue);
+    if (!methodSymbol)
+        ERROR_SEMANTIC("method '%s' was not declared (line: %d)", node->children1->value.strValue, node->line)
+
+    node->children1->symbol = methodSymbol; // en realidad no hace falta hacer esto 
 
     if (node->children2) semanticAnalysisAux(node->children2, st);
 

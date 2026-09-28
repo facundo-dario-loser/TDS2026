@@ -46,14 +46,14 @@ void analysisNodeMinus(AstNode *node, SymbolTable *st);
 void analysisNodeNegation(AstNode *node, SymbolTable *st);
 
 // funciones auxiliares
-bool checkIfFunctionHasReturn(AstNode *node);
-void getSymbolParamList(AstNode *node, Symbol **symbolParamList);
-void printMethodParamList(Symbol *methodSymbol);
+bool checkIfFunctionHasReturn(AstNode *node);                     // chequea que una funcion tenga return's en todas sus ramas
+void getSymbolParamList(AstNode *node, Symbol **symbolParamList); // retorna una lista enlazada de simbolso que son los parametros de un metodo/funcion
+void printMethodParamList(Symbol *methodSymbol);                  // printea la lista parametros de un metodo/funcion 
+void setLiteralSymbolInAstNode(AstNode *nodeLiteral);             // crea un simbolo para un nodo de un literal (int, float o bool) y se lo asigna al nodo
 
-SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType);
+SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType); // retorna el tipo semantico del simbolo a partir del campo nodeDeclaration del nodo del ast
 
-void setLiteralSymbolInAstNode(AstNode *nodeLiteral);
-
+// funciones para analizar diferentes tipos de operadores binarios
 void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st); // + - * / %
 void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);  // and, or
 void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);     // <, >
