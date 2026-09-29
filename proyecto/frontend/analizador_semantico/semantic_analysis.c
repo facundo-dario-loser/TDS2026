@@ -83,9 +83,9 @@ void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node GlobalDeclList visited")
     
     if (node->children1) {
+        node->children1->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL; // bajamos la info de que es una var global
         semanticAnalysisAux(node->children1, st);
         AstNode *varDeclNode = node->children1;
-        setListIdVariablesToGlobal(varDeclNode); // seteamos las variables como globales
     }
 
     if (node->children2) semanticAnalysisAux(node->children2, st);
@@ -112,6 +112,7 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
         // insertar el simbolo nuevo
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
+            .variableType         = node->variableType,
             .name                 = node->children2->value.strValue,
             .semanticType         = symbolSemanticType,
         };
@@ -124,6 +125,8 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
         // arrastrar el tipo de la declaracion en la lista
         node->children2->declarationType = nodeDeclarationType;
+        // bajamos el tipo de variable tambien
+        node->children2->variableType = node->variableType;
         semanticAnalysisAux(node->children2, st);
     }
 }
@@ -175,9 +178,6 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
         getSymbolParamList(node->children3, &paramList);
     }
 
-    // seteamos los simbolos de los aprametros para que sean variables de tipo 'parametro'
-    setParamListVariablesToParameter(paramList);
-
     // primero inserta el simbolo de la funcion y luego agregar los parametros 
     SymbolConfig methodSymbolConfig = {
         .type           = SYMBOL_TYPE_METHOD,
@@ -194,6 +194,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
     node->children2->symbol = functionSymbol; // solo los nodos ID apuntan a simbolos
                                               // aunque no haria falta guardar en la declaracion
+    functionSymbol->referenceCount++;
 
     // cuerpo de la funcion
     if (node->children4) {
@@ -227,6 +228,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st) {
 
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
+            .variableType         = node->variableType,
             .name                 = node->children1->value.strValue,
             .semanticType         = symbolSemanticType,
         };
@@ -242,6 +244,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st) {
         // insertar el simbolo nuevo
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
+            .variableType         = node->variableType,
             .name                 = node->children2->value.strValue,
             .semanticType         = symbolSemanticType,
         };
@@ -254,6 +257,8 @@ void analysisNodeListId(AstNode *node, SymbolTable *st) {
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
         // arrastrar el tipo de la declaracion en la lista
         node->children2->declarationType = nodeDeclarationType;
+        // bajamos el tipo de variable
+        node->children2->variableType = node->variableType;
         semanticAnalysisAux(node->children2, st);
     }
 }
@@ -268,6 +273,7 @@ void analysisNodeId(AstNode *node, SymbolTable *st) {
     if (!idSymbol) ERROR_SEMANTIC("variable '%s' was not declared (line: %d)", node->value.strValue, node->line)
     
     node->symbol = idSymbol;
+    idSymbol->referenceCount++;
 }
 
 
@@ -300,12 +306,14 @@ void analysisNodeParam(AstNode *node, SymbolTable *st) {
 
     SymbolConfig config = (SymbolConfig){
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_PARAMETER,
         .name         = symbolName,
         .semanticType = symbolSemanticType,
     };
 
     Symbol *paramSymbol = newSymbol(&config);
     node->children2->symbol = paramSymbol;
+    paramSymbol->referenceCount++;
 }
 
 
@@ -336,7 +344,13 @@ void analysisNodeBlock(AstNode *node, SymbolTable *st) {
 
 void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node BlockElems visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    
+    if (node->children1) {
+        // bajamos la info para que en la declaracion de variable se sepa que es local
+        node->children1->variableType = SYMBOL_VARIABLE_TYPE_LOCAL;
+        semanticAnalysisAux(node->children1, st);
+    }
+
     if (node->children2) semanticAnalysisAux(node->children2, st);
 }
 
@@ -396,6 +410,7 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
 
     // el nodo id lo analizo a mano (porque si no va a buscar el simbolo como una variable y es una funcion)
     Symbol *methodSymbol = searchSymbol(st, node->children1->value.strValue, SYMBOL_TYPE_METHOD);
+    methodSymbol->referenceCount++;
 
     if (!methodSymbol)
         ERROR_SEMANTIC("method '%s' was not declared (line: %d)", node->children1->value.strValue, node->line)
@@ -465,6 +480,7 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
 
     Symbol *methodCallSymbol = newSymbol(&config);
     node->symbol             = methodCallSymbol;
+    methodCallSymbol->referenceCount++;
 }
 
 
@@ -664,6 +680,7 @@ void analysisNodeEqual(AstNode *node, SymbolTable *st) {
 
     Symbol *equalSymbol = newSymbol(&config);
     node->symbol        = equalSymbol;
+    equalSymbol->referenceCount++;
 }
 
 
@@ -705,6 +722,7 @@ void analysisNodeMinus(AstNode *node, SymbolTable *st) {
 
     Symbol *minusSymbol = newSymbol(&config);
     node->symbol        = minusSymbol;
+    minusSymbol->referenceCount++;
 }
 
 
@@ -730,6 +748,7 @@ void analysisNodeNegation(AstNode *node, SymbolTable *st) {
 
     Symbol *negationSymbol = newSymbol(&config);
     node->symbol           = negationSymbol;
+    negationSymbol->referenceCount++;
 }
 
 
@@ -857,6 +876,7 @@ void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
 
     Symbol *literalSymbol = newSymbol(&config);
     nodeLiteral->symbol   = literalSymbol;
+    literalSymbol->referenceCount++;
 }
 
 
@@ -914,6 +934,7 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
 
     Symbol *exprArithBinOpSymbol = newSymbol(&config);
     arithBinOpNode->symbol       = exprArithBinOpSymbol;
+    exprArithBinOpSymbol->referenceCount++;
 }
 
 
@@ -953,6 +974,7 @@ void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
 
     Symbol *exprLogicalBinOpSymbol = newSymbol(&config);
     logicalBinOpNode->symbol       = exprLogicalBinOpSymbol;
+    exprLogicalBinOpSymbol->referenceCount++;
 }
 
 
@@ -995,37 +1017,5 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
 
     Symbol *comparisonSymbol = newSymbol(&config);
     comparisonOpNode->symbol = comparisonSymbol;
-}
-
-
-
-
-void setListIdVariablesToGlobal(AstNode *listIdNode) {
-    if (!listIdNode) return;
-
-    switch (listIdNode->type) {
-        case AST_NODE_TYPE_LIST_ID: {
-            listIdNode->children1->symbol->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL;
-            if (listIdNode->children2) setListIdVariablesToGlobal(listIdNode->children2);
-        } break;
-
-        case AST_NODE_TYPE_ID: {
-            listIdNode->symbol->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL;
-            // aca termina la recursion
-        } break;
-    }
-}
-
-
-
-
-void setParamListVariablesToParameter(Symbol *paramList) {
-    if (!paramList) return;
-
-    Symbol *aux = paramList;
-
-    while (aux) {
-        aux->variableType = SYMBOL_VARIABLE_TYPE_PARAMETER;
-        aux = aux->next;
-    }
+    comparisonSymbol->referenceCount++;
 }

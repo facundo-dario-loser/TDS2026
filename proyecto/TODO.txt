@@ -1,78 +1,19 @@
 [NOTA] doc y comentarios los hago en espanol, pero codigo en ingles
 [NOTA] los comentarios multilinea que elegi no permiten comentarios anidados
+[NOTA]: puedo tener una funcion/metodo global que se llame igual que una variable global 
+
 
 [TEST] ponerles nombres significativos a los tests 
 
-[MANEJO ERRORES SEMANTICO]: hacer un enum para eso cuando haga el analisis semantico
-
-[TABLA SIMBOLOS] no contar el campo next de symbol como una referencia mas a otro simbolo (solo se usa en la tabla de simbolos eso)
-
-[AST] sacar del enum los tipos de nodos que no use (y de dot.h/.c)
-
-[AST] meter el nro de linea en cada nodo
-
-[DUDA_ANALISIS_SEMANTICO]: deberia cortar luego de encontrar el primer error? o deberia agarrar todos los errores e informarlos?
-
-[TENER EN CUENTA] los simbolos de los parametros de una funcion deberian ir emtidos un scope mas adentro que la funcion (un nivel mas adentro)
-                  podria crear los simbolos de los parametros para cada param pero no insertarlos aun en la tabla (solo dejarlos apuntados por nodos del ast). Luego los recolecto y armos la lista para params del metodo (parece mejor idea).
-                  los simbolos de los parametros no se deben isnertar directamente en la tabal de simbolos. van en el campo aprams del metodo.
-
-[PARSER] agregar las lineas en el parser 
-
 [ANALISIS FUNCIONES]: ver una mejor forma de analizar los returns. Capaz le puedo decir al hijo del cuerpo de alguna forma que en su bloque debe haber un return y que se encarga el hijo de chequearlo.
-
-[REDEFINICION DE VARIABLES] ver como hacer para chequear que no se intente declarar una variable con el mismo nombre que un parametro
-                            podria ahcer que los simbolos tengan un punteor al simbolo de la funcion del cual son parte?
                             
-[ST]: insertSymbol() podria retorna un enum indicando si se inserto ok, si hay redeclaracion de varaible o si colisiona con algun parametro.
-
-[DUDA]: el casteo entre int's y float's deberia hacerlo en el analisis semantico? o luego?
-
-[NOTA]: puedo tener una funcion/metodo global que se llame igual que una variable global 
+[ST]: insertSymbol() podria retorna un enum indicando si se inserto ok, si hay redeclaracion de variable o si colisiona con algun parametro.
 
 generar el svg:
 dot -Tsvg file.dot -o ast.svg
 
 
-
-
-
-
-
-Para analisis de metodos
-
-La bandera de "Al menos un return":Para cumplir con el 
-requerimiento mínimo de que al menos haya un return, puedes 
-añadir un campo booleano hasAtLeastOneReturn dentro del símbolo 
-de la función (Symbol).Cada vez que analysisNodeReturn se ejecute 
-con éxito, setea st->currentMethod->hasAtLeastOneReturn = true;.
-
-
 [SEMANTICO] diferenciar entre varaible redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
-
-mi searchSymbol para parametros puede fallar
-
-si tengo
-
-boolean bigger(int x, int y) {
-    return (x > y);
-}
-
-void main() {
-    int a;
-    int b;
-
-    a = 8;
-    b = 4;
-
-    while(bigger(x,y)) {
-        x = x - 1;
-    }
-}
-
-- diferenciar var globales, param, var locales (VarType)
-
-
 
 
 
@@ -88,8 +29,9 @@ int f() {
     return expr;
 }
 
-void g() {
+int g() {
     return f; // <-- aca chequear que si se busca id efectivamente buscar un id 
 }
 
 - [>, <]: cambiar comparission por -> comparison (lo escribi mal) 
+- [BUG]: en las macros de debug por ahi hay como un bug que se imprime repetido algunas cosas.

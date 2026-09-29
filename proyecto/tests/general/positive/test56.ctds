@@ -1,0 +1,9 @@
+int x, y, z;
+
+int random(int w, float g, boolean u) {
+    return 1;
+}
+
+void main() {
+    boolean a, b, c;
+}

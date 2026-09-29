@@ -51,6 +51,7 @@ typedef struct Symbol {
 
 typedef struct SymbolConfig {
     SymbolType         type;
+    SymbolVariableType variableType; 
     char               *name;
     SymbolSemanticType semanticType;
     SymbolValue        value;

@@ -41,7 +41,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
 
     Symbol *s         = (Symbol*)malloc(sizeof(Symbol));
     s->type           = config->type;
-    s->variableType   = SYMBOL_VARIABLE_TYPE_LOCAL; // TODO: cambiar luego
+    s->variableType   = config->variableType;
     s->name           = config->name;
     s->semanticType   = config->semanticType;
     s->value          = config->value;
@@ -49,6 +49,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     s->next           = NULL;
     s->referenceCount = 0;
     s->offset         = 0; // por defecto
+    s->offsetSet      = false;
 
     s->next       = st->top->head;
     st->top->head = s;
@@ -122,11 +123,12 @@ void freeSymbol(Symbol *s) {
 
     Symbol *paramAux = s->parameters;
 
-    while (paramAux) {
+    // esto no deberia hacerlo. Los params los libero cuando llego a los nodos del ast de tipo 'param' -> 'ID'
+    /*while (paramAux) {
         Symbol *nextParamAux = paramAux->next;
         freeSymbol(paramAux);
         paramAux = nextParamAux;
-    }
+    }*/
 
     free(s);
 }
@@ -148,11 +150,16 @@ Symbol * newSymbol(SymbolConfig *config) {
 
     if (!s) ERROR_ST("couldn't allocate memory for s in newSymbol")
 
-    s->type         = config->type;
-    s->name         = config->name;
-    s->semanticType = config->semanticType;
-    s->value        = config->value;
-    s->parameters   = config->parameters;
+    s->type           = config->type;
+    s->variableType   = config->variableType;
+    s->name           = config->name;
+    s->semanticType   = config->semanticType;
+    s->value          = config->value;
+    s->parameters     = config->parameters;
+    s->next           = NULL;
+    s->referenceCount = 0;
+    s->offset         = 0;
+    s->offsetSet      = false;
 
     return s;
 }
@@ -225,4 +232,15 @@ void printSymbolInfo(Symbol *s) {
 
     printf("referenceCount: %d\n", s->referenceCount);
     printf("offset:         %d\n\n", s->offset);
+
+    if (s->parameters) {
+        printf("\n****'%s' Parameters Info****\n", s->name);
+
+        Symbol *aux = s->parameters;
+
+        while (aux) {
+            printSymbolInfo(aux);
+            aux = aux->next;
+        }
+    }
 }

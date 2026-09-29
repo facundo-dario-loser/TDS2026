@@ -61,15 +61,10 @@ typedef enum AstNodeDeclarationType {
     AST_NODE_DECLARATION_TYPE_BOOLEAN,
 } AstNodeDeclarationType;
 
-typedef enum AstNodeVarDeclType { // ???????
-    AST_NODE_VAR_DECL_LOCAL,
-    AST_NODE_VAR_DECL_GLOBAL,
-    AST_NODE_VAR_DECL_PARAMETER,
-} AstNodeVarDeclType;
-
 typedef struct AstNode {
     AstNodeType            type;
     AstNodeDeclarationType declarationType;    // solo para nodos 'AST_NODE_TYPE_TYPE'
+    SymbolVariableType     variableType;       // util en declaraciones de varaibles para pasarle info al simbolo de si es una variable local, global o parametro
     AstNodeValue           value;              // guarda temporalmente valores para luego darselos a los simbolos
     Symbol                 *symbol;
     struct AstNode         *children1;
