@@ -41,8 +41,8 @@ void semanticAnalysisAux(AstNode *root, SymbolTable *st) {
         case AST_NODE_TYPE_MULTIPLICATION:      analysisNodeMultiplication(root, st);     break;      
         case AST_NODE_TYPE_DIVISION:            analysisNodeDivision(root, st);           break;            
         case AST_NODE_TYPE_MOD:                 analysisNodeMod(root, st);                break;                 
-        case AST_NODE_TYPE_COMPARISION_SMALLER: analysisNodeComparisionSmaller(root, st); break; 
-        case AST_NODE_TYPE_COMPARISION_GREATER: analysisNodeComparisionGreater(root, st); break; 
+        case AST_NODE_TYPE_COMPARISON_SMALLER:  analysisNodeComparisonSmaller(root, st);  break; 
+        case AST_NODE_TYPE_COMPARISON_GREATER:  analysisNodeComparisonGreater(root, st);  break; 
         case AST_NODE_TYPE_EQUAL:               analysisNodeEqual(root, st);              break;               
         case AST_NODE_TYPE_AND:                 analysisNodeAnd(root, st);                break;                 
         case AST_NODE_TYPE_OR:                  analysisNodeOr(root, st);                 break;                  
@@ -492,7 +492,7 @@ void analysisNodeIfElse(AstNode *node, SymbolTable *st) {
     // chequear que la expr de la condicion sea booleana
     semanticAnalysisAux(node->children1, st);
     if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
-        ERROR_SEMANTIC("condition in the if statement must be a logic/boolean expression (line: %d)", node->line)
+        ERROR_SEMANTIC("condition in the if statement must be a logic/boolean expression, but it's of type %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
     
     if (node->children2) semanticAnalysisAux(node->children2, st);
     if (node->children3) semanticAnalysisAux(node->children3, st);
@@ -643,7 +643,7 @@ void analysisNodeMod(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
+void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node ComparisionSmaller visited")
     analysisComparisonOperator(node, st);
 }
@@ -651,7 +651,7 @@ void analysisNodeComparisionSmaller(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeComparisionGreater(AstNode *node, SymbolTable *st) {
+void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st) {
     DEBUG_SEMANTIC("node ComparisionGreater visited")
     analysisComparisonOperator(node, st);
 }
@@ -984,8 +984,8 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
     char *binOpStr;
 
     switch (comparisonOpNode->type) {
-        case AST_NODE_TYPE_COMPARISION_GREATER: binOpStr = ">"; break;
-        case AST_NODE_TYPE_COMPARISION_SMALLER: binOpStr = "<"; break;
+        case AST_NODE_TYPE_COMPARISON_GREATER: binOpStr = ">"; break;
+        case AST_NODE_TYPE_COMPARISON_SMALLER: binOpStr = "<"; break;
     }
     
     // chequear que ambas expresiones sean int's o float's 

@@ -29,13 +29,14 @@ frontend/analizador_sintactico/
 bison parser.y
 cd ..
 
-gcc frontend/analizador_lexico/lex.yy.c         \
-	frontend/analizador_sintactico/parser.tab.c \
-	utils/argument.c							\
-	utils/debug.c							    \
-    tads/ast.c 								    \
-    tads/st.c 								    \
-	utils/dot.c 								\
+gcc frontend/analizador_lexico/lex.yy.c               \
+	frontend/analizador_sintactico/parser.tab.c       \
+	utils/argument.c							      \
+	utils/debug.c							          \
+    tads/ast.c 								          \
+    tads/st.c 								          \
+	utils/dot.c 								      \
+    frontend/analizador_semantico/semantic_analysis.c \
 	main.c -o build/c-tds
 ```
 
@@ -122,6 +123,7 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 - `/frontend` contiene subcarpetas correspondientes al frontend del compilador:
     - `/analizador_lexico` contiene el lexer dentro del archivo `lexer.l`.
     - `/analizador_sintactico` contiene el parser en el archivo `parser.y`.
+    - `/analizador_semantico/` contiene los archivos correspodientes a la etapa del análisis semántico `semantic_analysis.h/.c`.
 
 - `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.
     - `/lexer` contiene tests correspondientes a la etapa del analisis lexico.

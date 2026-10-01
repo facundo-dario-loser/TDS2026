@@ -1,212 +1,291 @@
-# Documentación correspondiente a la entrega de la tabla de simbolos y el árbol sintáctico abstracto (TS y AST)
+# Documentación correspondiente a la entrega del analizador semántico
+La implementación del analizador semántico se encuentra en el path: `/proyecto/frontend/analizador_semantico/` en los archivos `semantic_analysis.h/.c`.
 
-## Tabla de símbolos (TS)
-Su implementación se encuentra dentro de `/proyecto/tads` en los archivos `st.h/.c`.
+## Cosas que modifique/agregue al AST
+La implementacion del ast se encuentra en el path `/proyecto/tads/` en los archivos `ast.h/.c`.
 
-Los simbolos se definen como:
+- Dentro del enum `AstNodeType` tuve que agregar el tipo de nodo: `AST_NODE_TYPE_BLOCK` que es para los bloques { }. Antes directamente al abrir un bloque colocaba las decalraciones de varaibles y sentencia directamente, pero el problema que me encontre es que sin este nodo no iba a saber en que momento abrir un nuevo nivel en la tabla de simbolos.
 
-```
-typedef struct Symbol {
-    SymbolType         type;
-    char               *name;
-    SymbolSemanticType semanticType;
-    SymbolValue        value;
-    struct Symbol      *parameters;
-    struct Symbol      *next;       
-    int                referenceCount;
-    int                offset;
-    bool               offsetSet;
-} Symbol;
-```
+- Dentro del struct `AstNode` agregue el campo: `bool isFunctionBlock;`. Basicamente los parametros de las funciones/metodos los trato como variables locales (variables que se declararon dentro del bloque principal de la funcion). Entonces cuando encuentro una decalracion de un metodo/funcion este tiene 4 hijos: el tipo de retorno, el id/nombre, los parametros y el cuerpo que es un bloque. Entonces al hijo que se corresponde con el bloque le bajo la informacion de que es un bloque de una funcion. Luego al procesar el bloque se abre un nuevo nivel en la tabla de simbolos y como tiene seteado el flag `isFunctionBlock` entonces lo que hace es en la tabal de simbolos ir un nivel hacia atras y buscar el simbolo de la funcion para extraer la lista de parametros (que es una lsita de simbolos) y entonces insertarla esta lista en el nivel corriente en la tabla de simbolos que se acaba de abrir.
 
-- `type` es el tipo de simbolo. Pueden ser de tipo variable, metodo/función o constate. En el caso de los simbolos correspondientes a parametros de funciones los voy a tratar como variables locales.
+- Dentro del struct `AstNode` agregue el campo: `SymbolVariableType     variableType;` que sirve para bajar informacion en los nodos y entonces al encontrar una declaracion de variable o parametro de una funcion cuando se cree el simbolo correspondiente se le pase la info de si es una variable local, global o si es un parametro. Esta informacion va a ser de utilidad en la generacion de codigo intermedio y generacion de assembly.
 
-- `name` es el nombre del simbolo (que viene dado por el nombre de la variable, función o parámetro). En el caso de constantes su nombre es el string de su valor y para el caso de valores temporales su nombre es ti donde i es un entero natural.
+## Cosas que modifique/agregue a los símbolos y tabla de simbolos
+La implementacion de los simbolos y la taba de simbolos se encuentra en el path `/proyecto/tads` en los archivos `st.h/.c`.
 
-- `semanticType` es el tipo semántico del simbolo (int, boolean, float). En el caso de funciones que retornan algo representa el tipo de la expresión que retorna.
+- Agregue este enum que permite saber si el simbolo de una variable corresponde a una variable global, local o si es un parametro de una funcion.
 
-- `value` permite guardar el valor del simbolo que puede ser un int, float o un booleano. Este campo es una union entre int, float y bool. Es util para constantes.
+    ```
+    typedef enum SymbolVariableType {
+        SYMBOL_VARIABLE_TYPE_LOCAL,
+        SYMBOL_VARIABLE_TYPE_GLOBAL,
+        SYMBOL_VARIABLE_TYPE_PARAMETER,
+    } SymbolVariableType;
+    ```
+    Esta informacion va a ser de utilidad en la generacion de codigo intermedio y en la generacion de assembly.
+    Luego agregue en el struct `Symbol` el campo `SymbolVariableType variableType;`
 
-- `parameters` es una lista enlazada de simbolos que representan los parametros de una función. Este campo solo se usa si el tipo del simbolo es función.
+- Modifique la funcion `insertSymbol` para que al chequear antes de insertar el nuevo simbolo que no colisione con otro simbolo del mismo nombre tambien chequee aparte del nombre que sea del mismo tipo (variable o funcion). Entonces es posible por ejemplo a nivel global tener una varaible llamada 'f' y una funcion con el nombre 'f' sin ningun problema.
 
-- `next` puntero a otro simbolo. Permite crear una lista enlazada de simbolos. Es útil para crear la lista de parametros de una función y para crear la lista de simbolos en un nivel de la pila de la tabla de simbolos.
+    ```
+    bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
+        if (!st) ERROR_ST("the symbol table is null (insertSymbol)")
 
-- `referenceCount` contador de punteros que hacen referencia al simbolo. Es útil a la hora de liberar el AST ya que varios nodos pueden apuntar a un mismo simbolo.
+        // chequear que no exista el simbolo en el nivel corriente
+        Symbol *aux = st->top->head;
 
-- `offset` es el offset del simbolo respecto del registro base rbp. Este campo sirve en la etapa de generación de assembly.
+        while (aux) {
+            if ((strcmp(aux->name, config->name) == 0) && (aux->type == config->type)) {
+                return false; // ya existe el simbolo
+            }
+        
+            aux = aux->next;
+        }
+        ...
+    ```
 
-- `offsetSet` flag para saber si a un simbolo ya se le seteo su offset o no.
+- Modifique la funcion `searchSymbol` para que ahora ademas de apsarle el simbolo que se desea buscar en la tabla de simbolos, tambien se indique si lo que se busca es una variable o una funcion.
+    ```
+    Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType) {
+        if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
 
-<br>La tabla de simbolos se implementa como una pila de niveles en donde cada nivel tiene una lista enlazada de simbolos.
-La pila de niveles también esta implementada como una lista enlazada.
+        Level *currentLevel = st->top;
 
-**Nivel:**<br>
-El campo `head` es un puntero a la cabeza de la lista enlazada de simbolos del nivel correspondiente.<br>
-`next` es un puntero al siguiente nivel (inferior). 
-```
-typedef struct Level {
-    Symbol       *head;
-    struct Level *next;
-} Level;
-```
+        while (currentLevel) {
+            Symbol *aux = currentLevel->head;
 
-**Tabla de símbolos:**<br>
-Contiene simplemente el puntero al tope de la pila (que es la cabeza de la lista enlazada de niveles). Cada vez que se inserta un nuevo nivel se hace a la cabeza de la lista.
-```
-typedef struct SymbolTable {
-    Level *top;
-} SymbolTable;
-```
+            while (aux) {
+                if ((strcmp(aux->name, name) == 0) && (aux->type == sType)) return aux;
+                aux = aux->next;
+            }
 
-<br>**Funciones de la tabla de símbolos:**<br><br>
-Apila un nuevo nivel en el tope, insertando el nivel a la cabeza de la lista enlazada de la pila.
-```
-void newLevel(SymbolTable *st);
-```
+            currentLevel = currentLevel->next;
+        }
 
-Elimina el nivel del tope de la pila.
-```
-void closeLevel(SymbolTable *st);
-```
+        return NULL;
+    }
+    ```
+    Esto lo tuve que hacer ya que podria tener el siguiente programa:
+    ```
+    int f;
 
-Dada la configuración de un símbolo, crea el simbolo y lo inserta en el nivel actual de la pila. Retorna true sii lo pudo insertar y false en otro caso (por ejemplo cuando ya existe el símbolo entonces no lo puede volver a insertar).<br> 
-**Nota**: mas abajo se detalla que es el struct de configuración (en la sección 'Decisiones de diseño').
-```
-bool insertSymbol(SymbolTable *st, SymbolConfig *config);
-```
+    int f() {
+        return f;
+    }
+    ```
+    En donde dentro de la funcion 'f' cuando se llegue al return se encontrara que retorna una expresion que es un 'ID', luego se buscara en la tabla de simbolos el simbolo f (variable), pero como siempre inserto a la cabeza los simbolos en cada nivel de la pila de la tabla de simbolos, bajaria un nivel por fuera del bloque de la funcion y se quedaria parado en el nivel correspondiente al scope global que tendria los simbolos de f(funcion) y f(variable):
+    ```
+    level 1: -> NULL (dentro de la funcion f no hay ninguna variable).
+      ^
+      |
+    level 0: -> [f:funcion] -> [f:variable] -> NULL
+    ``` 
+    Y encontraria primero el simbolo de la funcion 'f' y como tiene el nombre buscado, retornaria ese simbolo lo cual estaba mal.
 
-Dado el nombre de un simbolo lo busca en toda la pila y retorna un puntero al mismo. Si no lo encuentra retorna NULL.
-```
-Symbol * searchSymbol(SymbolTable *st, char *name);
-```
+- Agregue las funciones:
 
-Printea la tabla de simbolos en la terminal.
-```
-void printSymbolTable(SymbolTable *st);
-```
+    Dado el tipo semantico de un simbolo (int, float o boolean), lo retorna en forma de string.
+    ```
+    char * getSemanticTypeString(SymbolSemanticType semanticType);
+    ```
 
-Libera la memoria de la pila de la tabla de simbolos. No elimina los simbolos de cada nivel ya que estos quedan apuntados por nodos del ast.
-```
-void freeSymbolTable(SymbolTable *st);
-```
+    Crea un nuevo simbolo a partir de una configuracion dada y lo retorna, pero no lo inserta en la tabla de simbolos. Si no pudo crear el simbolo retorna NULL.
+    ```
+    Symbol * newSymbol(SymbolConfig *config);
+    ```
 
-Libera la memoria para de un simbolo.
-```
-void freeSymbol(Symbol *s);
-```
+    Dada una lista enlazada de simbolos, la inserta en el nivel corriente de la tabla de simbolos. Esta funcion se utiliza para insertar la lista de parametros de una funcion en el nivel que corresponde al bloque principal de la misma. Es decir que los parametros se tratan como variables locales en el bloque principal de la funcion.
+    ```
+    void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList);
+    ```
 
-## Árbol sintáctico abstracto (AST)
-Su implementación se encuentra dentro de `/proyecto/tads` en los archivos `ast.h/.c`.
+    Imprime la informacion de los campos del struct del simbolo en la terminal
+    ```
+    void printSymbolInfo(Symbol *s);
+    ```
 
-El ast se define como:
-```
-typedef struct AstNode {
-    AstNodeType            type;
-    AstNodeDeclarationType declarationType;
-    AstNodeValue           value;
-    Symbol                 *symbol;
-    struct AstNode         *children1;
-    struct AstNode         *children2;
-    struct AstNode         *children3;
-    struct AstNode         *children4;
-    bool                   hasReturn;
-    int                    line;
-} AstNode;
-```
+## Funciones del análisis semántico
+La implementación del analizador semántico se encuentra en el path: `/proyecto/frontend/analizador_semantico/` en los archivos `semantic_analysis.h/.c`.<br>
+El analisis semantico se realiza de manera recursiva sobre el ast obtenido luego del analisis sintactico.<br><br>
+Las funciones que se implementaron son las siguientes:
 
-- `type` tipo de nodo del ast. Es un valor el enum `AstNodeType`.
+- Funcion principal que crea la tabla de simbolos y llama la funcion auxiliar descripta abajo con el mismo puntero al nodo root y la direccion de la tabla de simbolos que creo.
+    ```
+    void semanticAnalysis(AstNode *root);
+    ```
 
-- `declarationType` puede ser (int, float, boolean). En mi ast tengo un tipo de nodo que llamado 'AST_NODE_TYPE_TYPE' el cual es para el tipo de las declaraciones de variables o funciones. Entonces declarationType permite saber dado un nodo de estos si el type es int, float o boolean.<br>
-**Ejemplo**: si tenemos `int x;` entonces tendriamos un nodo de tipo 'declaración de variable' con hijo izquierdo un nodo de tipo 'type' y con hijo derecho un nodo de tipo 'id'. Entonces en el nodo de tipo 'type' en el campo declarationType se le asigna que es int.<br>
-Esta información se guarda temporalmente aqui y luego se traslada al simbolo correspondiente al crearse.
+- Funcion que chequea el nodo root y en base a su tipo llama a la funcion correspondiente para analizar cada tipo de nodo del ast. Ademas va guardando el puntero a la tabla de simbolos para no perderlo entre las llamadas recursivas.
+    ```
+    void semanticAnalysisAux(AstNode *root, SymbolTable *st);
+    ```
 
-- `value` permite guardar un valor int, float, boolean o string. Sirve para guardar el valor de las constantes de manera temporal ya que luego durante el analisis semántico al crear los simbolos guardare este valor en los mismos.  
+- Funciones para analizar cada tipo de nodo del ast (una funcion por cada valor del enum `AstNodeType`). Cada una de esta recibe el nodo correspondiente y la tabla de simbolos:
+    ```
+    void analysisNodeP(AstNode *node, SymbolTable *st);
 
-- `symbol` es un puntero a un símbolo de la tabla de simbolos.
+    void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st);
 
-- `children1`, `children2`, `children3`, `children4` son punteros a nodos hijos del ast. 
+    void analysisNodeVarDecl(AstNode *node, SymbolTable *st);
 
-- `hasReturn` flag que es util para saber si una función que en el perfil indica que retorna algo, entonces chequear que en el cuerpo efectivamente tenga los return's correspondientes.
+    void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st);
 
-- `line` guarda la linea de una declaración, sentencia, etc. Sirve para indicar la linea cuando hay un error semántico. 
+    void analysisNodeMethodDecl(AstNode *node, SymbolTable *st);
 
-<br>**Funciones del AST**:<br>
+    void analysisNodeListId(AstNode *node, SymbolTable *st);
 
-Dada la configuración de un nodo, lo crea y retorna un puntero al mismo.<br>
-**Nota**: mas abajo se detalla que es la estructura de configuración (en la sección 'Decisiones de diseño'). 
-```
-AstNode * newAstNode(AstNodeConfig *config);
-```
+    void analysisNodeId(AstNode *node, SymbolTable *st);
 
-Libera la memoria de todos los nodos (y simbolos a los que apuntan) del árbol.
-```
-void freeAst(AstNode *root);
-```
+    void analysisNodeParams(AstNode *node, SymbolTable *st);
 
-## Decisiones de diseño
+    void analysisNodeVoid(AstNode *node, SymbolTable *st);
 
-- La creación de los simbolos la decidi postergar para el análisis semántico. Si bien es posible crear todos los simbolos en el mismo parser a medida que se construye el ast, considere que no seria muy limpio dado que estaria obligado a hacerlo en el mismo archivo `parser.y` ya que necesito acceder a las variables de bison ($1, $2, ...). Ademas me parecia mas sencillo hacerlo en el análisis semántico ya que seguiría la misma estructura que tenia en el preproyecto.
+    void analysisNodeParam(AstNode *node, SymbolTable *st);
 
-- Tanto en `ast.h` como en `st.h` cree estructuras de 'configuración' para los simbolos y nodos del ast:
+    void analysisNodeBlock(AstNode *node, SymbolTable *st);
 
-```
-typedef struct SymbolConfig {
-    SymbolType         type;
-    char               *name;
-    SymbolSemanticType semanticType;
-    SymbolValue        value;
-    struct Symbol      *parameters;
-} SymbolConfig;
+    void analysisNodeBlockElems(AstNode *node, SymbolTable *st);
 
-typedef struct AstNodeConfig {
-    AstNodeType            type;
-    AstNodeDeclarationType declarationType;
-    AstNodeValue           value;
-    AstNode                *children1;
-    AstNode                *children2;
-    AstNode                *children3;
-    AstNode                *children4;
-    int                    line;
-} AstNodeConfig;
-```
+    void analysisNodeStatements(AstNode *node, SymbolTable *st);
 
-El objetivo de las mismas es hacer más fácil el diseño de las funciones que permiten crear simbolos y nodos del ast.<br>
-`SymbolConfig` y `AstNodeConfig` contienen todos los campos que se podrian llegar a setear en la creación de un nuevo simbolo o nodo del ast.
+    void analysisNodeType(AstNode *node, SymbolTable *st);
 
-```
-bool      insertSymbol(SymbolTable *st, SymbolConfig *config);
-AstNode * newAstNode(AstNodeConfig *config);
-```
-Este diseño permite que solo tenga una única función para crear nodos y lo mismo para crear nuevos simbolos usando pocos parametros. La razón por la cual ambas funciones toman un puntero a las configuraciones es por una cuestion de eficiencia (para evitar que se copie todo el struct).
+    void analysisNodeAssignment(AstNode *node, SymbolTable *st);
 
-Por ejemplo en el caso del ast en lugar de tener varias funciones para crear diferentes tipos de nodos o tener 1 sola función con muchos parametros, entonces le paso solo 1 estructura con los campos que me interesen setear.<br>
-En el archivo `/proyecto/frontend/analizador_sintactico/parser.y` a su vez cuando llamo a newAstNode creo la estructura en la misma invocación.<br> 
-Esta forma de crear e inicializar structs en C se llama `designated initializers`.<br> 
-<br>**Ejemplo general**:
-```
-typedef struct MyStruct { ... } MyStruct;
+    void analysisNodeMethodCall(AstNode *node, SymbolTable *st);
 
-MyStruct s = (MyStruct){
-    .campo1 = valor1,
-    .campo2 = valor2,
-    ...
-};
-```
+    void analysisNodeIfElse(AstNode *node, SymbolTable *st);
 
-Los campos que no setee por defecto se setean en 0 para números y NULL para punteros.<br>
-De esta manera logro 'simular' funciones que toman un numero variable de parametros y ademas en cualquier orden.
-Esta práctica la aprendi de api's y bibliotecas modernas de C que lo suelen hacer.
+    void analysisNodeWhile(AstNode *node, SymbolTable *st);
 
-**Ejemplo**<br>
-A continuación muestro como crear diferentes tipos de nodos del ast usando la misma función y llenando solo los campos que me interesan en la configuración. Los mismos fueron sacados del archivo `parser.y`.<br>
+    void analysisNodeReturn(AstNode *node, SymbolTable *st);
 
-Para los nodos de tipo `ID` llamo a newNode asi:
-```
-newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $1});
-``` 
+    void analysisNodeListExpr(AstNode *node, SymbolTable *st);
 
-Para los nodos de tipo `IF_ELSE` llamo a newNode asi:
-```
-newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_IF_ELSE, .children1 = $3, .children2 = $5, .children3 = $7});
-```
-donde children 1 es la condición, children2 es el nodo del bloque que se ejecuta si se cumple la condición y children3 es el nodo del else.
+    void analysisNodeIntLiteral(AstNode *node, SymbolTable *st);
+
+    void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st);
+
+    void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st);
+
+    void analysisNodeAddition(AstNode *node, SymbolTable *st);
+
+    void analysisNodeSubtraction(AstNode *node, SymbolTable *st);
+
+    void analysisNodeMultiplication(AstNode *node, SymbolTable *st);
+
+    void analysisNodeDivision(AstNode *node, SymbolTable *st);
+
+    void analysisNodeMod(AstNode *node, SymbolTable *st);
+
+    void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st);
+
+    void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st);
+
+    void analysisNodeEqual(AstNode *node, SymbolTable *st);
+
+    void analysisNodeAnd(AstNode *node, SymbolTable *st);
+
+    void analysisNodeOr(AstNode *node, SymbolTable *st);
+
+    void analysisNodeMinus(AstNode *node, SymbolTable *st);
+
+    void analysisNodeNegation(AstNode *node, SymbolTable *st);
+    ```
+    <br>
+- **Funciones Auxiliares:**<br><br>
+    Chequea que una funcion/metodo  que retorna una expresion entonces efectivamente en todas las posibles trazas dentro del cuerpo de la misma siempre se termine con un return. Es decir que nunca se deberia poder alcanzar el final de la funcion porque siempre hay un return antes.
+    ```
+    bool checkIfFunctionHasReturn(AstNode *node);
+    ```
+    Un nodo de declaracion de metodo/funcion tiene 4 hijos: el nodo tipo de retorno, el nodo id/nombre, el nodo parametros y el nodo del cuerpo. Esta funcion dado el nodo de parametros y dado un puntero a una lista enlazada de simbolos vacia, completa la lista enlazada con todos los parametros del metodo en el mismo orden que los tiene.
+    ```
+    void getSymbolParamList(AstNode *node, Symbol **symbolParamList); 
+    ```
+    Funcion auxiliar de 'getSymbolParamList' que se encarga de hacer todo el trabajo. Es una funcion recursiva y para poder obtener la lista de parametros de la funcion en el mismo orden debe insertar los simbolos siempre a la cola y para ello debe guardar en el parametro 'tail' la cola o ultimo elemento de la lista. 'symbolParamList' seria la cabeza de la lista.
+    ```
+    void getSymbolParamListAux(AstNode *node, Symbol **symbolParamList, Symbol **tail);
+    ```
+    Dado un nodo del ast correspondiente a una constante, crea el simbolo para dicha constante y hace que ese nodo apunte al simbolo creado.
+    ```
+    void setLiteralSymbolInAstNode(AstNode *nodeLiteral);
+    ```
+    Dado un valor del enum DeclarationType del ast, que era para guardar el tipo (int, float, boolean o void) en un nodo type de una declaracion de funcion o metodo, retorna el tipo semantico equivalente para poder crear un simbolo luego.
+    ```
+    SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType);
+    ```
+    Funcion para analizar semanticamente nodos correspondientes a operadores binarios aritmeticos (`+`, `-`, `*`, `/`, `%`).
+    ```
+    void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st);
+    ```
+    Funcion para analizar semanticamente nodos correspondientes a operadores binarios logicos (`&&` and, `||` or).
+    ```
+    void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);
+    ```
+    Funcion para analizar semanticamente nodos correspondientes a operadores binarios de comparacion (`<`, `>`).
+    ```
+    void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);
+    ```
+
+## Chequeos semánticos
+En el analisis semantico se chequearon los 14 puntos del enunciado del proyecto:
+
+**1.** Ningun identificador es declarado dos veces en un mismo bloque.
+
+**2.** Ningun identificador es usado antes de ser declarado.
+
+**3.** Todo programa contiene la definicion de un metodo llamado main. Este metodo no tiene parametros. Notar que la ejecucion comienza con el metodo main.
+
+**4.** El numero y tipos de los argumentos en una invocacion a un metodo debe ser iguales al numero y tipos declarados en la definicion del metodo (los parametros formales y los reales deben ser iguales).
+
+**5.** Si la invocacion a un metodo es usada como una expresion, el metodo debe retornar un resultado.
+
+**6.** Una sentencia return solo tiene asociada una expresion si el metodo retorna un valor, si le metodo no retorna un valor (es un metodo void) entonces la sentencia return no puede tener asociada ninguna expresion.
+
+**7.** La expresion en una sentencia return debe ser igual al tipo de retorno declarado para el metodo.
+
+**8.** Un ⟨id⟩ usado como una ⟨location⟩ debe estar declarado como un parametro o como una variable local o global.
+
+**9.** La ⟨expr⟩ en una sentencia if o while debe ser boolean.
+
+**10.** Los operandos de ⟨arith op⟩’s y ⟨rel op⟩’s deben ser de tipo int o float.
+
+**11.** Los operandos de ⟨eq op⟩’s (==) deben tener el mismo tipo (int, o float boolean).
+
+**12.** Los operandos de ⟨cond op⟩’s y el operando de la negacion (!) deben ser de tipo boolean.
+
+**13.** La ⟨location⟩ y la ⟨expr⟩ en una asignacion, ⟨location⟩ = ⟨expr⟩, deben tener el mismo tipo.
+
+**14.** Se permiten coerciones o truncamientos entre int y float
+
+Y como chequeo extra tambien hice:
+
+**15.** En el caso de metodos que retornen una expresion (int, float o boolean) entonces se debe chequear que en el cuerpo del metodo en todas las posibles trazas siempre se termina con un 'return expr;'. Es decir un metodo que retorne algo al ejecutarse no se deberia poder alcanzar el fin del metodo por que se salio del mismo previamente con un return.
+
+**Aclaraciones extra**:
+
+- Cada vez que hay un nuevo bloque `{}` se abre un nuevo nivel en la pila de la tabla de simbolos.
+
+- En las declaraciones de metodos/funciones el simbolo correspondiente a la funcion se inserta en el nivel actual 'n' y todas los simbolos correspondientes a declaraciones de variables dentro del cuerpo del metodo se insertan en el nivel 'n + 1' o niveles mas profundos si se abren mas sub bloques dentro del cuerpo.
+
+- Los parametros de una funcion son tratados como variables locales del bloque principal de la funcion. Por lo que no se puede declarar ninguna variable con el mismo nombre que un parametro dentro del bloque principal de la funcion. Pero si es posible abrir nuevos sub bloques dentro del cuerpo de la funcion y declarar variables con los mismos nombres que los parametros.
+Por ejemplo esto no se puede hacer:
+    ```
+    void f(int x, int y) {
+        int x; // ERROR
+    }
+    ```
+    Pero esto si se puede hacer:
+    ```
+    void f(int x, int y) {
+        {
+            int x;
+        }
+    }
+    ```
+
+- En cuanto a los casteos, en las expresiones resultantes de las operaciones: `+`, `-`, `*`, `/` y `%` si alguno de los operandos es de tipo `float` y el otro de tipo `int`, este ultimo de casteara a tipo `float` y el resultado final sera de tipo `float`.
+<br>Tambien en el caso de asignaciones si la variable es de tipo `float` y la expresion que se le asigna es de tipo `int`, esta ultima se casteara a `float`. Y si la variable es de tipo `int` y la expresion es de tipo `float`, esta ultima se casteara a `int` (es un casteo que producira un truncamiento por lo que se perdera informacion del `float`).
+<br>En cualquiera de estos casos de casteo, el compilador emitira un mensaje de warning indicando el mismo.
+
+- Luego de terminar el analisis semantico todos los nodos de tipo `ID` correspondientes a una misma variable, van a apuntar a un mismo simbolo de la variable. <br>Todos los nodos `ID` correspondientes a un mismo metodo van a apuntar a un mismo simbolo correspondiente al metodo.<br>Por cada nodo de tipo literal (intLiteral, floatLiteral y boolLiteral) se va a crear un nuevo simbolo para esa constante/literal y se va a dejar al nodo apuntando al simbolo creado.<br>Por cada nodo correspondiente a alguna de estas expresiones: `methodCall`, `+`, `-(binario)`, `*`, `/`, `%`, `<`, `>`, `==`, `&&`, `||`, `-(unario)` y `!` se va a crear un simbolo de una variable temporal cuyo proposito sera guardar el resultado de evaluar dicha expresion. Luego se deja al nodo correspondiente apuntando al simbolo del temporal creado.
+

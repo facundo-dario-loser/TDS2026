@@ -159,8 +159,8 @@ expr: ID                    { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_
     | expr '*' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MULTIPLICATION, .children1 = $1, .children2 = $3, .line = yylineno}); }
     | expr '/' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_DIVISION, .children1 = $1, .children2 = $3, .line = yylineno}); }
     | expr '%' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_MOD, .children1 = $1, .children2 = $3, .line = yylineno}); }
-    | expr '<' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_SMALLER, .children1 = $1, .children2 = $3, .line = yylineno}); }
-    | expr '>' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_GREATER, .children1 = $1, .children2 = $3, .line = yylineno}); }
+    | expr '<' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISON_SMALLER, .children1 = $1, .children2 = $3, .line = yylineno}); }
+    | expr '>' expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISON_GREATER, .children1 = $1, .children2 = $3, .line = yylineno}); }
     | expr EQUAL expr       { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EQUAL, .children1 = $1, .children2 = $3, .line = yylineno}); }
     | expr AND expr         { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_AND, .children1 = $1, .children2 = $3, .line = yylineno}); }
     | expr OR expr          { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_OR, .children1 = $1, .children2 = $3, .line = yylineno}); }

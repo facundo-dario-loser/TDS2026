@@ -43,8 +43,8 @@ void getNodeLabel(AstNode *node, char label[256]) {
         case AST_NODE_TYPE_MULTIPLICATION:      snprintf(label, 256, "*");                                        break;
         case AST_NODE_TYPE_DIVISION:            snprintf(label, 256, "/");                                        break;
         case AST_NODE_TYPE_MOD:                 snprintf(label, 256, "%%");                                       break;
-        case AST_NODE_TYPE_COMPARISION_SMALLER: snprintf(label, 256, "<");                                        break;
-        case AST_NODE_TYPE_COMPARISION_GREATER: snprintf(label, 256, ">");                                        break;
+        case AST_NODE_TYPE_COMPARISON_SMALLER: snprintf(label, 256, "<");                                        break;
+        case AST_NODE_TYPE_COMPARISON_GREATER: snprintf(label, 256, ">");                                        break;
         case AST_NODE_TYPE_EQUAL:               snprintf(label, 256, "==");                                       break;
         case AST_NODE_TYPE_AND:                 snprintf(label, 256, "&&");                                       break;
         case AST_NODE_TYPE_OR:                  snprintf(label, 256, "||");                                       break;

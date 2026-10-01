@@ -37,8 +37,8 @@ typedef enum AstNodeType {
     AST_NODE_TYPE_MULTIPLICATION,      // *
     AST_NODE_TYPE_DIVISION,            // /
     AST_NODE_TYPE_MOD,                 // %
-    AST_NODE_TYPE_COMPARISION_SMALLER, // <
-    AST_NODE_TYPE_COMPARISION_GREATER, // >
+    AST_NODE_TYPE_COMPARISON_SMALLER, // <
+    AST_NODE_TYPE_COMPARISON_GREATER, // >
     AST_NODE_TYPE_EQUAL,               // ==
     AST_NODE_TYPE_AND,                 // &&
     AST_NODE_TYPE_OR,                  // ||

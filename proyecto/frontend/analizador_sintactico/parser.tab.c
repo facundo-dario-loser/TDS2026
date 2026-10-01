@@ -1737,13 +1737,13 @@ yyreduce:
 
   case 48: /* expr: expr '<' expr  */
 #line 162 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_SMALLER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISON_SMALLER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1742 "parser.tab.c"
     break;
 
   case 49: /* expr: expr '>' expr  */
 #line 163 "parser.y"
-                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISION_GREATER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
+                            { (yyval.node) = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_COMPARISON_GREATER, .children1 = (yyvsp[-2].node), .children2 = (yyvsp[0].node), .line = yylineno}); }
 #line 1748 "parser.tab.c"
     break;
 
