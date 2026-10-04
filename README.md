@@ -51,7 +51,7 @@ Ejemplo para ejecutar en la terminal:<br>
 - `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (implementado parcialmente).
 - `-opt` Aplicar optimizaciones (todavia no esta implementado).
 - `-debug` Ejecuta el compilador con logs e información útil en la terminal. También genera un archivo `.dot` con el mismo nombre que el archivo con el programa fuente y lo guarda en la carpeta `/dot_files`.<br>
-    Luego es posible crear una imagen `.svg` a partir del archivo `.dot` ejecutando el siguiente comando:
+    Luego es posible crear una imagen `.svg` del ast a partir del archivo `.dot` ejecutando el siguiente comando:
 
     ```
     cd dot_files

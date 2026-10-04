@@ -1,7 +1,7 @@
 # Documentación correspondiente a la entrega del analizador semántico
 La implementación del analizador semántico se encuentra en el path: `/proyecto/frontend/analizador_semantico/` en los archivos `semantic_analysis.h/.c`.
 
-## Cosas que modifique/agregue al AST
+## Modificaciones y actualizaciones en el AST
 La implementacion del ast se encuentra en el path `/proyecto/tads/` en los archivos `ast.h/.c`.
 
 - Dentro del enum `AstNodeType` tuve que agregar el tipo de nodo: `AST_NODE_TYPE_BLOCK` que es para los bloques { }. Antes directamente al abrir un bloque colocaba las decalraciones de varaibles y sentencia directamente, pero el problema que me encontre es que sin este nodo no iba a saber en que momento abrir un nuevo nivel en la tabla de simbolos.
@@ -10,7 +10,7 @@ La implementacion del ast se encuentra en el path `/proyecto/tads/` en los archi
 
 - Dentro del struct `AstNode` agregue el campo: `SymbolVariableType     variableType;` que sirve para bajar informacion en los nodos y entonces al encontrar una declaracion de variable o parametro de una funcion cuando se cree el simbolo correspondiente se le pase la info de si es una variable local, global o si es un parametro. Esta informacion va a ser de utilidad en la generacion de codigo intermedio y generacion de assembly.
 
-## Cosas que modifique/agregue a los símbolos y tabla de simbolos
+## Modificaciones y actualizaciones en los símbolos y la tabla de simbolos
 La implementacion de los simbolos y la taba de simbolos se encuentra en el path `/proyecto/tads` en los archivos `st.h/.c`.
 
 - Agregue este enum que permite saber si el simbolo de una variable corresponde a una variable global, local o si es un parametro de una funcion.
@@ -109,88 +109,89 @@ La implementación del analizador semántico se encuentra en el path: `/proyecto
 El analisis semantico se realiza de manera recursiva sobre el ast obtenido luego del analisis sintactico.<br><br>
 Las funciones que se implementaron son las siguientes:
 
-- Funcion principal que crea la tabla de simbolos y llama la funcion auxiliar descripta abajo con el mismo puntero al nodo root y la direccion de la tabla de simbolos que creo.
+- Funcion principal que crea la tabla de simbolos y llama a la funcion auxiliar descripta abajo con el mismo puntero al nodo root y la direccion de la tabla de simbolos que creo.
     ```
     void semanticAnalysis(AstNode *root);
     ```
 
-- Funcion que chequea el nodo root y en base a su tipo llama a la funcion correspondiente para analizar cada tipo de nodo del ast. Ademas va guardando el puntero a la tabla de simbolos para no perderlo entre las llamadas recursivas.
+- Funcion que chequea el nodo root y en base a su tipo llama a la funcion correspondiente para analizar cada tipo de nodo del ast. Ademas va guardando el puntero a la tabla de simbolos para no perderlo entre las llamadas recursivas y tambien lleva un puntero a un contador de cantidad de simbolos temporales creados para que cuando cree un nuevo temporal se le asigne correctamente el nombre (por ej: t0, t1, etc).
     ```
-    void semanticAnalysisAux(AstNode *root, SymbolTable *st);
+    void semanticAnalysisAux(AstNode *root, SymbolTable *st, int *tempCount);
     ```
 
-- Funciones para analizar cada tipo de nodo del ast (una funcion por cada valor del enum `AstNodeType`). Cada una de esta recibe el nodo correspondiente y la tabla de simbolos:
+- Funciones para analizar cada tipo de nodo del ast (una funcion por cada valor del enum `AstNodeType`). Cada una de estas recibe el nodo correspondiente, la tabla de simbolos y el contador de temporales:
     ```
-    void analysisNodeP(AstNode *node, SymbolTable *st);
-
-    void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st);
-
-    void analysisNodeVarDecl(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMethodDecl(AstNode *node, SymbolTable *st);
-
-    void analysisNodeListId(AstNode *node, SymbolTable *st);
-
-    void analysisNodeId(AstNode *node, SymbolTable *st);
-
-    void analysisNodeParams(AstNode *node, SymbolTable *st);
-
-    void analysisNodeVoid(AstNode *node, SymbolTable *st);
-
-    void analysisNodeParam(AstNode *node, SymbolTable *st);
-
-    void analysisNodeBlock(AstNode *node, SymbolTable *st);
-
-    void analysisNodeBlockElems(AstNode *node, SymbolTable *st);
-
-    void analysisNodeStatements(AstNode *node, SymbolTable *st);
-
-    void analysisNodeType(AstNode *node, SymbolTable *st);
-
-    void analysisNodeAssignment(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMethodCall(AstNode *node, SymbolTable *st);
-
-    void analysisNodeIfElse(AstNode *node, SymbolTable *st);
-
-    void analysisNodeWhile(AstNode *node, SymbolTable *st);
-
-    void analysisNodeReturn(AstNode *node, SymbolTable *st);
-
-    void analysisNodeListExpr(AstNode *node, SymbolTable *st);
-
-    void analysisNodeIntLiteral(AstNode *node, SymbolTable *st);
-
-    void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st);
-
-    void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st);
-
-    void analysisNodeAddition(AstNode *node, SymbolTable *st);
-
-    void analysisNodeSubtraction(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMultiplication(AstNode *node, SymbolTable *st);
-
-    void analysisNodeDivision(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMod(AstNode *node, SymbolTable *st);
-
-    void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st);
-
-    void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st);
-
-    void analysisNodeEqual(AstNode *node, SymbolTable *st);
-
-    void analysisNodeAnd(AstNode *node, SymbolTable *st);
-
-    void analysisNodeOr(AstNode *node, SymbolTable *st);
-
-    void analysisNodeMinus(AstNode *node, SymbolTable *st);
-
-    void analysisNodeNegation(AstNode *node, SymbolTable *st);
+    void analysisNodeP(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeId(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeParams(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeVoid(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeParam(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeBlock(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeBlockElems(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeStatements(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeType(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeAssignment(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeIfElse(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeWhile(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeReturn(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeListExpr(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeIntLiteral(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeAddition(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeSubtraction(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMultiplication(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeDivision(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMod(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeEqual(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeAnd(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeOr(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeMinus(AstNode *node, SymbolTable *st, int *tempCount);
+    
+    void analysisNodeNegation(AstNode *node, SymbolTable *st, int *tempCount);
     ```
+    En la implementacion se pueden encontrar mas explicaciones en comentarios sobre que hace cada una de estas funciones.
     <br>
 - **Funciones Auxiliares:**<br><br>
     Chequea que una funcion/metodo  que retorna una expresion entonces efectivamente en todas las posibles trazas dentro del cuerpo de la misma siempre se termine con un return. Es decir que nunca se deberia poder alcanzar el final de la funcion porque siempre hay un return antes.
@@ -215,15 +216,15 @@ Las funciones que se implementaron son las siguientes:
     ```
     Funcion para analizar semanticamente nodos correspondientes a operadores binarios aritmeticos (`+`, `-`, `*`, `/`, `%`).
     ```
-    void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st);
+    void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st, int *tempCount);
     ```
     Funcion para analizar semanticamente nodos correspondientes a operadores binarios logicos (`&&` and, `||` or).
     ```
-    void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st);
+    void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st, int *tempCount);
     ```
     Funcion para analizar semanticamente nodos correspondientes a operadores binarios de comparacion (`<`, `>`).
     ```
-    void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st);
+    void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount);
     ```
 
 ## Chequeos semánticos

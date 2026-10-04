@@ -5,59 +5,62 @@ void semanticAnalysis(AstNode *root) {
     
     SymbolTable st;
     st.top = NULL;
-    semanticAnalysisAux(root, &st);
+
+    int tempCount = 0;
+
+    semanticAnalysisAux(root, &st, &tempCount);
 }
 
-void semanticAnalysisAux(AstNode *root, SymbolTable *st) {
+void semanticAnalysisAux(AstNode *root, SymbolTable *st, int *tempCount) {
     if (!root) ERROR_SEMANTIC("root node is NULL in semanticAnalysisAux()")
     if (!st)   ERROR_SEMANTIC("symbol table is NULL in semanticAnalysisAux()")
 
     switch (root->type) {
-        case AST_NODE_TYPE_P:                   analysisNodeP(root, st);                  break;                
-        case AST_NODE_TYPE_GLOBAL_DECL_LIST:    analysisNodeGlobalDeclList(root, st);     break;    
-        case AST_NODE_TYPE_VAR_DECL:            analysisNodeVarDecl(root, st);            break;            
-        case AST_NODE_TYPE_METHOD_DECL_LIST:    analysisNodeMethodDeclList(root, st);     break;     
-        case AST_NODE_TYPE_METHOD_DECL:         analysisNodeMethodDecl(root, st);         break;         
-        case AST_NODE_TYPE_LIST_ID:             analysisNodeListId(root, st);             break;            
-        case AST_NODE_TYPE_ID:                  analysisNodeId(root, st);                 break;                  
-        case AST_NODE_TYPE_PARAMS:              analysisNodeParams(root, st);             break;              
-        case AST_NODE_TYPE_VOID:                analysisNodeVoid(root, st);               break;               
-        case AST_NODE_TYPE_PARAM:               analysisNodeParam(root, st);              break;               
-        case AST_NODE_TYPE_BLOCK:               analysisNodeBlock(root, st);              break;
-        case AST_NODE_TYPE_BLOCK_ELEMS:         analysisNodeBlockElems(root, st);         break;         
-        case AST_NODE_TYPE_STATEMENTS:          analysisNodeStatements(root, st);         break;          
-        case AST_NODE_TYPE_TYPE:                analysisNodeType(root, st);               break;                
-        case AST_NODE_TYPE_ASSIGNMENT:          analysisNodeAssignment(root, st);         break;          
-        case AST_NODE_TYPE_METHOD_CALL:         analysisNodeMethodCall(root, st);         break;        
-        case AST_NODE_TYPE_IF_ELSE:             analysisNodeIfElse(root, st);             break;             
-        case AST_NODE_TYPE_WHILE:               analysisNodeWhile(root, st);              break;               
-        case AST_NODE_TYPE_RETURN:              analysisNodeReturn(root, st);             break;             
-        case AST_NODE_TYPE_LIST_EXPR:           analysisNodeListExpr(root, st);           break;          
-        case AST_NODE_TYPE_INT_LITERAL:         analysisNodeIntLiteral(root, st);         break;         
-        case AST_NODE_TYPE_FLOAT_LITERAL:       analysisNodeFloatLiteral(root, st);       break;       
-        case AST_NODE_TYPE_BOOL_LITERAL:        analysisNodeBoolLiteral(root, st);        break;       
-        case AST_NODE_TYPE_ADDITION:            analysisNodeAddition(root, st);           break;            
-        case AST_NODE_TYPE_SUBTRACTION:         analysisNodeSubtraction(root, st);        break;         
-        case AST_NODE_TYPE_MULTIPLICATION:      analysisNodeMultiplication(root, st);     break;      
-        case AST_NODE_TYPE_DIVISION:            analysisNodeDivision(root, st);           break;            
-        case AST_NODE_TYPE_MOD:                 analysisNodeMod(root, st);                break;                 
-        case AST_NODE_TYPE_COMPARISON_SMALLER:  analysisNodeComparisonSmaller(root, st);  break; 
-        case AST_NODE_TYPE_COMPARISON_GREATER:  analysisNodeComparisonGreater(root, st);  break; 
-        case AST_NODE_TYPE_EQUAL:               analysisNodeEqual(root, st);              break;               
-        case AST_NODE_TYPE_AND:                 analysisNodeAnd(root, st);                break;                 
-        case AST_NODE_TYPE_OR:                  analysisNodeOr(root, st);                 break;                  
-        case AST_NODE_TYPE_MINUS:               analysisNodeMinus(root, st);              break;               
-        case AST_NODE_TYPE_NEGATION:            analysisNodeNegation(root, st);           break;   
+        case AST_NODE_TYPE_P:                   analysisNodeP(root, st, tempCount);                 break;                
+        case AST_NODE_TYPE_GLOBAL_DECL_LIST:    analysisNodeGlobalDeclList(root, st, tempCount);    break;    
+        case AST_NODE_TYPE_VAR_DECL:            analysisNodeVarDecl(root, st, tempCount);           break;            
+        case AST_NODE_TYPE_METHOD_DECL_LIST:    analysisNodeMethodDeclList(root, st, tempCount);    break;     
+        case AST_NODE_TYPE_METHOD_DECL:         analysisNodeMethodDecl(root, st, tempCount);        break;         
+        case AST_NODE_TYPE_LIST_ID:             analysisNodeListId(root, st, tempCount);            break;            
+        case AST_NODE_TYPE_ID:                  analysisNodeId(root, st, tempCount);                break;                  
+        case AST_NODE_TYPE_PARAMS:              analysisNodeParams(root, st, tempCount);            break;              
+        case AST_NODE_TYPE_VOID:                analysisNodeVoid(root, st, tempCount);              break;               
+        case AST_NODE_TYPE_PARAM:               analysisNodeParam(root, st, tempCount);             break;               
+        case AST_NODE_TYPE_BLOCK:               analysisNodeBlock(root, st, tempCount);             break;
+        case AST_NODE_TYPE_BLOCK_ELEMS:         analysisNodeBlockElems(root, st, tempCount);        break;         
+        case AST_NODE_TYPE_STATEMENTS:          analysisNodeStatements(root, st, tempCount);        break;          
+        case AST_NODE_TYPE_TYPE:                analysisNodeType(root, st, tempCount);              break;                
+        case AST_NODE_TYPE_ASSIGNMENT:          analysisNodeAssignment(root, st, tempCount);        break;          
+        case AST_NODE_TYPE_METHOD_CALL:         analysisNodeMethodCall(root, st, tempCount);        break;        
+        case AST_NODE_TYPE_IF_ELSE:             analysisNodeIfElse(root, st, tempCount);            break;             
+        case AST_NODE_TYPE_WHILE:               analysisNodeWhile(root, st, tempCount);             break;               
+        case AST_NODE_TYPE_RETURN:              analysisNodeReturn(root, st, tempCount);            break;             
+        case AST_NODE_TYPE_LIST_EXPR:           analysisNodeListExpr(root, st, tempCount);          break;          
+        case AST_NODE_TYPE_INT_LITERAL:         analysisNodeIntLiteral(root, st, tempCount);        break;         
+        case AST_NODE_TYPE_FLOAT_LITERAL:       analysisNodeFloatLiteral(root, st, tempCount);      break;       
+        case AST_NODE_TYPE_BOOL_LITERAL:        analysisNodeBoolLiteral(root, st, tempCount);       break;       
+        case AST_NODE_TYPE_ADDITION:            analysisNodeAddition(root, st, tempCount);          break;            
+        case AST_NODE_TYPE_SUBTRACTION:         analysisNodeSubtraction(root, st, tempCount);       break;         
+        case AST_NODE_TYPE_MULTIPLICATION:      analysisNodeMultiplication(root, st, tempCount);    break;      
+        case AST_NODE_TYPE_DIVISION:            analysisNodeDivision(root, st, tempCount);          break;            
+        case AST_NODE_TYPE_MOD:                 analysisNodeMod(root, st, tempCount);               break;                 
+        case AST_NODE_TYPE_COMPARISON_SMALLER:  analysisNodeComparisonSmaller(root, st, tempCount); break; 
+        case AST_NODE_TYPE_COMPARISON_GREATER:  analysisNodeComparisonGreater(root, st, tempCount); break; 
+        case AST_NODE_TYPE_EQUAL:               analysisNodeEqual(root, st, tempCount);             break;               
+        case AST_NODE_TYPE_AND:                 analysisNodeAnd(root, st, tempCount);               break;                 
+        case AST_NODE_TYPE_OR:                  analysisNodeOr(root, st, tempCount);                break;                  
+        case AST_NODE_TYPE_MINUS:               analysisNodeMinus(root, st, tempCount);             break;               
+        case AST_NODE_TYPE_NEGATION:            analysisNodeNegation(root, st, tempCount);          break;   
     }
 }
 
 
 
 
-void analysisNodeP(AstNode *node, SymbolTable *st) {
+void analysisNodeP(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node P visited")
     newLevel(st); // scope global
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
 
     // chequear que exista un metodo llamado main
     Symbol *aux = st->top->head;
@@ -79,22 +82,22 @@ void analysisNodeP(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st) {
+void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node GlobalDeclList visited")
     
     if (node->children1) {
         node->children1->variableType = SYMBOL_VARIABLE_TYPE_GLOBAL; // bajamos la info de que es una var global
-        semanticAnalysisAux(node->children1, st);
+        semanticAnalysisAux(node->children1, st, tempCount);
         AstNode *varDeclNode = node->children1;
     }
 
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
+void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node VarDecl visited")
     SymbolSemanticType     symbolSemanticType;
     char                   *strSemanticType;
@@ -127,23 +130,23 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st) {
         node->children2->declarationType = nodeDeclarationType;
         // bajamos el tipo de variable tambien
         node->children2->variableType = node->variableType;
-        semanticAnalysisAux(node->children2, st);
+        semanticAnalysisAux(node->children2, st, tempCount);
     }
 }
 
 
 
 
-void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st) {
+void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node MethodDeclList visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
+void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node MethodDecl visited")
     SymbolSemanticType returnType;
     char               *strReturnType;
@@ -174,7 +177,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
         // main no puede tener ningun param
         if (strcmp(methodName, "main") == 0) ERROR_SEMANTIC("main can't have any parameters (line %d)", node->line)
 
-        semanticAnalysisAux(node->children3, st);
+        semanticAnalysisAux(node->children3, st, tempCount);
         getSymbolParamList(node->children3, &paramList);
     }
 
@@ -199,7 +202,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
     // cuerpo de la funcion
     if (node->children4) {
         node->children4->isFunctionBlock = true;
-        semanticAnalysisAux(node->children4, st);
+        semanticAnalysisAux(node->children4, st, tempCount);
     }
 
     // chequear que si la funcion retorna algo entonces en el cuerpo esten los respectivos return's
@@ -215,7 +218,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeListId(AstNode *node, SymbolTable *st) {
+void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node ListId visited")
     SymbolSemanticType     symbolSemanticType;
     char                   *strSemanticType;
@@ -259,14 +262,14 @@ void analysisNodeListId(AstNode *node, SymbolTable *st) {
         node->children2->declarationType = nodeDeclarationType;
         // bajamos el tipo de variable
         node->children2->variableType = node->variableType;
-        semanticAnalysisAux(node->children2, st);
+        semanticAnalysisAux(node->children2, st, tempCount);
     }
 }
 
 
 
 
-void analysisNodeId(AstNode *node, SymbolTable *st) {
+void analysisNodeId(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Id visited")
     Symbol *idSymbol = searchSymbol(st, node->value.strValue, SYMBOL_TYPE_VARIABLE);
 
@@ -279,23 +282,23 @@ void analysisNodeId(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeParams(AstNode *node, SymbolTable *st) {
+void analysisNodeParams(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Params visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeVoid(AstNode *node, SymbolTable *st) {
+void analysisNodeVoid(AstNode *node, SymbolTable *st, int *tempCount) {
     TODO("analysisNodeVoid not implemented yet")
 }
 
 
 
 
-void analysisNodeParam(AstNode *node, SymbolTable *st) {
+void analysisNodeParam(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Param visited")
     SymbolSemanticType symbolSemanticType;
 
@@ -319,7 +322,7 @@ void analysisNodeParam(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeBlock(AstNode *node, SymbolTable *st) {
+void analysisNodeBlock(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Block visited")
     newLevel(st);
     
@@ -335,45 +338,45 @@ void analysisNodeBlock(AstNode *node, SymbolTable *st) {
         if (functionSymbolParamList) insertSymbolListInCurrentLevel(st, functionSymbolParamList);
     }
 
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
     closeLevel(st); 
 }
 
 
 
 
-void analysisNodeBlockElems(AstNode *node, SymbolTable *st) {
+void analysisNodeBlockElems(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node BlockElems visited")
     
     if (node->children1) {
         // bajamos la info para que en la declaracion de variable se sepa que es local
         node->children1->variableType = SYMBOL_VARIABLE_TYPE_LOCAL;
-        semanticAnalysisAux(node->children1, st);
+        semanticAnalysisAux(node->children1, st, tempCount);
     }
 
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeStatements(AstNode *node, SymbolTable *st) {
+void analysisNodeStatements(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Statements visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeType(AstNode *node, SymbolTable *st) {
+void analysisNodeType(AstNode *node, SymbolTable *st, int *tempCount) {
      TODO("analysisNodeType not implemented yet")
 }
 
 
 
 
-void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
+void analysisNodeAssignment(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Assigment visited")
     // ver que el tipo de la expresion de la derecha tenga el mismo tipo que el id de la izquierda
     SymbolSemanticType idType;
@@ -381,11 +384,11 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
     char               *idTypeStr;
     char               *exprTypeStr;
 
-    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children1, st, tempCount);
     idType    = node->children1->symbol->semanticType;
     idTypeStr = getSemanticTypeString(idType);
 
-    semanticAnalysisAux(node->children2, st);
+    semanticAnalysisAux(node->children2, st, tempCount);
     exprType    = node->children2->symbol->semanticType;
     exprTypeStr = getSemanticTypeString(exprType);
 
@@ -405,10 +408,10 @@ void analysisNodeAssignment(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
+void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node MethodCall visited")
 
-    // el nodo id lo analizo a mano (porque si no va a buscar el simbolo como una variable y es una funcion)
+    // el nodo id lo analizo a mano (porque si no 'analysisNodeID()' va a buscar el simbolo como una variable y es una funcion)
     Symbol *methodSymbol = searchSymbol(st, node->children1->value.strValue, SYMBOL_TYPE_METHOD);
     methodSymbol->referenceCount++;
 
@@ -417,7 +420,7 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
 
     node->children1->symbol = methodSymbol; // en realidad no hace falta hacer esto 
 
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 
     // chequear que se pasen argumentos de los mismos tipos que los 
     // parametros y misma cantidad
@@ -451,7 +454,7 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
                 aux = aux->children2; // ir al prox nodo list expr o expr
             } break;
             
-            // es una expr (es el ultimo argumetno pasado)
+            // es una expr (es el ultimo argumento pasado)
             default: {
                 if (!paramList)
                     ERROR_SEMANTIC("the method '%s' was called with more arguments than the number of parameters that it has (line: %d)", methodSymbol->name, node->line)
@@ -472,9 +475,17 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
     // crear simbolo del temporal para guardar el valor luego de llamar 
     // al metodo si es que tiene retorno
 
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
+
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = "temp",
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
+        .name         = tempName,
         .semanticType = methodSymbol->semanticType,
     };
 
@@ -486,36 +497,36 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeIfElse(AstNode *node, SymbolTable *st) {
+void analysisNodeIfElse(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node IfElse visited")
 
     // chequear que la expr de la condicion sea booleana
-    semanticAnalysisAux(node->children1, st);
+    semanticAnalysisAux(node->children1, st, tempCount);
     if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
         ERROR_SEMANTIC("condition in the if statement must be a logic/boolean expression, but it's of type %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
     
-    if (node->children2) semanticAnalysisAux(node->children2, st);
-    if (node->children3) semanticAnalysisAux(node->children3, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
+    if (node->children3) semanticAnalysisAux(node->children3, st, tempCount);
 }
 
 
 
 
-void analysisNodeWhile(AstNode *node, SymbolTable *st) {
+void analysisNodeWhile(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node While visited")
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
 
     // chequear que la expr de la condicion sea boolean
     if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
         ERROR_SEMANTIC("the expression on the condition in the while statement must be boolean, but it is %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
 
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeReturn(AstNode *node, SymbolTable *st) {
+void analysisNodeReturn(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Return visited")
 
     SymbolSemanticType returnExprSemanticType;
@@ -523,7 +534,7 @@ void analysisNodeReturn(AstNode *node, SymbolTable *st) {
 
     // chequear si retorna una expr y el tipo de la expr que retorna
     if (node->children1) {
-        semanticAnalysisAux(node->children1, st);
+        semanticAnalysisAux(node->children1, st, tempCount);
         returnExprSemanticType = node->children1->symbol->semanticType;
     } else {
         returnExprSemanticType = SYMBOL_SEMANTIC_TYPE_VOID;
@@ -568,17 +579,17 @@ void analysisNodeReturn(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeListExpr(AstNode *node, SymbolTable *st) {
+void analysisNodeListExpr(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node ListExpr visited")
 
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 }
 
 
 
 
-void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
+void analysisNodeIntLiteral(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node IntLiteral visited")
     setLiteralSymbolInAstNode(node);
 }
@@ -586,7 +597,7 @@ void analysisNodeIntLiteral(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st) {
+void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node FloatLiteral visited")
     setLiteralSymbolInAstNode(node);
 }
@@ -594,7 +605,7 @@ void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st) {
+void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node BoolLiteral visited")
     setLiteralSymbolInAstNode(node);
 }
@@ -602,78 +613,83 @@ void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeAddition(AstNode *node, SymbolTable *st) {
+void analysisNodeAddition(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Addition visited")
-    analysisArithmeticBinaryOperator(node, st);
+    analysisArithmeticBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeSubtraction(AstNode *node, SymbolTable *st) {
+void analysisNodeSubtraction(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Subtraction visited")
-    analysisArithmeticBinaryOperator(node, st);
+    analysisArithmeticBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeMultiplication(AstNode *node, SymbolTable *st) {
+void analysisNodeMultiplication(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Multiplication visited")
-    analysisArithmeticBinaryOperator(node, st);
+    analysisArithmeticBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeDivision(AstNode *node, SymbolTable *st) {
+void analysisNodeDivision(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Division visited")
-    analysisArithmeticBinaryOperator(node, st);
+    analysisArithmeticBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeMod(AstNode *node, SymbolTable *st) {
-    // deberia dejar que los operandos puedan ser float?
+void analysisNodeMod(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Mod visited")
-    analysisArithmeticBinaryOperator(node, st);
+    analysisArithmeticBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st) {
+void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node ComparisionSmaller visited")
-    analysisComparisonOperator(node, st);
+    analysisComparisonOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st) {
+void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node ComparisionGreater visited")
-    analysisComparisonOperator(node, st);
+    analysisComparisonOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeEqual(AstNode *node, SymbolTable *st) {
+void analysisNodeEqual(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Equal visited")
 
-    if (node->children1) semanticAnalysisAux(node->children1, st);
-    if (node->children2) semanticAnalysisAux(node->children2, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
+    if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 
     // chequear que ambos operandos sean del mismo tipo
     if (node->children1->symbol->semanticType != node->children2->symbol->semanticType)
         ERROR_SEMANTIC("in '==' left expr is of type %s and the right expr is of type %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), getSemanticTypeString(node->children2->symbol->semanticType), node->line)
 
     // crear el simbolo temporal para guardar luego el resultado
-    char *tempName = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
         .name         = tempName,
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
@@ -686,36 +702,42 @@ void analysisNodeEqual(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeAnd(AstNode *node, SymbolTable *st) {
+void analysisNodeAnd(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node And visited")
-    analysisLogicalBinaryOperator(node, st);
+    analysisLogicalBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeOr(AstNode *node, SymbolTable *st) {
+void analysisNodeOr(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Or visited")
-    analysisLogicalBinaryOperator(node, st);
+    analysisLogicalBinaryOperator(node, st, tempCount);
 }
 
 
 
 
-void analysisNodeMinus(AstNode *node, SymbolTable *st) {
+void analysisNodeMinus(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Minus visited")
 
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
 
     // chequear que el operando sea int o float
     if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)
         ERROR_SEMANTIC("in '-' (unary) the operand must be int or float, but it's boolean (line: %d)", node->line)
 
     // crear simbolo para el temporal que guarda el resultado
-    char *tempName = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
         .name         = tempName,
         .semanticType = node->children1->symbol->semanticType,
     };
@@ -728,20 +750,26 @@ void analysisNodeMinus(AstNode *node, SymbolTable *st) {
 
 
 
-void analysisNodeNegation(AstNode *node, SymbolTable *st) {
+void analysisNodeNegation(AstNode *node, SymbolTable *st, int *tempCount) {
     DEBUG_SEMANTIC("node Negation visited")
 
-    if (node->children1) semanticAnalysisAux(node->children1, st);
+    if (node->children1) semanticAnalysisAux(node->children1, st, tempCount);
 
     // chequear que el operando sea int o float
     if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_BOOLEAN)
         ERROR_SEMANTIC("in '!' the operand must be boolean, but it's %s (line: %d)", getSemanticTypeString(node->children1->symbol->semanticType), node->line)
 
     // crear simbolo para el temporal que guarda el resultado
-    char *tempName = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
         .name         = tempName,
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
@@ -882,7 +910,7 @@ void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
 
 
 
-void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) {
+void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st, int *tempCount) {
     char *binOpStr;
 
     switch (arithBinOpNode->type) {
@@ -893,8 +921,8 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
         case AST_NODE_TYPE_MOD:            binOpStr = "mod (%%)";           break;
     }
     
-    semanticAnalysisAux(arithBinOpNode->children1, st);
-    semanticAnalysisAux(arithBinOpNode->children2, st);
+    semanticAnalysisAux(arithBinOpNode->children1, st, tempCount);
+    semanticAnalysisAux(arithBinOpNode->children2, st, tempCount);
 
     Symbol *leftExprSymbol  = arithBinOpNode->children1->symbol;
     Symbol *rightExprSymbol = arithBinOpNode->children2->symbol;
@@ -924,10 +952,16 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
     }
 
     // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
         .name         = tempName,
         .semanticType = exprSemanticType,
     };
@@ -940,7 +974,7 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st) 
 
 
 
-void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
+void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st, int *tempCount) {
     char *binOpStr;
 
     switch (logicalBinOpNode->type) {
@@ -948,8 +982,8 @@ void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
         case AST_NODE_TYPE_OR:  binOpStr = "or (||)";  break;
     }
     
-    semanticAnalysisAux(logicalBinOpNode->children1, st);
-    semanticAnalysisAux(logicalBinOpNode->children2, st);
+    semanticAnalysisAux(logicalBinOpNode->children1, st, tempCount);
+    semanticAnalysisAux(logicalBinOpNode->children2, st, tempCount);
 
     Symbol *leftExprSymbol  = logicalBinOpNode->children1->symbol;
     Symbol *rightExprSymbol = logicalBinOpNode->children2->symbol;
@@ -964,10 +998,16 @@ void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
     }
 
     // por ahora solo se llama temp, luego le pondre ti con i de 0..N
-    char *tempName = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
         .name         = tempName,
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
@@ -980,7 +1020,7 @@ void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st) {
 
 
 
-void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
+void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount) {
     char *binOpStr;
 
     switch (comparisonOpNode->type) {
@@ -991,14 +1031,14 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
     // chequear que ambas expresiones sean int's o float's 
     // los temporales no cuentan ya que significa que se coloco una exp aritmetica
     // y necesitamos directamente numeros literales o id's
-    semanticAnalysisAux(comparisonOpNode->children1, st);
+    semanticAnalysisAux(comparisonOpNode->children1, st, tempCount);
     if (!((comparisonOpNode->children1->type == AST_NODE_TYPE_ID)             || 
           (comparisonOpNode->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
           (comparisonOpNode->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
             ERROR_SEMANTIC("left expr of '%s' must be an int literal, float literal, int variable or float variable (line: %d)", binOpStr, comparisonOpNode->line)
         }
     
-    semanticAnalysisAux(comparisonOpNode->children2, st);
+    semanticAnalysisAux(comparisonOpNode->children2, st, tempCount);
     if (!((comparisonOpNode->children2->type == AST_NODE_TYPE_ID)             || 
           (comparisonOpNode->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
           (comparisonOpNode->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
@@ -1006,12 +1046,19 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st) {
         }
 
     // crear el simbolo para el temporal
-    char *symbolName                      = "temp";
+    char tempName[24] = "t";
+    char strTempCount[8];
+
+    snprintf(strTempCount, 8, "%d", *tempCount);
+    strcat(tempName, strTempCount);
+    (*tempCount)++;
+
     SymbolSemanticType symbolSemanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN;
 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
-        .name         = symbolName,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
+        .name         = tempName,
         .semanticType = symbolSemanticType,
     };
 

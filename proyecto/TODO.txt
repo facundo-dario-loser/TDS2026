@@ -34,3 +34,9 @@ int g() {
 
 - [BUG creo?]: en las macros de debug por ahi hay como un bug que se imprime repetido algunas cosas.
 - escribir la doc del analisis semantico 
+
+- [METHOD CALL]: todos los temporales son variables locales, pero el temporal de main seria global?
+                 ya que main se llama globalmente?
+                 si es asi modificar analysisNodeMethodCall para dependiendo del nombre decirle al temporal si es
+                 local o global.
+

@@ -161,6 +161,8 @@ Symbol * newSymbol(SymbolConfig *config) {
     s->offset         = 0;
     s->offsetSet      = false;
 
+    PRINT_SYMBOL(s)
+
     return s;
 }
 
@@ -233,7 +235,7 @@ void printSymbolInfo(Symbol *s) {
     printf("referenceCount: %d\n", s->referenceCount);
     printf("offset:         %d\n\n", s->offset);
 
-    if (s->parameters) {
+    /*if (s->parameters) {
         printf("\n****'%s' Parameters Info****\n", s->name);
 
         Symbol *aux = s->parameters;
@@ -242,5 +244,5 @@ void printSymbolInfo(Symbol *s) {
             printSymbolInfo(aux);
             aux = aux->next;
         }
-    }
+    }*/
 }
