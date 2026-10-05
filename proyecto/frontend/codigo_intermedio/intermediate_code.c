@@ -16,6 +16,9 @@ Instruction * newInstruction(InstructionConfig *config) {
     return i;
 }
 
+
+
+
 void insertInstruction(Instruction **tail, Instruction *i) {
     if (!i) return;
 
@@ -27,6 +30,9 @@ void insertInstruction(Instruction **tail, Instruction *i) {
         *tail = i;
     }
 }
+
+
+
 
 Instruction * generateIntermediateCode(AstNode *root) {
     Instruction *head;
@@ -47,6 +53,9 @@ Instruction * generateIntermediateCode(AstNode *root) {
 
     return head;
 }
+
+
+
 
 void generateIntermediateCodeAux(AstNode *root, Instruction **tail) {
     if (!root) return;
@@ -95,18 +104,26 @@ void generateIntermediateCodeAux(AstNode *root, Instruction **tail) {
 
 char * getInstructionTypeString(InstructionType instType) {
     switch(instType) {
-        case INSTRUCTION_TYPE_BEGIN_METHOD:         return "BEGIN_METHOD";
-        case INSTRUCTION_TYPE_END_METHOD:           return "END_METHOD";
-        case INSTRUCTION_GLOBAL_VAR_DECL:           return "GLOBAL_VAR_DECL";
-        case INSTRUCTION_TYPE_LABEL:                return "LABEL"; 
-        case INSTRUCTION_TYPE_JMP:                  return "JMP";
-        case INSTRUCTION_TYPE_JMP_ZERO:             return "JMP_ZERO";
-        case INSTRUCTION_TYPE_ASSIGNMENT:           return "ASSIGNMENT";
-        case INSTRUCTION_TYPE_ADDITION_INT_INT:     return "ADDITION_INT_INT";
-        case INSTRUCTION_TYPE_ADDITION_INT_FLOAT:   return "ADDITION_INT_FLOAT";
-        case INSTRUCTION_TYPE_ADDITION_FLOAT_INT:   return "ADDITION_FLOAT_INT";
-        case INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT: return "ADDITION_FLOAT_FLOAT";
-        default:                                    return "?";
+        case INSTRUCTION_TYPE_BEGIN_METHOD:           return "BEGIN_METHOD";
+        case INSTRUCTION_TYPE_END_METHOD:             return "END_METHOD";
+        case INSTRUCTION_GLOBAL_VAR_DECL:             return "GLOBAL_VAR_DECL";
+        case INSTRUCTION_TYPE_LABEL:                  return "LABEL"; 
+        case INSTRUCTION_TYPE_JMP:                    return "JMP";
+        case INSTRUCTION_TYPE_JMP_ZERO:               return "JMP_ZERO";
+        case INSTRUCTION_TYPE_ASSIGNMENT_INT_INT:     return "ASSIGNMENT_INT_INT";
+        case INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT:   return "ASSIGNMENT_INT_FLOAT";
+        case INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT:   return "ASSIGNMENT_FLOAT_INT";
+        case INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_FLOAT: return "ASSIGNMENT_FLOAT_FLOAT";
+        case INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL:   return "ASSIGNMENT_BOOL_BOOL";   
+        case INSTRUCTION_TYPE_ADDITION_INT_INT:       return "ADDITION_INT_INT";
+        case INSTRUCTION_TYPE_ADDITION_INT_FLOAT:     return "ADDITION_INT_FLOAT";
+        case INSTRUCTION_TYPE_ADDITION_FLOAT_INT:     return "ADDITION_FLOAT_INT";
+        case INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT:   return "ADDITION_FLOAT_FLOAT";
+        case INSTRUCTION_TYPE_AND:                    return "AND";
+        case INSTRUCTION_TYPE_PUSH_ARGUMENT:          return "PUSH_ARGUMENT";
+        case INSTRUCTION_TYPE_CALL_METHOD:            return "CALL_METHOD";
+        case INSTRUCTION_TYPE_RETURN:                 return "RETURN";
+        default:                                      return "?";
     }
 }
 
@@ -119,11 +136,44 @@ void printInstructions(Instruction *head) {
     Instruction *aux = head;   
 
     while (aux) {
-        char *op1Str    = aux->op1    ? aux->op1->name    : "NULL";
-        char *op2Str    = aux->op2    ? aux->op2->name    : "NULL";
-        char *resultStr = aux->result ? aux->result->name : "NULL"; 
+        char op1Str[64];
+        char op2Str[64];
+        char resultStr[64];
+
+        aux->op1    ? strcpy(op1Str, aux->op1->name)       : strcpy(op1Str, "NULL");
+        aux->op2    ? strcpy(op2Str, aux->op2->name)       : strcpy(op2Str, "NULL");
+        aux->result ? strcpy(resultStr, aux->result->name) : strcpy(resultStr, "NULL");
+
+        if (aux->op1 && (aux->op1->type == SYMBOL_TYPE_CONSTANT)) {
+            switch (aux->op1->semanticType) {
+                case SYMBOL_SEMANTIC_TYPE_INT:     snprintf(op1Str, 64, "%d", aux->op1->value.intValue);                          break;
+                case SYMBOL_SEMANTIC_TYPE_FLOAT:   snprintf(op1Str, 64, "%f", aux->op1->value.floatValue);                        break;
+                case SYMBOL_SEMANTIC_TYPE_BOOLEAN: snprintf(op1Str, 64, "%s", (aux->op1->value.booleanValue ? "true" : "false")); break;
+            }
+        }
+
+        if (aux->op2 && (aux->op2->type == SYMBOL_TYPE_CONSTANT)) {
+            switch (aux->op2->semanticType) {
+                case SYMBOL_SEMANTIC_TYPE_INT:     snprintf(op2Str, 64, "%d", aux->op2->value.intValue);                          break;
+                case SYMBOL_SEMANTIC_TYPE_FLOAT:   snprintf(op2Str, 64, "%f", aux->op2->value.floatValue);                        break;
+                case SYMBOL_SEMANTIC_TYPE_BOOLEAN: snprintf(op2Str, 64, "%s", (aux->op2->value.booleanValue ? "true" : "false")); break;
+            }
+        }
+
+        if (aux->result && (aux->result->type == SYMBOL_TYPE_CONSTANT)) {
+            switch (aux->result->semanticType) {
+                case SYMBOL_SEMANTIC_TYPE_INT:     snprintf(resultStr, 64, "%d", aux->result->value.intValue);                          break;
+                case SYMBOL_SEMANTIC_TYPE_FLOAT:   snprintf(resultStr, 64, "%f", aux->result->value.floatValue);                        break;
+                case SYMBOL_SEMANTIC_TYPE_BOOLEAN: snprintf(resultStr, 64, "%s", (aux->result->value.booleanValue ? "true" : "false")); break;
+            }
+        }
+
+        if ((aux->type == INSTRUCTION_TYPE_BEGIN_METHOD) && 
+            (aux->prev && (aux->prev->type == INSTRUCTION_GLOBAL_VAR_DECL))) printf("\n");
 
         printf("%s %s, %s, %s\n", getInstructionTypeString(aux->type), op1Str, op2Str, resultStr);
+        
+        if (aux->type == INSTRUCTION_TYPE_END_METHOD) printf("\n");
         aux = aux->next;
     }
 }
@@ -158,7 +208,10 @@ void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeGlobalDeclList(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeGlobalDeclList() not implemented yet")
+    DEBUG_IR("node GlobalDeclList visited")
+
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail);
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail);
 }
 
 
@@ -242,15 +295,36 @@ void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeListId() not implemented yet")
+    DEBUG_IR("node LisId visited")
+
+    if (node->children1->symbol && (node->children1->symbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+        InstructionConfig config = {
+            .type    = INSTRUCTION_GLOBAL_VAR_DECL,
+            .result  = node->children1->symbol, 
+        };
+
+        Instruction *i = newInstruction(&config);
+        insertInstruction(tail, i);
+    }
+
+    if ((node->children2->type == AST_NODE_TYPE_ID) && (node->children2->symbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+        InstructionConfig config = {
+            .type    = INSTRUCTION_GLOBAL_VAR_DECL,
+            .result  = node->children2->symbol, 
+        };
+
+        Instruction *i = newInstruction(&config);
+        insertInstruction(tail, i);
+    }
+
+    if (node->children2->type == AST_NODE_TYPE_LIST_ID) generateIntermediateCodeAux(node->children2, tail);
 }
 
 
 
 
 void generateIntermediateCodeNodeId(AstNode *node, Instruction **tail) {
-    // porque se rompe al poner el debug????
-    //DEBUG_IR("node Id visited")
+    DEBUG_IR("node Id visited")
     // no hace falta hacer nada
 }
 
@@ -319,8 +393,35 @@ void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail) {
     // generar codigo para la expresion que asigno
     if (node->children2) generateIntermediateCodeAux(node->children2, tail);
 
+    InstructionType assignmentType;
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            assignmentType = INSTRUCTION_TYPE_ASSIGNMENT_INT_INT;
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            assignmentType = INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT;
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            assignmentType = INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT;
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            assignmentType = INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_FLOAT;
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            assignmentType = INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL;
+        }
+
     InstructionConfig config = {
-        .type   = INSTRUCTION_TYPE_ASSIGNMENT,
+        .type   = assignmentType,
         .op1    = node->children2->symbol,
         .result = node->children1->symbol,
     };
@@ -333,7 +434,50 @@ void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeMethodCall() not implemented yet")
+    DEBUG("node MethodCallVisited")
+
+    // primero generamos instrucciones de pusheo de los argumentos
+    if (node->children2) {
+        AstNode *aux = node->children2;
+
+        while (aux) {
+            if (aux->type == AST_NODE_TYPE_LIST_EXPR) {
+                // push hijo izq
+                generateIntermediateCodeAux(aux->children1, tail);
+
+                InstructionConfig config = {
+                    .type   = INSTRUCTION_TYPE_PUSH_ARGUMENT,
+                    .result = aux->children1->symbol,
+                };
+
+                Instruction *i = newInstruction(&config);
+                insertInstruction(tail, i);
+
+                // push los otros args si hay
+                aux = aux->children2;
+            } else {
+                generateIntermediateCodeAux(aux->children2, tail);
+
+                InstructionConfig config = {
+                    .type   = INSTRUCTION_TYPE_PUSH_ARGUMENT,
+                    .result = aux->symbol,
+                };
+
+                Instruction *i = newInstruction(&config);
+                insertInstruction(tail, i);
+
+                aux = NULL; // ya no hay mas argumentos
+            }
+        }
+    }
+
+    InstructionConfig config = {
+        .type   = INSTRUCTION_TYPE_CALL_METHOD,
+        .result = node->children1->symbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
 }
 
 
@@ -354,7 +498,22 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeReturn() not implemented yet")
+    DEBUG_IR("node Return visited")
+
+    Symbol *returnExprSymbol = NULL;
+
+    if (node->children1) {
+        generateIntermediateCodeAux(node->children1, tail);
+        returnExprSymbol = node->children1->symbol;
+    }
+
+    InstructionConfig config = {
+        .type   = INSTRUCTION_TYPE_RETURN,
+        .result = returnExprSymbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
 }
 
 
@@ -368,7 +527,8 @@ void generateIntermediateCodeNodeListExpr(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeIntLiteral(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeIntLiteral() not implemented yet")
+    DEBUG_IR("node IntLiteral visited")
+    // no habria que hacer nada
 }
 
 
@@ -382,7 +542,8 @@ void generateIntermediateCodeNodeFloatLiteral(AstNode *node, Instruction **tail)
 
 
 void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeBoolLiteral() not implemented yet")
+    DEBUG_IR("node BoolLiteral visited")
+    // no hace falta hacer nada
 }
 
 
@@ -484,7 +645,20 @@ void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail) {
 
 
 void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail) {
-    TODO("generateIntermediateCodeNodeAnd() not implemented yet")
+    DEBUG("node And visited")
+
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail);
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail);
+
+    InstructionConfig config = {
+        .type   = INSTRUCTION_TYPE_AND,
+        .op1    = node->children1->symbol,
+        .op2    = node->children2->symbol,
+        .result = node->symbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
 }
 
 

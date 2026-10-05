@@ -138,3 +138,4 @@ podria luego planchar tosdo y meter todas las variables locales al principio
 
 - [CASTEOS]: los voy a hacer en la generacion de assembly
 
+- [COD INTER]: podria asignar los offsets en la generacion de codigo intermedio

@@ -509,7 +509,7 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount) {
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = methodSymbol->semanticType,
     };
 
@@ -714,7 +714,7 @@ void analysisNodeEqual(AstNode *node, SymbolTable *st, int *tempCount) {
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
 
@@ -762,7 +762,7 @@ void analysisNodeMinus(AstNode *node, SymbolTable *st, int *tempCount) {
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = node->children1->symbol->semanticType,
     };
 
@@ -794,7 +794,7 @@ void analysisNodeNegation(AstNode *node, SymbolTable *st, int *tempCount) {
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
 
@@ -906,7 +906,7 @@ void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
 
     SymbolConfig config = {
         .type = SYMBOL_TYPE_CONSTANT,
-        .name = literalName,
+        .name = literalName, // no hay problema (no es necesario usar strdup())
     };
 
     switch (nodeLiteral->type) {
@@ -986,7 +986,7 @@ void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st, 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = exprSemanticType,
     };
 
@@ -1032,7 +1032,7 @@ void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st, i
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
     };
 
@@ -1082,7 +1082,7 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int 
     SymbolConfig config = {
         .type         = SYMBOL_TYPE_VARIABLE,
         .variableType = SYMBOL_VARIABLE_TYPE_LOCAL,
-        .name         = tempName,
+        .name         = strdup(tempName),
         .semanticType = symbolSemanticType,
     };
 

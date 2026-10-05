@@ -6,18 +6,25 @@
 #include "../../tads/ast.h"
 
 typedef enum InstructionType {
-    INSTRUCTION_GLOBAL_VAR_DECL, // para meter lasvar globales en el .data
+    INSTRUCTION_GLOBAL_VAR_DECL,            // para meter las var globales en el .data
     INSTRUCTION_TYPE_BEGIN_METHOD,
     INSTRUCTION_TYPE_END_METHOD,
-    INSTRUCTION_TYPE_LABEL,      // label/etiqueta 
-    INSTRUCTION_TYPE_JMP,        // salto incondicional
-    INSTRUCTION_TYPE_JMP_ZERO,   // salto condicional
-    INSTRUCTION_TYPE_ASSIGNMENT,
+    INSTRUCTION_TYPE_LABEL,                  // label/etiqueta 
+    INSTRUCTION_TYPE_JMP,                    // salto incondicional
+    INSTRUCTION_TYPE_JMP_ZERO,               // salto condicional
+    INSTRUCTION_TYPE_ASSIGNMENT_INT_INT,     // int var = expr_int
+    INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT,   // int var = expr_float
+    INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT,   // float var = expr_int
+    INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_FLOAT, // float var = expr_float
+    INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL,   // boolean var = expr_boolean
     INSTRUCTION_TYPE_ADDITION_INT_INT,
     INSTRUCTION_TYPE_ADDITION_INT_FLOAT,
     INSTRUCTION_TYPE_ADDITION_FLOAT_INT,
     INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT,
-
+    INSTRUCTION_TYPE_AND,
+    INSTRUCTION_TYPE_PUSH_ARGUMENT,
+    INSTRUCTION_TYPE_CALL_METHOD,
+    INSTRUCTION_TYPE_RETURN,
 } InstructionType;
 
 typedef struct Instruction {
