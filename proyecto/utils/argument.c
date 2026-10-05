@@ -74,6 +74,13 @@ void processOptionO(int argc, char *argv[]) {
 
     semanticAnalysis(root);
     DEBUG("semantic analysis done")
+
+    Instruction *instructionList = generateIntermediateCode(root);
+
+    if (!instructionList)
+        ERROR_GLOBAL("instructionList is NULL")
+    
+    DEBUG("intermediate code generated")
 }
 
 void processOptionTarget(int argc, char *argv[]) {
@@ -90,21 +97,42 @@ void processOptionTarget(int argc, char *argv[]) {
     }
 
     switch (stage) {
-        case STAGE_SCAN: while (yylex() != 0) {} 
-                         DEBUG("lexical analysis done\n")
-                         break;
+        case STAGE_SCAN: { 
+                            while (yylex() != 0) {} 
+                            DEBUG("lexical analysis done\n")
+                         } break;
         
-        case STAGE_PARSE: int parseResult = yyparse();
+        case STAGE_PARSE: {
+                            int parseResult = yyparse();
     
-                          if (parseResult == 0) {
-                            DEBUG("sintax analysis done\n")
-                          } else {
-                            ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
-                          }
+                            if (parseResult == 0) {
+                                DEBUG("sintax analysis done\n")
+                            } else {
+                                ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
+                            }
 
-                          break;
+                          } break;
 
-        case STAGE_CODINTER: TODO("processOptionTarget (STAGE_CODINTER) not implemented yet")
+        case STAGE_CODINTER: {
+                                int parseResult = yyparse();
+    
+                                if (parseResult == 0) {
+                                    DEBUG("sintax analysis done\n")
+                                } else {
+                                    ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
+                                }
+                             
+                                semanticAnalysis(root);
+                                DEBUG("semantic analysis done")
+        
+                                Instruction *instructionList = generateIntermediateCode(root);
+
+                                if (!instructionList)
+                                    ERROR_GLOBAL("instructionList is NULL")
+    
+                                DEBUG("intermediate code generated")
+                             } break;
+
         case STAGE_ASSEMBLY: TODO("processOptionTarget (STAGE_ASSEMBLY) not implemented yet")
     }
 }
@@ -154,4 +182,14 @@ void processOptionDebug(int argc, char *argv[]) {
 
     semanticAnalysis(root);
     DEBUG("semantic analysis done")
+
+    Instruction *instructionList = generateIntermediateCode(root);
+
+    if (!instructionList)
+        ERROR_GLOBAL("instructionList is NULL")
+    
+    DEBUG("intermediate code generated")
+
+    printf("\n****Intermediate Code****\n");
+    printInstructions(instructionList);
 }

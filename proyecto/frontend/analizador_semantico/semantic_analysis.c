@@ -123,6 +123,14 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount) {
         bool res = insertSymbol(st, &varSymbolConfig);
 
         if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
+        
+        // guardar el simbolo en el nodo ID (sirve en la generacion de codigo intermedio)
+        Symbol *varSymbol = searchSymbol(st, node->children2->value.strValue, SYMBOL_TYPE_VARIABLE);
+        
+        if (!varSymbol)
+            ERROR_SEMANTIC("varSymbol is NULL in analysisNodeVarDecl()")
+
+        node->children2->symbol = varSymbol;
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
@@ -237,8 +245,16 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
         };
 
         bool res = insertSymbol(st, &varSymbolConfig);
-
+        
         if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
+
+        // guardar el simbolo en el nodo ID (sirve para la generacion de codigo intermedio)
+        Symbol *varSymbol = searchSymbol(st, node->children1->value.strValue, SYMBOL_TYPE_VARIABLE);
+
+        if (!varSymbol)
+            ERROR_SEMANTIC("varSymbol is NULL in analysisNodeListId()")
+        
+        node->children1->symbol = varSymbol;
     }
 
     if (!node->children2) return;
@@ -255,6 +271,14 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
         bool res = insertSymbol(st, &varSymbolConfig);
 
         if (!res) ERROR_SEMANTIC("redeclared variable '%s %s' (line: %d)", strSemanticType, varSymbolConfig.name, node->line)
+        
+        // guardar el simbolo en el nodo ID (sirve para la generacion de codigo intermedio)
+        Symbol *varSymbol = searchSymbol(st, node->children2->value.strValue, SYMBOL_TYPE_VARIABLE);
+
+        if (!varSymbol)
+            ERROR_SEMANTIC("varSymbol is NULL in analysisNodeListId()")
+        
+        node->children2->symbol = varSymbol;
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {

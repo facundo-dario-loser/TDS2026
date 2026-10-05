@@ -6,6 +6,7 @@ C_PROGRAMS =  frontend/analizador_lexico/lex.yy.c         		\
 			  tads/st.c 								   		\
 			  utils/dot.c 								   		\
 			  frontend/analizador_semantico/semantic_analysis.c \
+			  frontend/codigo_intermedio/intermediate_code.c    \
 			  main.c
 
 main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y $(PROGRAMAS_C)
