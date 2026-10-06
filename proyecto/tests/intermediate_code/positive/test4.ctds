@@ -1,0 +1,19 @@
+void main() {
+    int x;
+    boolean a, b;
+
+    a = true;
+
+    if (a) {
+        x = 1;
+    } else {
+        x = 2;
+    }
+
+
+    b = false;
+
+    if (b) {
+        x = 40;
+    }
+}

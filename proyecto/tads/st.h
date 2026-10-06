@@ -12,6 +12,7 @@ typedef enum SymbolType {
     SYMBOL_TYPE_VARIABLE, // a los parametros tambien los trato como variables locales
     SYMBOL_TYPE_METHOD,
     SYMBOL_TYPE_CONSTANT,
+    SYMBOL_TYPE_LABEL,    // se utiliza en la generacion de codigo intermedio (para guardar el nombre/nro del label)
 } SymbolType;
 
 // permite saber el alcance de la variable (local, global, o si es un parametro de un metodo/funcion)

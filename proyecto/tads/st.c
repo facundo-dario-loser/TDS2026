@@ -193,6 +193,7 @@ void printSymbolInfo(Symbol *s) {
         case SYMBOL_TYPE_VARIABLE: symbolTypeStr = "variable"; break;
         case SYMBOL_TYPE_METHOD:   symbolTypeStr = "method";   break;
         case SYMBOL_TYPE_CONSTANT: symbolTypeStr = "constant"; break;
+        case SYMBOL_TYPE_LABEL:    symbolTypeStr = "label";    break;
     }
 
     if (s->type == SYMBOL_TYPE_VARIABLE) {

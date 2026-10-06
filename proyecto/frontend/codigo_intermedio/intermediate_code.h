@@ -10,8 +10,6 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_BEGIN_METHOD,
     INSTRUCTION_TYPE_END_METHOD,
     INSTRUCTION_TYPE_LABEL,                  // label/etiqueta 
-    INSTRUCTION_TYPE_JMP,                    // salto incondicional
-    INSTRUCTION_TYPE_JMP_ZERO,               // salto condicional
     INSTRUCTION_TYPE_ASSIGNMENT_INT_INT,     // int var = expr_int
     INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT,   // int var = expr_float
     INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT,   // float var = expr_int
@@ -22,9 +20,39 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_ADDITION_FLOAT_INT,
     INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT,
     INSTRUCTION_TYPE_AND,
+    INSTRUCTION_TYPE_OR,
     INSTRUCTION_TYPE_PUSH_ARGUMENT,
     INSTRUCTION_TYPE_CALL_METHOD,
     INSTRUCTION_TYPE_RETURN,
+    INSTRUCTION_TYPE_SUBTRACTION_INT_INT,
+    INSTRUCTION_TYPE_SUBTRACTION_INT_FLOAT,
+    INSTRUCTION_TYPE_SUBTRACTION_FLOAT_INT,
+    INSTRUCTION_TYPE_SUBTRACTION_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_MULTIPLICATION_INT_INT,
+    INSTRUCTION_TYPE_MULTIPLICATION_INT_FLOAT,
+    INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_INT,
+    INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_DIVISION_INT_INT,
+    INSTRUCTION_TYPE_DIVISION_INT_FLOAT,
+    INSTRUCTION_TYPE_DIVISION_FLOAT_INT,
+    INSTRUCTION_TYPE_DIVISION_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_MOD_INT_INT,
+    INSTRUCTION_TYPE_MOD_INT_FLOAT,
+    INSTRUCTION_TYPE_MOD_FLOAT_INT,
+    INSTRUCTION_TYPE_MOD_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_INT,
+    INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_FLOAT,
+    INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_INT,
+    INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_COMPARISON_GREATER_INT_INT,
+    INSTRUCTION_TYPE_COMPARISON_GREATER_INT_FLOAT,
+    INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_INT,
+    INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_FLOAT,
+    INSTRUCTION_TYPE_UNARY_MINUS_INT,
+    INSTRUCTION_TYPE_UNARY_MINUS_FLOAT, 
+    INSTRUCTION_TYPE_NEGATION,
+    INSTRUCTION_TYPE_JMP_ZERO, // salta a la etiqueta del result si op1 es 0 (salto condicional)
+    INSTRUCTION_TYPE_JMP,      // salto incondicional
 } InstructionType;
 
 typedef struct Instruction {
@@ -51,7 +79,7 @@ void insertInstruction(Instruction **tail, Instruction *i);
 // dada la raiz del ast, retorna una lista enlazada de instrucciones
 Instruction * generateIntermediateCode(AstNode *root);
 
-void generateIntermediateCodeAux(AstNode *root, Instruction **tail);
+void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount);
 
 // dado un tipo de instruccion lo retorna en forma de string
 char * getInstructionTypeString(InstructionType instType);
@@ -63,40 +91,40 @@ void printInstructions(Instruction *head);
 void freeInstructionLinkedList(Instruction *head);
 
 // funciones para generar codigo intermedio para cada nodo
-void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeGlobalDeclList(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMethodDeclList(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeId(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeParams(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeVoid(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeParam(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeBlock(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeBlockElems(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeStatements(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeType(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeListExpr(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeIntLiteral(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeFloatLiteral(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMultiplication(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeDivision(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail);
-void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail);
+void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeGlobalDeclList(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodDeclList(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeId(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeParams(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeVoid(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeParam(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBlock(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBlockElems(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeStatements(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeType(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeListExpr(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeIntLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeFloatLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMultiplication(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeDivision(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int *labelCount);
 
 #endif // INTERMEDIATE_CODE_H
