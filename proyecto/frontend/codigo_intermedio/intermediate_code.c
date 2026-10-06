@@ -153,6 +153,7 @@ char * getInstructionTypeString(InstructionType instType) {
         case INSTRUCTION_TYPE_UNARY_MINUS_INT:                return "UNARY_MINUS_INT";
         case INSTRUCTION_TYPE_UNARY_MINUS_FLOAT:              return "UNARY_MINUS_FLOAT";
         case INSTRUCTION_TYPE_NEGATION:                       return "NEGATION";
+        case INSTRUCTION_TYPE_EQUAL:                          return "EQUAL";
         default:                                              return "?";
     }
 }
@@ -611,7 +612,82 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
 
 
 void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *labelCount) {
-    TODO("generateIntermediateCodeNodeWhile() not implemented yet")
+    DEBUG_IR("node While visited")
+
+    // etiqueta de inicio del while
+    char beginWhileLabelName[64] = "label_";
+    char labelCountStr[16];
+
+    snprintf(labelCountStr, sizeof(labelCountStr), "%d", *labelCount);
+    strcat(beginWhileLabelName, labelCountStr);
+
+    SymbolConfig beginWhileLabelSymbolConfig = {
+        .type           = SYMBOL_TYPE_LABEL,
+        .name           = strdup(beginWhileLabelName),
+        .value.intValue = (*labelCount),
+    };
+
+    Symbol *beginWhileLabelSymbol = newSymbol(&beginWhileLabelSymbolConfig);
+
+    InstructionConfig beginWhileLabelInstConfig = {
+        .type   = INSTRUCTION_TYPE_LABEL,
+        .result = beginWhileLabelSymbol,
+    };
+
+    Instruction *beginWhileLabelInst = newInstruction(&beginWhileLabelInstConfig);
+    insertInstruction(tail, beginWhileLabelInst);
+
+    (*labelCount)++;
+
+    // evaluar la expr de la condicion
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+
+    // etiqueta de fin del while
+    char endWhileLabelName[64] = "label_";
+    
+    snprintf(labelCountStr, sizeof(labelCountStr), "%d", *labelCount);
+    strcat(endWhileLabelName, labelCountStr);
+
+    SymbolConfig endWhileLabelSymbolConfig = {
+        .type           = SYMBOL_TYPE_LABEL,
+        .name           = strdup(endWhileLabelName),
+        .value.intValue = (*labelCount),
+    };
+
+    Symbol *endWhileLabelSymbol = newSymbol(&endWhileLabelSymbolConfig);
+
+    InstructionConfig endWhileLabelInstConfig = {
+        .type   = INSTRUCTION_TYPE_LABEL,
+        .result = endWhileLabelSymbol,
+    };
+
+    // instruccion jmp condicional para saber si termina la iteracion o no
+    InstructionConfig jmpZeroInstConfig = {
+        .type   = INSTRUCTION_TYPE_JMP_ZERO,
+        .op1    = node->children1->symbol,
+        .result = endWhileLabelSymbol,
+    };
+
+    Instruction *jmpZeroInst = newInstruction(&jmpZeroInstConfig);
+    insertInstruction(tail, jmpZeroInst);
+
+    // instrucciones del cuerpo del while
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    // instruccion de jmp para volver al inicio del while
+    InstructionConfig jmpWhileInstConfig = {
+        .type   = INSTRUCTION_TYPE_JMP,
+        .result = beginWhileLabelSymbol,
+    };
+
+    Instruction *jmpWhileInst = newInstruction(&jmpWhileInstConfig);
+    insertInstruction(tail, jmpWhileInst);
+
+    // inserto el label del fin del while
+    Instruction *endWhileLabelInst = newInstruction(&endWhileLabelInstConfig);
+    insertInstruction(tail, endWhileLabelInst);
+
+    (*labelCount)++;
 }
 
 
@@ -987,7 +1063,21 @@ void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **
 
 
 void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *labelCount) {
-    TODO("generateIntermediateCodeNodeEqual() not implemented yet")
+    DEBUG_IR("node Equal visited")
+
+    // primero generar instrucciones para evaluar la expr de cada operando
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    InstructionConfig equalInstConfig = {
+        .type   = INSTRUCTION_TYPE_EQUAL,
+        .op1    = node->children1->symbol,
+        .op2    = node->children2->symbol,
+        .result = node->symbol,
+    };
+    
+    Instruction *equalInst = newInstruction(&equalInstConfig);
+    insertInstruction(tail, equalInst);
 }
 
 

@@ -53,6 +53,7 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_NEGATION,
     INSTRUCTION_TYPE_JMP_ZERO, // salta a la etiqueta del result si op1 es 0 (salto condicional)
     INSTRUCTION_TYPE_JMP,      // salto incondicional
+    INSTRUCTION_TYPE_EQUAL,    // a == b
 } InstructionType;
 
 typedef struct Instruction {
