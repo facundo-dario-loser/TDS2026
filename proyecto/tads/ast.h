@@ -87,7 +87,8 @@ typedef struct AstNodeConfig {
     int                    line;
 } AstNodeConfig;
 
-AstNode * newAstNode(AstNodeConfig *config); // crea un nuevo nodo dada la configuracion
-void      freeAst(AstNode *root);            // libera la memoria todos los nodos del arbol (y de los simbolos a los que apuntan) 
+AstNode * newAstNode(AstNodeConfig *config);          // crea un nuevo nodo dada la configuracion
+void      freeAst(AstNode *root);                     // libera la memoria todos los nodos del arbol (y de los simbolos a los que apuntan) 
+char    * getAstNodeTypeString(AstNodeType nodeType); // dado un tipo de nodo, lo retorna en forma de string
 
 #endif // AST_H

@@ -119,18 +119,25 @@ void freeSymbolTable(SymbolTable *st) {
 void freeSymbol(Symbol *s) {
     if (!s) ERROR_ST("s is NULL (freeSymbol)")
 
-    if (s->name) free(s->name);
+    char *symbolName = NULL;
+    char *symbolTypeStr = getSymbolTypeString(s->type);
 
-    Symbol *paramAux = s->parameters;
+    if (s->name) {
+        symbolName = s->name;
+        free(s->name);
+    }
 
     // esto no deberia hacerlo. Los params los libero cuando llego a los nodos del ast de tipo 'param' -> 'ID'
-    /*while (paramAux) {
+    /*Symbol *paramAux = s->parameters;
+
+    while (paramAux) {
         Symbol *nextParamAux = paramAux->next;
         freeSymbol(paramAux);
         paramAux = nextParamAux;
     }*/
 
     free(s);
+    DEBUG_ST("symbol %s (%s) was freed", symbolName, symbolTypeStr)
 }
 
 char * getSemanticTypeString(SymbolSemanticType semanticType) {
@@ -246,4 +253,14 @@ void printSymbolInfo(Symbol *s) {
             aux = aux->next;
         }
     }*/
+}
+
+char * getSymbolTypeString(SymbolType sType) {
+    switch (sType) {
+        case SYMBOL_TYPE_VARIABLE: return "variable";
+        case SYMBOL_TYPE_CONSTANT: return "constant";
+        case SYMBOL_TYPE_METHOD:   return "method";
+        case SYMBOL_TYPE_LABEL:    return "label";
+        default:                   return "?";
+    }
 }

@@ -123,7 +123,7 @@ char * getInstructionTypeString(InstructionType instType) {
         case INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT:           return "ADDITION_FLOAT_FLOAT";
         case INSTRUCTION_TYPE_AND:                            return "AND";
         case INSTRUCTION_TYPE_OR:                             return "OR";
-        case INSTRUCTION_TYPE_PUSH_ARGUMENT:                  return "PUSH_ARGUMENT";
+        case INSTRUCTION_TYPE_ARGUMENT:                       return "ARGUMENT";
         case INSTRUCTION_TYPE_CALL_METHOD:                    return "CALL_METHOD";
         case INSTRUCTION_TYPE_RETURN:                         return "RETURN";
         case INSTRUCTION_TYPE_SUBTRACTION_INT_INT:            return "SUBTRACTION_INT_INT";
@@ -218,9 +218,21 @@ void freeInstructionLinkedList(Instruction *head) {
     while (head) {
         Instruction *next = head->next;
 
-        if (head->op1)    freeSymbol(head->op1);
-        if (head->op2)    freeSymbol(head->op2);
-        if (head->result) freeSymbol(head->result);
+        if (head->op1) {
+            head->op1->referenceCount--;
+            if (head->op1->referenceCount == 0) freeSymbol(head->op1);
+        }
+
+        if (head->op2) {
+            head->op2->referenceCount--;
+            if (head->op2->referenceCount == 0) freeSymbol(head->op2);
+        }
+        
+        if (head->result) {
+            head->result->referenceCount--;
+            if (head->result->referenceCount == 0) freeSymbol(head->result);
+        }
+
         free(head);
 
         head = next;
@@ -265,6 +277,8 @@ void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail, int 
 
             Instruction *i = newInstruction(&config);
             insertInstruction(tail, i);
+
+            node->children2->symbol->referenceCount++;
         }
 
         // sino, no generamos instrucciones (no hace falta para variables locales)
@@ -302,8 +316,9 @@ void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail, i
     };
 
     Instruction *beginMethodInstruction = newInstruction(&configBeginMethod);
-
     insertInstruction(tail, beginMethodInstruction);
+
+    methodSymbol->referenceCount++;
 
     //if (node->children1) generateIntermediateCodeAux(node->children1, tail);
     //if (node->children2) generateIntermediateCodeAux(node->children2, tail);
@@ -318,8 +333,9 @@ void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail, i
     };
 
     Instruction *endMethodInstruction = newInstruction(&configEndMethod);
-
     insertInstruction(tail, endMethodInstruction);
+
+    methodSymbol->referenceCount++;
 }
 
 
@@ -336,6 +352,8 @@ void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *
 
         Instruction *i = newInstruction(&config);
         insertInstruction(tail, i);
+
+        node->children1->symbol->referenceCount++;
     }
 
     if ((node->children2->type == AST_NODE_TYPE_ID) && (node->children2->symbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
@@ -346,6 +364,8 @@ void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *
 
         Instruction *i = newInstruction(&config);
         insertInstruction(tail, i);
+
+        node->children2->symbol->referenceCount++;
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) generateIntermediateCodeAux(node->children2, tail, labelCount);
@@ -459,6 +479,9 @@ void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail, i
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
+
+    node->children2->symbol->referenceCount++;
+    node->children1->symbol->referenceCount++;
 }
 
 
@@ -477,12 +500,14 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
                 generateIntermediateCodeAux(aux->children1, tail, labelCount);
 
                 InstructionConfig config = {
-                    .type   = INSTRUCTION_TYPE_PUSH_ARGUMENT,
+                    .type   = INSTRUCTION_TYPE_ARGUMENT,
                     .result = aux->children1->symbol,
                 };
 
                 Instruction *i = newInstruction(&config);
                 insertInstruction(tail, i);
+
+                aux->children1->symbol->referenceCount++;
 
                 // push los otros args si hay
                 aux = aux->children2;
@@ -490,12 +515,14 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
                 generateIntermediateCodeAux(aux->children2, tail, labelCount);
 
                 InstructionConfig config = {
-                    .type   = INSTRUCTION_TYPE_PUSH_ARGUMENT,
+                    .type   = INSTRUCTION_TYPE_ARGUMENT,
                     .result = aux->symbol,
                 };
 
                 Instruction *i = newInstruction(&config);
                 insertInstruction(tail, i);
+
+                aux->symbol->referenceCount++;
 
                 aux = NULL; // ya no hay mas argumentos
             }
@@ -509,6 +536,8 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
 }
 
 
@@ -563,7 +592,7 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
 
     // instruccion del jump condicional
     jumpZeroLabel = endIfLabelSymbol;
-    if (node->children3) jumpZeroLabel = elseBlockLabelSymbol;
+    if (node->children3) jumpZeroLabel = elseBlockLabelSymbol; // TODO: si no hay un else debo borrar el simbolo del else
 
     InstructionConfig jmpZeroConfig = {
         .type   = INSTRUCTION_TYPE_JMP_ZERO,
@@ -573,6 +602,9 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
 
     Instruction *jmpZeroInst = newInstruction(&jmpZeroConfig);
     insertInstruction(tail, jmpZeroInst);
+
+    node->children1->symbol->referenceCount++;
+    jumpZeroLabel->referenceCount++;
 
     // instrucciones del bloque del if
     generateIntermediateCodeAux(node->children2, tail, labelCount);
@@ -587,6 +619,8 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
         Instruction *jmpEndIfInst = newInstruction(&jmpEndIfConfig);
         insertInstruction(tail, jmpEndIfInst);
 
+        endIfLabelSymbol->referenceCount++;
+
         InstructionConfig elseBlockLabelInstConfig = {
             .type   = INSTRUCTION_TYPE_LABEL,
             .result = elseBlockLabelSymbol,
@@ -594,6 +628,8 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
 
         Instruction *elseBlockLabelInst = newInstruction(&elseBlockLabelInstConfig);
         insertInstruction(tail, elseBlockLabelInst);
+
+        elseBlockLabelSymbol->referenceCount++;
 
         // instrucciones del cuerpo del else
         generateIntermediateCodeAux(node->children3, tail, labelCount);
@@ -606,6 +642,8 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
 
     Instruction *endIfLabelInst = newInstruction(&endIfLabelInstConfig);
     insertInstruction(tail, endIfLabelInst);
+
+    endIfLabelSymbol->referenceCount++;
 }
 
 
@@ -636,6 +674,8 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
 
     Instruction *beginWhileLabelInst = newInstruction(&beginWhileLabelInstConfig);
     insertInstruction(tail, beginWhileLabelInst);
+
+    beginWhileLabelSymbol->referenceCount++;
 
     (*labelCount)++;
 
@@ -671,6 +711,8 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
     Instruction *jmpZeroInst = newInstruction(&jmpZeroInstConfig);
     insertInstruction(tail, jmpZeroInst);
 
+    endWhileLabelSymbol->referenceCount++;
+
     // instrucciones del cuerpo del while
     if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
 
@@ -683,9 +725,13 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
     Instruction *jmpWhileInst = newInstruction(&jmpWhileInstConfig);
     insertInstruction(tail, jmpWhileInst);
 
+    beginWhileLabelSymbol->referenceCount++;
+
     // inserto el label del fin del while
     Instruction *endWhileLabelInst = newInstruction(&endWhileLabelInstConfig);
     insertInstruction(tail, endWhileLabelInst);
+
+    endWhileLabelSymbol->referenceCount++;
 
     (*labelCount)++;
 }
@@ -710,6 +756,8 @@ void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail, int *
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
+
+    returnExprSymbol->referenceCount++;
 }
 
 
@@ -748,45 +796,7 @@ void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail, 
 
 void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node Addition visited")
-
-    // analizar la expr del operando izquierdo
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-
-    // analizar la expr del operando derecho
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
-    InstructionType instructionAdditionType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionAdditionType = INSTRUCTION_TYPE_ADDITION_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionAdditionType = INSTRUCTION_TYPE_ADDITION_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionAdditionType = INSTRUCTION_TYPE_ADDITION_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionAdditionType = INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = instructionAdditionType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeArithmeticBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -794,45 +804,7 @@ void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail, int
 
 void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node Subtraction visited")
-
-    // analizar la expr del operando izquierdo
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-
-    // analizar la expr del operando derecho
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
-    InstructionType instructionSubtractionType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionSubtractionType = INSTRUCTION_TYPE_SUBTRACTION_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionSubtractionType = INSTRUCTION_TYPE_SUBTRACTION_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionSubtractionType = INSTRUCTION_TYPE_SUBTRACTION_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionSubtractionType = INSTRUCTION_TYPE_SUBTRACTION_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = instructionSubtractionType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeArithmeticBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -840,137 +812,23 @@ void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail, 
 
 void generateIntermediateCodeNodeMultiplication(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node Multiplication visited")
-
-    // analizar la expr del operando izquierdo
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-
-    // analizar la expr del operando derecho
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
-    InstructionType instructionMultiplicationType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionMultiplicationType = INSTRUCTION_TYPE_MULTIPLICATION_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionMultiplicationType = INSTRUCTION_TYPE_MULTIPLICATION_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionMultiplicationType = INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionMultiplicationType = INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = instructionMultiplicationType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeArithmeticBinaryOperation(node, tail, labelCount);
 }
 
 
 
 
 void generateIntermediateCodeNodeDivision(AstNode *node, Instruction **tail, int *labelCount) {
-        DEBUG_IR("node Division visited")
-
-    // analizar la expr del operando izquierdo
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-
-    // analizar la expr del operando derecho
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
-    InstructionType instructionDivisionType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionDivisionType = INSTRUCTION_TYPE_DIVISION_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionDivisionType = INSTRUCTION_TYPE_DIVISION_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionDivisionType = INSTRUCTION_TYPE_DIVISION_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionDivisionType = INSTRUCTION_TYPE_DIVISION_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = instructionDivisionType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    DEBUG_IR("node Division visited")
+    generateIntermediateCodeArithmeticBinaryOperation(node, tail, labelCount);
 }
 
 
 
 
 void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail, int *labelCount) {
-        DEBUG_IR("node Mod visited")
-
-    // analizar la expr del operando izquierdo
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-
-    // analizar la expr del operando derecho
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
-    InstructionType instructionModType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionModType = INSTRUCTION_TYPE_MOD_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionModType = INSTRUCTION_TYPE_MOD_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            instructionModType = INSTRUCTION_TYPE_MOD_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            instructionModType = INSTRUCTION_TYPE_MOD_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = instructionModType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    DEBUG_IR("node Mod visited")
+    generateIntermediateCodeArithmeticBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -978,42 +836,7 @@ void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail, int *lab
 
 void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node ComparisonSmaller visited")
-
-    // los operandos son expresiones aritmeticas
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    InstructionType comparisonSmallerType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            comparisonSmallerType = INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            comparisonSmallerType = INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            comparisonSmallerType = INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            comparisonSmallerType = INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = comparisonSmallerType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeComparisonBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -1021,42 +844,7 @@ void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **
 
 void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node ComparisonGreater visited")
-
-    // los operandos son expresiones aritmeticas
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    InstructionType comparisonGreaterType;
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            comparisonGreaterType = INSTRUCTION_TYPE_COMPARISON_GREATER_INT_INT;
-        }
-    
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            comparisonGreaterType = INSTRUCTION_TYPE_COMPARISON_GREATER_INT_FLOAT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            comparisonGreaterType = INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_INT;
-        }
-
-    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
-        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            comparisonGreaterType = INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_FLOAT;
-        }
-
-    InstructionConfig config = {
-        .type   = comparisonGreaterType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeComparisonBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -1078,6 +866,10 @@ void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *l
     
     Instruction *equalInst = newInstruction(&equalInstConfig);
     insertInstruction(tail, equalInst);
+
+    node->children1->symbol->referenceCount++;
+    node->children2->symbol->referenceCount++;
+    node->symbol->referenceCount++;
 }
 
 
@@ -1085,19 +877,7 @@ void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *l
 
 void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node And visited")
-
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    InstructionConfig config = {
-        .type   = INSTRUCTION_TYPE_AND,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeLogicalBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -1105,19 +885,7 @@ void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *lab
 
 void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node Or visited")
-
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    InstructionConfig config = {
-        .type   = INSTRUCTION_TYPE_OR,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
+    generateIntermediateCodeLogicalBinaryOperation(node, tail, labelCount);
 }
 
 
@@ -1141,6 +909,9 @@ void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *l
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
+    node->symbol->referenceCount++;
 }
 
 
@@ -1159,4 +930,174 @@ void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
+    node->symbol->referenceCount++;
+}
+
+
+
+
+void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount) {
+    // analizar la expr del operando izquierdo
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+
+    // analizar la expr del operando derecho
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    // ver el tipo de suma (los casteos los haria en la generacion de assembly)
+    InstructionType instructionArithBinaryOpType;
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            switch(node->type) {
+                case AST_NODE_TYPE_ADDITION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_ADDITION_INT_INT;       break;
+                case AST_NODE_TYPE_SUBTRACTION:    instructionArithBinaryOpType = INSTRUCTION_TYPE_SUBTRACTION_INT_INT;    break;
+                case AST_NODE_TYPE_MULTIPLICATION: instructionArithBinaryOpType = INSTRUCTION_TYPE_MULTIPLICATION_INT_INT; break;
+                case AST_NODE_TYPE_DIVISION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_DIVISION_INT_INT;       break;
+                case AST_NODE_TYPE_MOD:            instructionArithBinaryOpType = INSTRUCTION_TYPE_MOD_INT_INT;            break;
+                default: ERROR_IR("invalid arithmetic binary operation (INT_INT)");
+            }
+        }
+    
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            switch(node->type) {
+                case AST_NODE_TYPE_ADDITION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_ADDITION_INT_FLOAT;       break;
+                case AST_NODE_TYPE_SUBTRACTION:    instructionArithBinaryOpType = INSTRUCTION_TYPE_SUBTRACTION_INT_FLOAT;    break;
+                case AST_NODE_TYPE_MULTIPLICATION: instructionArithBinaryOpType = INSTRUCTION_TYPE_MULTIPLICATION_INT_FLOAT; break;
+                case AST_NODE_TYPE_DIVISION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_DIVISION_INT_FLOAT;       break;
+                case AST_NODE_TYPE_MOD:            instructionArithBinaryOpType = INSTRUCTION_TYPE_MOD_INT_FLOAT;            break;
+                default: ERROR_IR("invalid arithmetic binary operation (INT_FLOAT)");
+            }
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            switch(node->type) {
+                case AST_NODE_TYPE_ADDITION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_ADDITION_FLOAT_INT;       break;
+                case AST_NODE_TYPE_SUBTRACTION:    instructionArithBinaryOpType = INSTRUCTION_TYPE_SUBTRACTION_FLOAT_INT;    break;
+                case AST_NODE_TYPE_MULTIPLICATION: instructionArithBinaryOpType = INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_INT; break;
+                case AST_NODE_TYPE_DIVISION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_DIVISION_FLOAT_INT;       break;
+                case AST_NODE_TYPE_MOD:            instructionArithBinaryOpType = INSTRUCTION_TYPE_MOD_FLOAT_INT;            break;
+                default: ERROR_IR("invalid arithmetic binary operation (FLOAT_INT)");
+            }
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            switch(node->type) {
+                case AST_NODE_TYPE_ADDITION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT;       break;
+                case AST_NODE_TYPE_SUBTRACTION:    instructionArithBinaryOpType = INSTRUCTION_TYPE_SUBTRACTION_FLOAT_FLOAT;    break;
+                case AST_NODE_TYPE_MULTIPLICATION: instructionArithBinaryOpType = INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_FLOAT; break;
+                case AST_NODE_TYPE_DIVISION:       instructionArithBinaryOpType = INSTRUCTION_TYPE_DIVISION_FLOAT_FLOAT;       break;
+                case AST_NODE_TYPE_MOD:            instructionArithBinaryOpType = INSTRUCTION_TYPE_MOD_FLOAT_FLOAT;            break;
+                default: ERROR_IR("invalid arithmetic binary operation (FLOAT_FLOAT)");
+            }
+        }
+
+    InstructionConfig config = {
+        .type   = instructionArithBinaryOpType,
+        .op1    = node->children1->symbol,
+        .op2    = node->children2->symbol,
+        .result = node->symbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
+    node->children2->symbol->referenceCount++;
+    node->symbol->referenceCount++;
+}
+
+
+
+
+void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount) {
+    // los operandos son expresiones aritmeticas
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    InstructionType comparisonBinaryOpType;
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            switch (node->type) {
+                case AST_NODE_TYPE_COMPARISON_SMALLER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_INT; break;
+                case AST_NODE_TYPE_COMPARISON_GREATER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_GREATER_INT_INT; break;
+                default: ERROR_IR("invalid comparison binary operation (INT_INT)")
+            }
+        }
+    
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            switch (node->type) {
+                case AST_NODE_TYPE_COMPARISON_SMALLER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_FLOAT; break;
+                case AST_NODE_TYPE_COMPARISON_GREATER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_GREATER_INT_FLOAT; break;
+                default: ERROR_IR("invalid comparison binary operation (INT_FLOAT)")
+            }
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            switch (node->type) {
+                case AST_NODE_TYPE_COMPARISON_SMALLER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_INT; break;
+                case AST_NODE_TYPE_COMPARISON_GREATER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_INT; break;
+                default: ERROR_IR("invalid comparison binary operation (FLOAT_INT)")
+            }
+        }
+
+    if (node->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+        node->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            switch (node->type) {
+                case AST_NODE_TYPE_COMPARISON_SMALLER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_FLOAT; break;
+                case AST_NODE_TYPE_COMPARISON_GREATER: comparisonBinaryOpType = INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_FLOAT; break;
+                default: ERROR_IR("invalid comparison binary operation (FLOAT_FLOAT)")
+            }
+        }
+
+    InstructionConfig config = {
+        .type   = comparisonBinaryOpType,
+        .op1    = node->children1->symbol,
+        .op2    = node->children2->symbol,
+        .result = node->symbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
+    node->children2->symbol->referenceCount++;
+    node->symbol->referenceCount++;
+}
+
+
+
+
+void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount) {
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    InstructionType binaryLogicalOpType;
+
+    switch (node->type) {
+        case AST_NODE_TYPE_AND: binaryLogicalOpType = INSTRUCTION_TYPE_AND; break;
+        case AST_NODE_TYPE_OR:  binaryLogicalOpType = INSTRUCTION_TYPE_OR;  break;
+        default: ERROR_IR("invalid binary logical operation")
+    }
+
+    InstructionConfig config = {
+        .type   = binaryLogicalOpType,
+        .op1    = node->children1->symbol,
+        .op2    = node->children2->symbol,
+        .result = node->symbol,
+    };
+
+    Instruction *i = newInstruction(&config);
+    insertInstruction(tail, i);
+
+    node->children1->symbol->referenceCount++;
+    node->children2->symbol->referenceCount++;
+    node->symbol->referenceCount++;
 }

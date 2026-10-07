@@ -906,7 +906,7 @@ void setLiteralSymbolInAstNode(AstNode *nodeLiteral) {
 
     SymbolConfig config = {
         .type = SYMBOL_TYPE_CONSTANT,
-        .name = literalName, // no hay problema (no es necesario usar strdup())
+        .name = strdup(literalName),
     };
 
     switch (nodeLiteral->type) {

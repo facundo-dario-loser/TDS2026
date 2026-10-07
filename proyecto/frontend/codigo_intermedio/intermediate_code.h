@@ -21,7 +21,7 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT,
     INSTRUCTION_TYPE_AND,
     INSTRUCTION_TYPE_OR,
-    INSTRUCTION_TYPE_PUSH_ARGUMENT,
+    INSTRUCTION_TYPE_ARGUMENT,               // pasar arg en un registro o en la pila (en llamada a un metodo)
     INSTRUCTION_TYPE_CALL_METHOD,
     INSTRUCTION_TYPE_RETURN,
     INSTRUCTION_TYPE_SUBTRACTION_INT_INT,
@@ -127,5 +127,10 @@ void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *lab
 void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount);
 void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *labelCount);
 void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int *labelCount);
+
+
+void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
 
 #endif // INTERMEDIATE_CODE_H

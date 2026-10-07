@@ -81,6 +81,9 @@ void processOptionO(int argc, char *argv[]) {
         ERROR_GLOBAL("instructionList is NULL")
     
     DEBUG("intermediate code generated")
+
+    // ya no es necesario el ast
+    freeAst(root);
 }
 
 void processOptionTarget(int argc, char *argv[]) {
@@ -131,6 +134,7 @@ void processOptionTarget(int argc, char *argv[]) {
                                     ERROR_GLOBAL("instructionList is NULL")
     
                                 DEBUG("intermediate code generated")
+                                // aca podria liberar el ast, pero no hace falta en realidad
                              } break;
 
         case STAGE_ASSEMBLY: TODO("processOptionTarget (STAGE_ASSEMBLY) not implemented yet")
@@ -192,4 +196,7 @@ void processOptionDebug(int argc, char *argv[]) {
 
     printf("\n****Intermediate Code****\n");
     printInstructions(instructionList);
+
+    // ya no es necesario el ast
+    freeAst(root);
 }
