@@ -84,6 +84,10 @@ void processOptionO(int argc, char *argv[]) {
 
     // ya no es necesario el ast
     freeAst(root);
+
+    // generacion asm
+
+    freeInstructionLinkedList(instructionList);
 }
 
 void processOptionTarget(int argc, char *argv[]) {
@@ -199,4 +203,8 @@ void processOptionDebug(int argc, char *argv[]) {
 
     // ya no es necesario el ast
     freeAst(root);
+
+    // generacion asm
+
+    freeInstructionLinkedList(instructionList);
 }

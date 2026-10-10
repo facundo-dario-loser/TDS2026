@@ -58,14 +58,4 @@ no hay problema ya que tendran diferentes offsets
             por convencion los argumentos se pasan en el stack
 
 
-
-
-- test5 codinter pasa algo raro: se libera un simbolo:
-...
-[LOG_AST]: node ListId freed
-[LOG_AST]: node varDecl freed
-[LOG_AST]: node Type freed
-[LOG_SYMBOL_TABLE]: symbol �����Y (variable) was freed
-[LOG_AST]: node Id freed
-[LOG_AST]: node varDecl freed
-...
+- [SEMANTICO]: si en una condicion o asignacion pongo un metodo que no retorna nada (void), dar un mejor mensaje de error

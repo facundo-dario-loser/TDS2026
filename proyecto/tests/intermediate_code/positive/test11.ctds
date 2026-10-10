@@ -1,0 +1,15 @@
+int max(int x, int y) {
+    if (x > y) {
+        return x;
+    }
+    return y;
+}
+
+void main() {
+    int x, y;
+
+    y = 4;
+    x = max(1, max(8, y));
+    y = 20;
+    x = max(max(9, y), 2);
+}

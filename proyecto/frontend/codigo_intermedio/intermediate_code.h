@@ -138,4 +138,7 @@ void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instructio
 // genera codigo intermedio para nodos correspondientes a operaciones binarias logicas/booleanas (&&, ||)
 void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
 
+// genera instrucciones para evaluar todos arugmentos pasado en la invocacion a un metodo
+void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount);
+
 #endif // INTERMEDIATE_CODE_H

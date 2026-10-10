@@ -1,0 +1,16 @@
+void main() {
+    int x, y;
+    boolean a;
+
+    x = 20;
+    y = 80;
+
+    if (x < 40) {
+        while (x < y) {
+            x = x + 1;
+        }
+        a = true;
+    } else {
+        a = false;
+    }
+}

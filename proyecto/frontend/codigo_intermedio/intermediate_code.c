@@ -494,11 +494,13 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
     if (node->children2) {
         AstNode *aux = node->children2;
 
+        // primero evaluar todos los argumentos pasados al metodo
+        if (aux) generateIntermediateCodeForMethodCallArguments(node, tail, labelCount);
+
+        // pushear o pasar todos los argumentos al metodo
         while (aux) {
             if (aux->type == AST_NODE_TYPE_LIST_EXPR) {
                 // push hijo izq
-                generateIntermediateCodeAux(aux->children1, tail, labelCount);
-
                 InstructionConfig config = {
                     .type   = INSTRUCTION_TYPE_ARGUMENT,
                     .result = aux->children1->symbol,
@@ -512,8 +514,7 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
                 // push los otros args si hay
                 aux = aux->children2;
             } else {
-                generateIntermediateCodeAux(aux->children2, tail, labelCount);
-
+                // es una expr
                 InstructionConfig config = {
                     .type   = INSTRUCTION_TYPE_ARGUMENT,
                     .result = aux->symbol,
@@ -547,7 +548,8 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
     insertInstruction(tail, i);
 
     node->children1->symbol->referenceCount++;
-    methodReturnValueSymbol->referenceCount++;
+    // puede ser null si el metodo no retorna nada
+    if (methodReturnValueSymbol) methodReturnValueSymbol->referenceCount++;
 }
 
 
@@ -675,6 +677,8 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
         .value.intValue = (*labelCount),
     };
 
+    (*labelCount)++;
+
     Symbol *beginWhileLabelSymbol = newSymbol(&beginWhileLabelSymbolConfig);
 
     InstructionConfig beginWhileLabelInstConfig = {
@@ -686,8 +690,6 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
     insertInstruction(tail, beginWhileLabelInst);
 
     beginWhileLabelSymbol->referenceCount++;
-
-    (*labelCount)++;
 
     // evaluar la expr de la condicion
     if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
@@ -703,6 +705,8 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
         .name           = strdup(endWhileLabelName),
         .value.intValue = (*labelCount),
     };
+
+    (*labelCount)++;
 
     Symbol *endWhileLabelSymbol = newSymbol(&endWhileLabelSymbolConfig);
 
@@ -743,8 +747,6 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
     insertInstruction(tail, endWhileLabelInst);
 
     endWhileLabelSymbol->referenceCount++;
-
-    (*labelCount)++;
 }
 
 
@@ -1111,4 +1113,21 @@ void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction *
     node->children1->symbol->referenceCount++;
     node->children2->symbol->referenceCount++;
     node->symbol->referenceCount++;
+}
+
+void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount) {
+    if (!methodCallNode) return;
+
+    AstNode *aux = methodCallNode->children2;
+
+    while (aux) {
+        if (aux->type == AST_NODE_TYPE_LIST_EXPR) {
+            if (aux->children1) generateIntermediateCodeAux(aux->children1, tail, labelCount);
+            aux = aux->children2;            
+        } else {
+            // es una expr
+            generateIntermediateCodeAux(aux, tail, labelCount);
+            aux = NULL;
+        }
+    }
 }

@@ -440,34 +440,33 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount) {
 
     // el nodo id lo analizo a mano (porque si no 'analysisNodeID()' va a buscar el simbolo como una variable y es una funcion)
     Symbol *methodSymbol = searchSymbol(st, node->children1->value.strValue, SYMBOL_TYPE_METHOD);
-    methodSymbol->referenceCount++;
 
     if (!methodSymbol)
         ERROR_SEMANTIC("method '%s' was not declared (line: %d)", node->children1->value.strValue, node->line)
 
     node->children1->symbol = methodSymbol; // en realidad no hace falta hacer esto 
+    methodSymbol->referenceCount++;
 
     if (node->children2) semanticAnalysisAux(node->children2, st, tempCount);
 
     // chequear que se pasen argumentos de los mismos tipos que los 
     // parametros y misma cantidad
-    AstNode *aux         = node;
+    AstNode *aux         = node; // node methodCall
     Symbol  *paramList   = methodSymbol->parameters;
     int     currentArg   = 1; // argumento actual que se tiene que chequear
 
+    if (!aux->children2 && paramList) 
+        ERROR_SEMANTIC("method '%s' was called without any arguments (line: %d)", methodSymbol->name, node->line)
+    
+    if (aux->children2 && !paramList)
+        ERROR_SEMANTIC("method '%s' doesn't have any parameters, but it was called with arguments (line: %d)", methodSymbol->name, node->line)
+
+    aux = aux->children2; // ir a al nodo list expr
+
     while (aux) {
-        
+
         switch (aux->type) {
-            case AST_NODE_TYPE_METHOD_CALL: {
-                if (!aux->children2 && paramList) 
-                    ERROR_SEMANTIC("method '%s' was called without any arguments (line: %d)", methodSymbol->name, node->line)
 
-                if (aux->children2 && !paramList)
-                    ERROR_SEMANTIC("method '%s' doesn't have any parameters, but it was called with arguments (line: %d)", methodSymbol->name, node->line)
-
-                aux = aux->children2; // ir a al nodo list expr
-            } break;
-            
             case AST_NODE_TYPE_LIST_EXPR: {
                 // chequear con la expr (hijo izq)
                 if (!paramList)
@@ -501,7 +500,6 @@ void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount) {
 
     // crear simbolo del temporal para guardar el valor luego de llamar 
     // al metodo si es que tiene retorno
-
     char tempName[24] = "t";
     char strTempCount[8];
 
