@@ -14,24 +14,6 @@ dot -Tsvg file.dot -o ast.svg
 
 [SEMANTICO] diferenciar entre varaible redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
 
-
-
-
-
-
-si tengo:
-
-int f;
-
-int f() {
-    ....
-    return expr;
-}
-
-int g() {
-    return f; // <-- aca chequear que si se busca id efectivamente buscar un id 
-}
-
 - [BUG creo?]: en las macros de debug por ahi hay como un bug que se imprime repetido algunas cosas.
 - escribir la doc del analisis semantico 
 
@@ -40,71 +22,11 @@ int g() {
                  si es asi modificar analysisNodeMethodCall para dependiendo del nombre decirle al temporal si es
                  local o global.
 
-
-- [COD INTER]: puedo generar un simboloq ue sea simplemente un label y que guarde solo el numero del label
-               while: lo primero que hago es una etiqueta/label al princpio para loopear,
-               despues hago una comparacion y un jump a otra etiqueta.
-
-               podria ser un jump que a su vez evalue la condicion no? ponele: jumpIfTrue o algo asi.
-
-
-
-- [COD INTER]:
-hace suma (distinguir): va a ser ams facil para generar el assembly
-int, int
-float, float
-int, float
-float, int 
-
-- [COD INTER]: liberar el ast luegode generar las instrucciones
-
 - [COD INTER]:
 parametros de metodo podria generar info: 
 
-begin_method: ...
-push param, NULL, NULL
-
-- [declaraciones locales no ahce falta]: porque esta en la pila
-
-- [cod inter]: hay saltos condiciones jmpZero e incondicionales jmp
-
-
-if (x > 1+1) {
-    x = 1;
-}
-
-mov $1, %eax
-add $1, %eax 
-cmp x eax
-
-jg o 1g creo L1
-
-L1: ...
-
-
-******************
-
-SUMA 1 1 T1
-MAYOR X T1 T2
-IF_FALSE T2 NULL L1 
-ASIG 1 NULL x
-LABEL NULL NULL L1 
-
-
-if () {
-
-}
-label_no_entra_al_if
-
-despues de generar el codigo del cuerpo generar otro label
-
-
-- [COD INTER]: para variables globales,puedo hacer isntruccion decl var global 
-
 - [COD INTER]: los argumentos pasados en uan invocacion se guardan en registros 
                por convencion, y si faltan registros se guardan en la pila
-
-- [COD INTER]: las var locales no importan guardarlas en instrucciones
 
 si tengo 
 
@@ -118,19 +40,6 @@ no hay drama. en las instrucciones capaz se repite el nombre, pero como son simb
 no hay problema ya que tendran diferentes offsets
 
 
-- [cod inter]:
-
-si tengo var locales ... statemtens ... block -> nueva var decl 
-
-int x;
-... statements ...
-{
-    int y;
-}
-
-podria luego planchar tosdo y meter todas las variables locales al principio
-????
-
 - [OFFSET]: - los offsets de las variables las puedo setear en el analsis semantico al crear los simbolos
             - luego en el analisis de metodo, al temrinar dejo guardado en el simbolo del metodo la cantidada total de variables locales
               para sacar el offset total (porque al principio de una rutina tengo que restar para guardar espacio apra var locales)
@@ -141,6 +50,22 @@ podria luego planchar tosdo y meter todas las variables locales al principio
 - [COD INTER]: podria asignar los offsets en la generacion de codigo intermedio
 - agregar contador de variables locales de una funcion en el analisis semantico
 
-- agregar warnings de casteos en <, > (analsis semantico)
-
 - en target codinter: imprimir por lo menos las instrucciones (y algo parecido en las otras etapas)
+
+- en cod inter: finalmente deberia generar una instruccion que sea call main? ya que es el punto de entrada
+
+- assembly: dentro de un metodo lo primero que deberia hacer es guardar los argumentos (si es que tiene) de los registros al stack
+            por convencion los argumentos se pasan en el stack
+
+
+
+
+- test5 codinter pasa algo raro: se libera un simbolo:
+...
+[LOG_AST]: node ListId freed
+[LOG_AST]: node varDecl freed
+[LOG_AST]: node Type freed
+[LOG_SYMBOL_TABLE]: symbol �����Y (variable) was freed
+[LOG_AST]: node Id freed
+[LOG_AST]: node varDecl freed
+...

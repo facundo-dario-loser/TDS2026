@@ -116,7 +116,7 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount) {
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
             .variableType         = node->variableType,
-            .name                 = node->children2->value.strValue,
+            .name                 = strdup(node->children2->value.strValue),
             .semanticType         = symbolSemanticType,
         };
 
@@ -131,6 +131,7 @@ void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount) {
             ERROR_SEMANTIC("varSymbol is NULL in analysisNodeVarDecl()")
 
         node->children2->symbol = varSymbol;
+        varSymbol->referenceCount++;
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
@@ -176,7 +177,7 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount) {
     }
 
     // ID de la funcion
-    if (node->children2) methodName = node->children2->value.strValue;
+    if (node->children2) methodName = strdup(node->children2->value.strValue);
 
     // parametros de la funcion
     Symbol *paramList = NULL;
@@ -240,7 +241,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
             .variableType         = node->variableType,
-            .name                 = node->children1->value.strValue,
+            .name                 = strdup(node->children1->value.strValue),
             .semanticType         = symbolSemanticType,
         };
 
@@ -255,6 +256,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
             ERROR_SEMANTIC("varSymbol is NULL in analysisNodeListId()")
         
         node->children1->symbol = varSymbol;
+        varSymbol->referenceCount++;
     }
 
     if (!node->children2) return;
@@ -264,7 +266,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
         SymbolConfig varSymbolConfig = {
             .type                 = SYMBOL_TYPE_VARIABLE,
             .variableType         = node->variableType,
-            .name                 = node->children2->value.strValue,
+            .name                 = strdup(node->children2->value.strValue),
             .semanticType         = symbolSemanticType,
         };
 
@@ -279,6 +281,7 @@ void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount) {
             ERROR_SEMANTIC("varSymbol is NULL in analysisNodeListId()")
         
         node->children2->symbol = varSymbol;
+        varSymbol->referenceCount++;
     }
 
     if (node->children2->type == AST_NODE_TYPE_LIST_ID) {
@@ -329,7 +332,7 @@ void analysisNodeParam(AstNode *node, SymbolTable *st, int *tempCount) {
     AstNodeDeclarationType nodeDeclarationType = node->children1->declarationType;
     symbolSemanticType = getSymbolSemanticTypeFromAstNodeDeclarationType(nodeDeclarationType);
 
-    char *symbolName = node->children2->value.strValue;
+    char *symbolName = strdup(node->children2->value.strValue);
 
     SymbolConfig config = (SymbolConfig){
         .type         = SYMBOL_TYPE_VARIABLE,
@@ -1051,23 +1054,32 @@ void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int 
         case AST_NODE_TYPE_COMPARISON_GREATER: binOpStr = ">"; break;
         case AST_NODE_TYPE_COMPARISON_SMALLER: binOpStr = "<"; break;
     }
-    
-    // chequear que ambas expresiones sean int's o float's 
-    // los temporales no cuentan ya que significa que se coloco una exp aritmetica
-    // y necesitamos directamente numeros literales o id's
+
+    // chequear que las expresiones de los operandos sean aritmeticas
     semanticAnalysisAux(comparisonOpNode->children1, st, tempCount);
-    if (!((comparisonOpNode->children1->type == AST_NODE_TYPE_ID)             || 
-          (comparisonOpNode->children1->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (comparisonOpNode->children1->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("left expr of '%s' must be an int literal, float literal, int variable or float variable (line: %d)", binOpStr, comparisonOpNode->line)
-        }
-    
+    if (!(comparisonOpNode->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT ||
+          comparisonOpNode->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            ERROR_SEMANTIC("left expr of '%s' must be of type int or float (line: %d)", binOpStr, comparisonOpNode->line)
+         }
+
     semanticAnalysisAux(comparisonOpNode->children2, st, tempCount);
-    if (!((comparisonOpNode->children2->type == AST_NODE_TYPE_ID)             || 
-          (comparisonOpNode->children2->type == AST_NODE_TYPE_INT_LITERAL)    ||
-          (comparisonOpNode->children2->type == AST_NODE_TYPE_FLOAT_LITERAL))) {
-            ERROR_SEMANTIC("right expr of '%s' must be an int literal, float literal, int variable or float variable (line: %d)", binOpStr, comparisonOpNode->line)
-        }
+    if (!(comparisonOpNode->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT ||
+          comparisonOpNode->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            ERROR_SEMANTIC("left expr of '%s' must be of type int or float (line: %d)", binOpStr, comparisonOpNode->line)
+         }
+
+    // warnings de casteos (TODO ....)
+    if (comparisonOpNode->children1->symbol->semanticType != comparisonOpNode->children2->symbol->semanticType) {
+        if (comparisonOpNode->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT &&
+            comparisonOpNode->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                WARNING_SEMANTIC("casting left expression of '%s' to float (line: %d)", binOpStr, comparisonOpNode->line)
+            }
+
+        if (comparisonOpNode->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT &&
+            comparisonOpNode->children2->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                WARNING_SEMANTIC("casting right expression of '%s' to float (line: %d)", binOpStr, comparisonOpNode->line)
+            }
+    }
 
     // crear el simbolo para el temporal
     char tempName[24] = "t";

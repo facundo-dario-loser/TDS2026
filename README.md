@@ -37,6 +37,7 @@ gcc frontend/analizador_lexico/lex.yy.c               \
     tads/st.c 								          \
 	utils/dot.c 								      \
     frontend/analizador_semantico/semantic_analysis.c \
+    frontend/codigo_intermedio/intermediate_code.c    \
 	main.c -o build/c-tds
 ```
 
@@ -63,7 +64,7 @@ Ejemplo para ejecutar en la terminal:<br>
 **Etapas**
 - `scan` ejecutar solo el análisis léxico.
 - `parse` ejecutar hasta el análisis sintáctico.
-- `codinter` ejecutar hasta la generación de código intermedio de bajo nivel (no implementado aun).
+- `codinter` ejecutar hasta la generación de código intermedio de bajo nivel.
 - `assembly` ejecutar hasta la generación de assembly (no implementado aun).
 
 **Ejemplos de uso**
@@ -84,6 +85,7 @@ El proyecto cuenta con un script de python y reglas en el Makefile que permiten 
 Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/lexer`: tests para la etapa del analisis lexico.
 - `/parser`: tests para la etapa del analisis sintactico.
+- `/intermediate_code`: tests para la etapa de generación de código intermedio.
 - `/general`: tests generales para todas las etapas del compilador.
 
 Cada una de estas carpetas a su vez tiene dos subcarpetas `/positive` y `/negative` con tests que deben pasar y tests que no deben pasar respectivemente. 
@@ -99,6 +101,11 @@ make test_lexer
 Ejecutar los tests para la etapa de **análisis sintáctico**:
 ```
 make test_parser
+```
+
+Ejecutar los tests para la etapa de **código intermedio**:
+```
+make test_codinter
 ```
 
 Ejecutar los tests **generales**:
@@ -124,11 +131,13 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
     - `/analizador_lexico` contiene el lexer dentro del archivo `lexer.l`.
     - `/analizador_sintactico` contiene el parser en el archivo `parser.y`.
     - `/analizador_semantico/` contiene los archivos correspodientes a la etapa del análisis semántico `semantic_analysis.h/.c`.
+    - `/codigo_intermedio` contiene los archivos que implementan la generación de código intermedio `intermediate_code.h/.c`. 
 
 - `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.
     - `/lexer` contiene tests correspondientes a la etapa del analisis lexico.
     - `/parser` contiene tests correspondientes a la etapa del analisis sintactico.
     - `/general` contiene tests que no corresponden a ninguna etapa en concreto.
+    - `/intermediate_code` contiene tests correspondientes a la etapa de generación de código intermedio.
 
 - `/utils` contiene archivos con utilidades.
     - `argument.h/.c` tiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.

@@ -119,11 +119,12 @@ void freeSymbolTable(SymbolTable *st) {
 void freeSymbol(Symbol *s) {
     if (!s) ERROR_ST("s is NULL (freeSymbol)")
 
-    char *symbolName = NULL;
-    char *symbolTypeStr = getSymbolTypeString(s->type);
+    char *symbolName         = NULL; 
+    char *symbolTypeStr      = getSymbolTypeString(s->type);
+    char *symbolSemanticType = getSemanticTypeString(s->semanticType);
 
     if (s->name) {
-        symbolName = s->name;
+        symbolName = strdup(s->name);
         free(s->name);
     }
 
@@ -137,7 +138,8 @@ void freeSymbol(Symbol *s) {
     }*/
 
     free(s);
-    DEBUG_ST("symbol %s (%s) was freed", symbolName, symbolTypeStr)
+    DEBUG_ST("symbol %s (%s %s) was freed", symbolName, symbolSemanticType, symbolTypeStr)
+    // deberia hacer free(symbolName) creo, porque lo obtuve con strdup()
 }
 
 char * getSemanticTypeString(SymbolSemanticType semanticType) {

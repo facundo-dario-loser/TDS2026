@@ -1,292 +1,369 @@
-# Documentación correspondiente a la entrega del analizador semántico
-La implementación del analizador semántico se encuentra en el path: `/proyecto/frontend/analizador_semantico/` en los archivos `semantic_analysis.h/.c`.
+# Documentación correspondiente a la entrega del generador de código intermedio.
+La implementación del generador de código intermedio se encuentra en el path: `/proyecto/frontend/codigo_intermedio/` en los archivos `intermediate_code.h/.c`.
 
-## Modificaciones y actualizaciones en el AST
-La implementacion del ast se encuentra en el path `/proyecto/tads/` en los archivos `ast.h/.c`.
+## Actualizaciones en el AST
+implemente una nueva funcion que dado el tipo de un nodo, lo retorna en forma de string:
 
-- Dentro del enum `AstNodeType` tuve que agregar el tipo de nodo: `AST_NODE_TYPE_BLOCK` que es para los bloques { }. Antes directamente al abrir un bloque colocaba las decalraciones de varaibles y sentencia directamente, pero el problema que me encontre es que sin este nodo no iba a saber en que momento abrir un nuevo nivel en la tabla de simbolos.
+```
+char * getAstNodeTypeString(AstNodeType nodeType);
+```
+Se utiliza para debugear.
 
-- Dentro del struct `AstNode` agregue el campo: `bool isFunctionBlock;`. Basicamente los parametros de las funciones/metodos los trato como variables locales (variables que se declararon dentro del bloque principal de la funcion). Entonces cuando encuentro una decalracion de un metodo/funcion este tiene 4 hijos: el tipo de retorno, el id/nombre, los parametros y el cuerpo que es un bloque. Entonces al hijo que se corresponde con el bloque le bajo la informacion de que es un bloque de una funcion. Luego al procesar el bloque se abre un nuevo nivel en la tabla de simbolos y como tiene seteado el flag `isFunctionBlock` entonces lo que hace es en la tabal de simbolos ir un nivel hacia atras y buscar el simbolo de la funcion para extraer la lista de parametros (que es una lsita de simbolos) y entonces insertarla esta lista en el nivel corriente en la tabla de simbolos que se acaba de abrir.
+## Actualizaciones en los símbolos y la tabla de simbolos
+agregue esta funcion que dado el tipo de un simbolo, lo retorna en forma de string:
+```
+char * getSymbolTypeString(SymbolType sType);
+```
+Se utiliza para debugear.
 
-- Dentro del struct `AstNode` agregue el campo: `SymbolVariableType     variableType;` que sirve para bajar informacion en los nodos y entonces al encontrar una declaracion de variable o parametro de una funcion cuando se cree el simbolo correspondiente se le pase la info de si es una variable local, global o si es un parametro. Esta informacion va a ser de utilidad en la generacion de codigo intermedio y generacion de assembly.
+Por otro lado agregue un nuevo tipo de simbolo que es el de label
+```
+typedef enum SymbolType {
+    SYMBOL_TYPE_VARIABLE,
+    SYMBOL_TYPE_METHOD,
+    SYMBOL_TYPE_CONSTANT,
+    SYMBOL_TYPE_LABEL,    // <----
+} SymbolType;
+```
+Este nuevo tipo de simbolo es útil para la generación de código intermedio ya que hay instrucciones que denotan un label y uno de sus operandos debe apuntar a un simbolo de tipo label justamente.
 
-## Modificaciones y actualizaciones en los símbolos y la tabla de simbolos
-La implementacion de los simbolos y la taba de simbolos se encuentra en el path `/proyecto/tads` en los archivos `st.h/.c`.
+## Correciones y actualizaciones en el analizador semántico
+En la funcion que se encarga de analizar semanticamente los nodos para los operadores `<` y `>`:
+```
+void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount)
+```
+corregi un error conceptual, ya que antes para los operadores de comparacion solo permitia que sus operandos fueran literales de enteros, reales o un id, pero esto es erroneo ya que por ejemplo no podria usar como uno de sus operando una llamada a un metodo que retorne un int.
+Entonces modifique el chequeo para que solo permita expresiones aritmeticas (las cuales abarcan a los id y literales enteras o reales y ademas permiten por ejemplo llamadas a metodo que retonen un int o float).
+Ademas agregue warnings de casteo, en donde si uno de los operandos es un float y el otro un int, el operando de tipo int se casteara a float.
 
-- Agregue este enum que permite saber si el simbolo de una variable corresponde a una variable global, local o si es un parametro de una funcion.
+## Instrucciones de código intermedio
+A continuacion se listan y detalla la semántica de cada una de las instrucciones de codigo intermedio que siguen la estructura del codigo de 3 direcciones.
 
-    ```
-    typedef enum SymbolVariableType {
-        SYMBOL_VARIABLE_TYPE_LOCAL,
-        SYMBOL_VARIABLE_TYPE_GLOBAL,
-        SYMBOL_VARIABLE_TYPE_PARAMETER,
-    } SymbolVariableType;
-    ```
-    Esta informacion va a ser de utilidad en la generacion de codigo intermedio y en la generacion de assembly.
-    Luego agregue en el struct `Symbol` el campo `SymbolVariableType variableType;`
+Todas las instrucciones tienen esta estructura:
+```
+INSTRUCTION_NAME op1 op2 result
+```
+dónde `INSTRUCTION_NAME` es el nombre de la instrucción, `op1` es el operando 1, `op2` el operando 2 y `result` el operando donde se almacena el resultado.
 
-- Modifique la funcion `insertSymbol` para que al chequear antes de insertar el nuevo simbolo que no colisione con otro simbolo del mismo nombre tambien chequee aparte del nombre que sea del mismo tipo (variable o funcion). Entonces es posible por ejemplo a nivel global tener una varaible llamada 'f' y una funcion con el nombre 'f' sin ningun problema.
+**Tipos de instrucciones:**<br><br>
+Identifica que hay una declaración de variable global.
+`result` apunta al simbolo de la variable global.
+```
+INSTRUCTION_TYPE_GLOBAL_VAR_DECL
+```
 
-    ```
-    bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
-        if (!st) ERROR_ST("the symbol table is null (insertSymbol)")
+<br>Esta es una pseudo instrucción ya que hace de etiqueta/label para identificar que comienza la declaración de un método.
+`result` apunta al simbolo del método.
+```
+INSTRUCTION_TYPE_BEGIN_METHOD
+```
 
-        // chequear que no exista el simbolo en el nivel corriente
-        Symbol *aux = st->top->head;
+<br>Esta es una pseudo instrucción ya que hace de etiqueta/label para identificar que termina la declaración de un método.
+`result` apunta al simbolo del método.
+```
+INSTRUCTION_TYPE_END_METHOD
+```
 
-        while (aux) {
-            if ((strcmp(aux->name, config->name) == 0) && (aux->type == config->type)) {
-                return false; // ya existe el simbolo
-            }
-        
-            aux = aux->next;
-        }
-        ...
-    ```
+<br>Esta es una pseudo instrucción que sirve para denotar un label en el código. `result` apunta al simbolo del label.
+```
+INSTRUCTION_TYPE_LABEL
+```
 
-- Modifique la funcion `searchSymbol` para que ahora ademas de apsarle el simbolo que se desea buscar en la tabla de simbolos, tambien se indique si lo que se busca es una variable o una funcion.
-    ```
-    Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType) {
-        if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
+<br>Conjunto de instrucciones instrucciones que indican que hay una asignación en donde a una variable de tipo int o float se le asigna una expresión de tipo int o float.
+El `op1` apunta al simbolo de la expresión y `result` apunta al simbolo de la variable a la cual se le asigna la expresión.
+```
+INSTRUCTION_TYPE_ASSIGNMENT_INT_INT     // result(int)   = op1(int)
+INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT   // result(int)   = op1(float)
+INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT   // result(float) = op1(int) 
+INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_FLOAT // result(float) = op1(float)
+```
 
-        Level *currentLevel = st->top;
+<br>Instrucción que indica que hay una asignación en donde a una variable de tipo boolean se le asigna una expresión booleana.
+El `op1` apunta al simbolo de la expresión y `result` apunta al simbolo de la variable a la cual se le asigna la expresión.
+```
+INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL // result(boolean) = op1(boolean)
+```
 
-        while (currentLevel) {
-            Symbol *aux = currentLevel->head;
+<br>Instrucción que denota la operación 'and' lógico (&&). `op1` apunta al simbolo de la expresión izquierda del and y `op2` apunta al simbolo de la expresión derecha. `result` apunta al simbolo donde se guardara el resultado del and.
+```
+INSTRUCTION_TYPE_AND // result(boolean) = op1(boolean) && op2(boolean)
+```
 
-            while (aux) {
-                if ((strcmp(aux->name, name) == 0) && (aux->type == sType)) return aux;
-                aux = aux->next;
-            }
+<br>Instrucción que denota la operación 'or' lógico (||). `op1` apunta al simbolo de la expresión izquierda del or y `op2` apunta al simbolo de la expresión derecha. `result` apunta al simbolo donde se guardara el resultado del or.
+```
+INSTRUCTION_TYPE_OR // result(boolean) = op1(boolean) || op2(boolean)
+```
 
-            currentLevel = currentLevel->next;
-        }
+<br>Instrucción que indica que se esta pasando un argumento para la invocación de un método. Luego en Assembly se interpreta como que se debe pasar el argumento en un registro o en la pila si no hay mas lugar. `result` apunta al simbolo del argumento. 
+```
+INSTRUCTION_TYPE_ARGUMENT
+```
 
-        return NULL;
-    }
-    ```
-    Esto lo tuve que hacer ya que podria tener el siguiente programa:
-    ```
-    int f;
+<br>Instrucción que indica que hay una llamada a un método. `op1` apunta al simbolo del método y si es que este retorna una expresión, entonces `result` apunta al simbolo del temporal donde se almacenara el resultado de la invocación.
+```
+INSTRUCTION_TYPE_CALL_METHOD
+```
 
-    int f() {
-        return f;
-    }
-    ```
-    En donde dentro de la funcion 'f' cuando se llegue al return se encontrara que retorna una expresion que es un 'ID', luego se buscara en la tabla de simbolos el simbolo f (variable), pero como siempre inserto a la cabeza los simbolos en cada nivel de la pila de la tabla de simbolos, bajaria un nivel por fuera del bloque de la funcion y se quedaria parado en el nivel correspondiente al scope global que tendria los simbolos de f(funcion) y f(variable):
-    ```
-    level 1: -> NULL (dentro de la funcion f no hay ninguna variable).
-      ^
-      |
-    level 0: -> [f:funcion] -> [f:variable] -> NULL
-    ``` 
-    Y encontraria primero el simbolo de la funcion 'f' y como tiene el nombre buscado, retornaria ese simbolo lo cual estaba mal.
+<br>Instrucción que denota un return. `result` apunta al simbolo de la expresión que se retorna.
+```
+INSTRUCTION_TYPE_RETURN
+```
 
-- Agregue las funciones:
+<br>Conjunto de instrucciones que indican que hay una suma entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la suma.
+```
+// result(int) = op1(int) + op2(int)
+INSTRUCTION_TYPE_ADDITION_INT_INT
 
-    Dado el tipo semantico de un simbolo (int, float o boolean), lo retorna en forma de string.
-    ```
-    char * getSemanticTypeString(SymbolSemanticType semanticType);
-    ```
+// result(float) = op1(int) + op2(float)
+INSTRUCTION_TYPE_ADDITION_INT_FLOAT
 
-    Crea un nuevo simbolo a partir de una configuracion dada y lo retorna, pero no lo inserta en la tabla de simbolos. Si no pudo crear el simbolo retorna NULL.
-    ```
-    Symbol * newSymbol(SymbolConfig *config);
-    ```
+// result(float) = op1(float) + op2(int)
+INSTRUCTION_TYPE_ADDITION_FLOAT_INT
 
-    Dada una lista enlazada de simbolos, la inserta en el nivel corriente de la tabla de simbolos. Esta funcion se utiliza para insertar la lista de parametros de una funcion en el nivel que corresponde al bloque principal de la misma. Es decir que los parametros se tratan como variables locales en el bloque principal de la funcion.
-    ```
-    void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList);
-    ```
+// result(float) = op1(float) + op2(float)
+INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT
+```
 
-    Imprime la informacion de los campos del struct del simbolo en la terminal
-    ```
-    void printSymbolInfo(Symbol *s);
-    ```
+<br>Conjunto de instrucciones que indican que hay una resta entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la resta.
+```
+// result(int) = op1(int) - op2(int)
+INSTRUCTION_TYPE_SUBTRACTION_INT_INT
 
-## Funciones del análisis semántico
-La implementación del analizador semántico se encuentra en el path: `/proyecto/frontend/analizador_semantico/` en los archivos `semantic_analysis.h/.c`.<br>
-El analisis semantico se realiza de manera recursiva sobre el ast obtenido luego del analisis sintactico.<br><br>
-Las funciones que se implementaron son las siguientes:
+// result(float) = op1(int) - op2(float)
+INSTRUCTION_TYPE_SUBTRACTION_INT_FLOAT
 
-- Funcion principal que crea la tabla de simbolos y llama a la funcion auxiliar descripta abajo con el mismo puntero al nodo root y la direccion de la tabla de simbolos que creo.
-    ```
-    void semanticAnalysis(AstNode *root);
-    ```
+// result(float) = op1(float) - op2(int)
+INSTRUCTION_TYPE_SUBTRACTION_FLOAT_INT
 
-- Funcion que chequea el nodo root y en base a su tipo llama a la funcion correspondiente para analizar cada tipo de nodo del ast. Ademas va guardando el puntero a la tabla de simbolos para no perderlo entre las llamadas recursivas y tambien lleva un puntero a un contador de cantidad de simbolos temporales creados para que cuando cree un nuevo temporal se le asigne correctamente el nombre (por ej: t0, t1, etc).
-    ```
-    void semanticAnalysisAux(AstNode *root, SymbolTable *st, int *tempCount);
-    ```
+// result(float) = op1(float) - op2(float)
+INSTRUCTION_TYPE_SUBTRACTION_FLOAT_FLOAT
+```
 
-- Funciones para analizar cada tipo de nodo del ast (una funcion por cada valor del enum `AstNodeType`). Cada una de estas recibe el nodo correspondiente, la tabla de simbolos y el contador de temporales:
-    ```
-    void analysisNodeP(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeGlobalDeclList(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeVarDecl(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMethodDeclList(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeListId(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeId(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeParams(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeVoid(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeParam(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeBlock(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeBlockElems(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeStatements(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeType(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeAssignment(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMethodCall(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeIfElse(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeWhile(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeReturn(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeListExpr(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeIntLiteral(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeFloatLiteral(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeBoolLiteral(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeAddition(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeSubtraction(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMultiplication(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeDivision(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMod(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeComparisonSmaller(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeComparisonGreater(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeEqual(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeAnd(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeOr(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeMinus(AstNode *node, SymbolTable *st, int *tempCount);
-    
-    void analysisNodeNegation(AstNode *node, SymbolTable *st, int *tempCount);
-    ```
-    En la implementacion se pueden encontrar mas explicaciones en comentarios sobre que hace cada una de estas funciones.
-    <br>
-- **Funciones Auxiliares:**<br><br>
-    Chequea que una funcion/metodo  que retorna una expresion entonces efectivamente en todas las posibles trazas dentro del cuerpo de la misma siempre se termine con un return. Es decir que nunca se deberia poder alcanzar el final de la funcion porque siempre hay un return antes.
-    ```
-    bool checkIfFunctionHasReturn(AstNode *node);
-    ```
-    Un nodo de declaracion de metodo/funcion tiene 4 hijos: el nodo tipo de retorno, el nodo id/nombre, el nodo parametros y el nodo del cuerpo. Esta funcion dado el nodo de parametros y dado un puntero a una lista enlazada de simbolos vacia, completa la lista enlazada con todos los parametros del metodo en el mismo orden que los tiene.
-    ```
-    void getSymbolParamList(AstNode *node, Symbol **symbolParamList); 
-    ```
-    Funcion auxiliar de 'getSymbolParamList' que se encarga de hacer todo el trabajo. Es una funcion recursiva y para poder obtener la lista de parametros de la funcion en el mismo orden debe insertar los simbolos siempre a la cola y para ello debe guardar en el parametro 'tail' la cola o ultimo elemento de la lista. 'symbolParamList' seria la cabeza de la lista.
-    ```
-    void getSymbolParamListAux(AstNode *node, Symbol **symbolParamList, Symbol **tail);
-    ```
-    Dado un nodo del ast correspondiente a una constante, crea el simbolo para dicha constante y hace que ese nodo apunte al simbolo creado.
-    ```
-    void setLiteralSymbolInAstNode(AstNode *nodeLiteral);
-    ```
-    Dado un valor del enum DeclarationType del ast, que era para guardar el tipo (int, float, boolean o void) en un nodo type de una declaracion de funcion o metodo, retorna el tipo semantico equivalente para poder crear un simbolo luego.
-    ```
-    SymbolSemanticType getSymbolSemanticTypeFromAstNodeDeclarationType(AstNodeDeclarationType declType);
-    ```
-    Funcion para analizar semanticamente nodos correspondientes a operadores binarios aritmeticos (`+`, `-`, `*`, `/`, `%`).
-    ```
-    void analysisArithmeticBinaryOperator(AstNode *arithBinOpNode, SymbolTable *st, int *tempCount);
-    ```
-    Funcion para analizar semanticamente nodos correspondientes a operadores binarios logicos (`&&` and, `||` or).
-    ```
-    void analysisLogicalBinaryOperator(AstNode *logicalBinOpNode, SymbolTable *st, int *tempCount);
-    ```
-    Funcion para analizar semanticamente nodos correspondientes a operadores binarios de comparacion (`<`, `>`).
-    ```
-    void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount);
-    ```
+<br>Conjunto de instrucciones que indican que hay una multiplicación entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la multiplicación.
+```
+// result(int) = op1(int) * op2(int)
+INSTRUCTION_TYPE_MULTIPLICATION_INT_INT
 
-## Chequeos semánticos
-En el analisis semantico se chequearon los 14 puntos del enunciado del proyecto:
+// result(float) = op1(int) * op2(float)
+INSTRUCTION_TYPE_MULTIPLICATION_INT_FLOAT
 
-**1.** Ningun identificador es declarado dos veces en un mismo bloque.
+// result(float) = op1(float) * op2(int)
+INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_INT
 
-**2.** Ningun identificador es usado antes de ser declarado.
+// result(float) = op1(float) * op2(float)
+INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_FLOAT
+```
 
-**3.** Todo programa contiene la definicion de un metodo llamado main. Este metodo no tiene parametros. Notar que la ejecucion comienza con el metodo main.
+<br>Conjunto de instrucciones que indican que hay una división entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la división.
+```
+// result(int) = op1(int) / op2(int)
+INSTRUCTION_TYPE_DIVISION_INT_INT
 
-**4.** El numero y tipos de los argumentos en una invocacion a un metodo debe ser iguales al numero y tipos declarados en la definicion del metodo (los parametros formales y los reales deben ser iguales).
+// result(float) = op1(int) / op2(float)
+INSTRUCTION_TYPE_DIVISION_INT_FLOAT
 
-**5.** Si la invocacion a un metodo es usada como una expresion, el metodo debe retornar un resultado.
+// result(float) = op1(float) / op2(int)
+INSTRUCTION_TYPE_DIVISION_FLOAT_INT
 
-**6.** Una sentencia return solo tiene asociada una expresion si el metodo retorna un valor, si le metodo no retorna un valor (es un metodo void) entonces la sentencia return no puede tener asociada ninguna expresion.
+// result(float) = op1(float) / op2(float)
+INSTRUCTION_TYPE_DIVISION_FLOAT_FLOAT
+```
 
-**7.** La expresion en una sentencia return debe ser igual al tipo de retorno declarado para el metodo.
+<br>Conjunto de instrucciones que indican que hay una operación de móodulo entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado del móodulo.
+```
+// result(int) = op1(int) % op2(int)
+INSTRUCTION_TYPE_MOD_INT_INT
 
-**8.** Un ⟨id⟩ usado como una ⟨location⟩ debe estar declarado como un parametro o como una variable local o global.
+// result(float) = op1(int) % op2(float)
+INSTRUCTION_TYPE_MOD_INT_FLOAT
 
-**9.** La ⟨expr⟩ en una sentencia if o while debe ser boolean.
+// result(float) = op1(float) % op2(int)
+INSTRUCTION_TYPE_MOD_FLOAT_INT
 
-**10.** Los operandos de ⟨arith op⟩’s y ⟨rel op⟩’s deben ser de tipo int o float.
+// result(float) = op1(float) % op2(float)
+INSTRUCTION_TYPE_MOD_FLOAT_FLOAT
+```
 
-**11.** Los operandos de ⟨eq op⟩’s (==) deben tener el mismo tipo (int, o float boolean).
+<br>Conjunto de instrucciones que indican que hay una operación de comparación `<`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la operación.
+```
+// result(boolean) = op1(int) < op2(int) 
+INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_INT
 
-**12.** Los operandos de ⟨cond op⟩’s y el operando de la negacion (!) deben ser de tipo boolean.
+// result(boolean) = op1(int) < op2(float)
+INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_FLOAT
 
-**13.** La ⟨location⟩ y la ⟨expr⟩ en una asignacion, ⟨location⟩ = ⟨expr⟩, deben tener el mismo tipo.
+// result(boolean) = op1(float) < op2(int)
+INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_INT
 
-**14.** Se permiten coerciones o truncamientos entre int y float
+// result(boolean) = op1(float) < op2(float)
+INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_FLOAT
+```
 
-Y como chequeo extra tambien hice:
+<br>Conjunto de instrucciones que indican que hay una operación de comparación `>`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la operación.
+```
+// result(boolean) = op1(int) > op2(int) 
+INSTRUCTION_TYPE_COMPARISON_GREATER_INT_INT
 
-**15.** En el caso de metodos que retornen una expresion (int, float o boolean) entonces se debe chequear que en el cuerpo del metodo en todas las posibles trazas siempre se termina con un 'return expr;'. Es decir un metodo que retorne algo al ejecutarse no se deberia poder alcanzar el fin del metodo por que se salio del mismo previamente con un return.
+// result(boolean) = op1(int) > op2(float)
+INSTRUCTION_TYPE_COMPARISON_GREATER_INT_FLOAT
 
-**Aclaraciones extra**:
+// result(boolean) = op1(float) > op2(int)
+INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_INT
 
-- Cada vez que hay un nuevo bloque `{}` se abre un nuevo nivel en la pila de la tabla de simbolos.
+// result(boolean) = op1(float) > op2(float)
+INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_FLOAT
+```
 
-- En las declaraciones de metodos/funciones el simbolo correspondiente a la funcion se inserta en el nivel actual 'n' y todas los simbolos correspondientes a declaraciones de variables dentro del cuerpo del metodo se insertan en el nivel 'n + 1' o niveles mas profundos si se abren mas sub bloques dentro del cuerpo.
+<br>Conjunto de instrucciones que indican que se multiplico por -1 a una expresión aritmetica (se aplico el `-` unario a la expresión). `op1` apunta al simbolo del operando y `result` apunta al simbolo del temporal donde de almacenara el resultado de aplicarle el `-` a la expresión.
+```
+INSTRUCTION_TYPE_UNARY_MINUS_INT   // result(int)   = -op1(int)
+INSTRUCTION_TYPE_UNARY_MINUS_FLOAT // result(float) = -op2(float)
+```
 
-- Los parametros de una funcion son tratados como variables locales del bloque principal de la funcion. Por lo que no se puede declarar ninguna variable con el mismo nombre que un parametro dentro del bloque principal de la funcion. Pero si es posible abrir nuevos sub bloques dentro del cuerpo de la funcion y declarar variables con los mismos nombres que los parametros.
-Por ejemplo esto no se puede hacer:
-    ```
-    void f(int x, int y) {
-        int x; // ERROR
-    }
-    ```
-    Pero esto si se puede hacer:
-    ```
-    void f(int x, int y) {
-        {
-            int x;
-        }
-    }
-    ```
+<br>Instrucción que denota la operación de negación `!`. `op1` apunta al simbolo del operando y `result` apunta al simbolo donde se almacenara el resultado de la operación.
+```
+INSTRUCTION_TYPE_NEGATION // result(boolean) = !op1(boolean)
+```
+<br>Instrucción que indica un salto/jump condicional. `op1` apunta al simbolo del operando (que es un booleano) y `result` apunta a un simbolo que denota una etiqueta/label. Si `op1` es false entonces se saltaria a la etiqueta de `result`.
+```
+INSTRUCTION_TYPE_JMP_FALSE // if (!op1(boolean)) goto result(label)
+```
 
-- En cuanto a los casteos, en las expresiones resultantes de las operaciones: `+`, `-`, `*`, `/` y `%` si alguno de los operandos es de tipo `float` y el otro de tipo `int`, este ultimo de casteara a tipo `float` y el resultado final sera de tipo `float`.
-<br>Tambien en el caso de asignaciones si la variable es de tipo `float` y la expresion que se le asigna es de tipo `int`, esta ultima se casteara a `float`. Y si la variable es de tipo `int` y la expresion es de tipo `float`, esta ultima se casteara a `int` (es un casteo que producira un truncamiento por lo que se perdera informacion del `float`).
-<br>En cualquiera de estos casos de casteo, el compilador emitira un mensaje de warning indicando el mismo.
+<br>Instrucción que indica un salto/jump incondicional. `result` apunta a un simbolo que denota la etiqueta/label a la que se salta.
+```
+INSTRUCTION_TYPE_JMP // goto result(label)
+```
 
-- Luego de terminar el analisis semantico todos los nodos de tipo `ID` correspondientes a una misma variable, van a apuntar a un mismo simbolo de la variable. <br>Todos los nodos `ID` correspondientes a un mismo metodo van a apuntar a un mismo simbolo correspondiente al metodo.<br>Por cada nodo de tipo literal (intLiteral, floatLiteral y boolLiteral) se va a crear un nuevo simbolo para esa constante/literal y se va a dejar al nodo apuntando al simbolo creado.<br>Por cada nodo correspondiente a alguna de estas expresiones: `methodCall`, `+`, `-(binario)`, `*`, `/`, `%`, `<`, `>`, `==`, `&&`, `||`, `-(unario)` y `!` se va a crear un simbolo de una variable temporal cuyo proposito sera guardar el resultado de evaluar dicha expresion. Luego se deja al nodo correspondiente apuntando al simbolo del temporal creado.
+<br>Instrucción que indica que hay una operación de comparación por iguales `==`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacena el resultado de la comparación.
+```
+INSTRUCTION_TYPE_EQUAL // result(boolean) = op1 == op2
+```
 
+## Estructura de una instrucción
+La implentación de las instrucciones y la generación de código intermedio se encuentra en el path `frontend/codigo_intermedio` en los archivos `intermediate_code.h/.c`.
+
+```
+typedef struct Instruction {
+    InstructionType    type;
+    Symbol             *op1;
+    Symbol             *op2;
+    Symbol             *result;
+    struct Instruction *next;
+    struct Instruction *prev;
+} Instruction;
+```
+
+Dónde:
+- **type**: es el tipo de la instrucción (alguno de los ya listados anteriormente).
+- **op1**: puntero al simbolo del operando 1.
+- **op2**: puntero al simbolo del operando 2.
+- **result**: puntero al simbolo del resultado. 
+- **next**: puntero a la proxima instrucción.
+- **prev**: puntero a la instrucción previa.
+
+Como resultado de la generación de código intermedio se retorna una lista doblemente enlazada de instrucciones (por eso existen los campos `next` y `prev`).
+
+Por otro lado también implemente esta estructura:
+
+```
+typedef struct InstructionConfig {
+    InstructionType    type;
+    Symbol             *op1;
+    Symbol             *op2;
+    Symbol             *result;
+} InstructionConfig;
+```
+
+que contiene todos los campos que se podria llegar a setear en la creación de una nueva instrucción. Sigue la misma lógica que ya utilice con los nodos y simbolos comom explique anteriormente en las entregas respectivas. 
+La razón de este struct es para que la función que crea una isntrucción solo tome un parámetro que es este config. Esto me evita hacer varias funciones para crear una instrucción o tener que hacer una función pero con muchos parametros. Ademas me permite pasar solo los campos que me interesan.  
+
+## Funciones del generador de código intermedio
+
+Función que dada la configuración de una instrucción crea una nueva instrucción y la retorna.
+```
+Instruction * newInstruction(InstructionConfig *config);
+```
+
+<br>Función que dada una instrucción y la cola de una lista enlazada, inserta la instrucción al final de la lista.
+```
+void insertInstruction(Instruction **tail, Instruction *i);
+```
+
+<br>Función que genera el código intermedio. Toma como parametro la raiz del ast y retorna una lista doblemente enlazada de isntrucciones. Llama a la función auxiliar de abajo.
+```
+Instruction * generateIntermediateCode(AstNode *root);
+```
+
+<br>Función auxiliar que genera el código intermedio. Toma como parametro la raiz del ast, la cola de una lista enlazada y un contador de labels. Cada vez que inserta una nueva instrucción en la lista lo hace al final de la misma usando el puntero a la cola y ademas necesita llevar el contador de labels ya que los mismos se identifican por su numero (label_1, label_2, etc).
+```
+void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount);
+```
+
+<br>Función que dado el tipo de una instrucción, lo retorna en forma de string.
+```
+char * getInstructionTypeString(InstructionType instType);
+```
+
+<br>Función que dada la cabeza de una lista enlazada de instrucciones, las imprime a todas en la terminal.
+```
+void printInstructions(Instruction *head);
+```
+
+<br>Función que dada la cabeza de una lista enlazada de instrucciones, libera la memoria para cada una.
+```
+void freeInstructionLinkedList(Instruction *head);
+```
+
+<br>Funciones para generan instrucciones de código intermedio para cada tipo de nodo del ast. Todas toman un puntero al nodo, la cola de la lista de instrucciones y el contador de labels. 
+```
+void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeGlobalDeclList(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodDeclList(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeId(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeParams(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeVoid(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeParam(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBlock(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBlockElems(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeStatements(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeType(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeListExpr(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeIntLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeFloatLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMultiplication(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeDivision(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *labelCount);
+void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int *labelCount);
+```
+
+<br>Función auxiliar para generar código intermedio para los nodos del ast que se corresponden con operaciones binarias aritmeticas (`+`, `-`, `*`, `/` y `%`).
+```
+void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+```
+
+<br>Función auxiliar para generar código intermedio para los los nodos del ast que se corresponden con operaciones binarias de comparación (`<` y `>`).
+```
+void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+```
+
+<br>Función auxiliar para generar código intermedio para los nodos del ast  que se corresponden con operaciones binarias lógicas/booleanas (`&&` y `||`).
+```
+void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+```

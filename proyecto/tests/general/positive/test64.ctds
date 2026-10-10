@@ -1,0 +1,25 @@
+int max(int x, int y) {
+    if (x > y) {
+        return x;
+    }
+
+    return y;
+}
+
+void main() {
+    int x;
+    float y;
+    boolean a;
+
+    x = 2;
+    y = 4.0;
+    
+    a = x < y;
+    a = y < x;
+
+    a = x > y;
+    a = y > x;
+
+    a = max(1,2) < 4;
+    a = 2 < max(1,2);
+}

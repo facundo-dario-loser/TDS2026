@@ -108,10 +108,10 @@ char * getInstructionTypeString(InstructionType instType) {
     switch(instType) {
         case INSTRUCTION_TYPE_BEGIN_METHOD:                   return "BEGIN_METHOD";
         case INSTRUCTION_TYPE_END_METHOD:                     return "END_METHOD";
-        case INSTRUCTION_GLOBAL_VAR_DECL:                     return "GLOBAL_VAR_DECL";
+        case INSTRUCTION_TYPE_GLOBAL_VAR_DECL:                return "GLOBAL_VAR_DECL";
         case INSTRUCTION_TYPE_LABEL:                          return "LABEL"; 
         case INSTRUCTION_TYPE_JMP:                            return "JMP";
-        case INSTRUCTION_TYPE_JMP_ZERO:                       return "JMP_ZERO";
+        case INSTRUCTION_TYPE_JMP_FALSE:                      return "JMP_FALSE";
         case INSTRUCTION_TYPE_ASSIGNMENT_INT_INT:             return "ASSIGNMENT_INT_INT";
         case INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT:           return "ASSIGNMENT_INT_FLOAT";
         case INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT:           return "ASSIGNMENT_FLOAT_INT";
@@ -200,7 +200,7 @@ void printInstructions(Instruction *head) {
         }
 
         if ((aux->type == INSTRUCTION_TYPE_BEGIN_METHOD) && 
-            (aux->prev && (aux->prev->type == INSTRUCTION_GLOBAL_VAR_DECL))) printf("\n");
+            (aux->prev && (aux->prev->type == INSTRUCTION_TYPE_GLOBAL_VAR_DECL))) printf("\n");
 
         printf("%s %s, %s, %s\n", getInstructionTypeString(aux->type), op1Str, op2Str, resultStr);
         
@@ -271,7 +271,7 @@ void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail, int 
 
         if (varIsGlobal) {
             InstructionConfig config = {
-                .type   = INSTRUCTION_GLOBAL_VAR_DECL,
+                .type   = INSTRUCTION_TYPE_GLOBAL_VAR_DECL,
                 .result = node->children2->symbol, 
             };
 
@@ -346,7 +346,7 @@ void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *
 
     if (node->children1->symbol && (node->children1->symbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
         InstructionConfig config = {
-            .type    = INSTRUCTION_GLOBAL_VAR_DECL,
+            .type    = INSTRUCTION_TYPE_GLOBAL_VAR_DECL,
             .result  = node->children1->symbol, 
         };
 
@@ -358,7 +358,7 @@ void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *
 
     if ((node->children2->type == AST_NODE_TYPE_ID) && (node->children2->symbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
         InstructionConfig config = {
-            .type    = INSTRUCTION_GLOBAL_VAR_DECL,
+            .type    = INSTRUCTION_TYPE_GLOBAL_VAR_DECL,
             .result  = node->children2->symbol, 
         };
 
@@ -529,15 +529,25 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
         }
     }
 
+    // variable para guardar en un temporal el valor que retorne un metodo (si es que retorna una expresion)
+    Symbol *methodReturnValueSymbol = NULL;
+
+    if (node->children1->symbol->semanticType != SYMBOL_SEMANTIC_TYPE_VOID) {
+        // el metodo retorna una expresion
+        methodReturnValueSymbol = node->symbol;
+    }
+
     InstructionConfig config = {
         .type   = INSTRUCTION_TYPE_CALL_METHOD,
-        .result = node->children1->symbol,
+        .op1    = node->children1->symbol, // id del metodo
+        .result = methodReturnValueSymbol, // temporal donde se almacena el valor que retorna (si es que retorna)
     };
 
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
 
     node->children1->symbol->referenceCount++;
+    methodReturnValueSymbol->referenceCount++;
 }
 
 
@@ -595,7 +605,7 @@ void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *
     if (node->children3) jumpZeroLabel = elseBlockLabelSymbol; // TODO: si no hay un else debo borrar el simbolo del else
 
     InstructionConfig jmpZeroConfig = {
-        .type   = INSTRUCTION_TYPE_JMP_ZERO,
+        .type   = INSTRUCTION_TYPE_JMP_FALSE,
         .op1    = node->children1->symbol, // expresion de la condicion
         .result = jumpZeroLabel,
     };
@@ -703,7 +713,7 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
 
     // instruccion jmp condicional para saber si termina la iteracion o no
     InstructionConfig jmpZeroInstConfig = {
-        .type   = INSTRUCTION_TYPE_JMP_ZERO,
+        .type   = INSTRUCTION_TYPE_JMP_FALSE,
         .op1    = node->children1->symbol,
         .result = endWhileLabelSymbol,
     };
@@ -711,6 +721,7 @@ void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *l
     Instruction *jmpZeroInst = newInstruction(&jmpZeroInstConfig);
     insertInstruction(tail, jmpZeroInst);
 
+    node->children1->symbol->referenceCount++;
     endWhileLabelSymbol->referenceCount++;
 
     // instrucciones del cuerpo del while

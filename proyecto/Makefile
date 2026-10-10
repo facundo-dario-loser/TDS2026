@@ -32,4 +32,5 @@ test_general: build/c-tds
 	python3 run_tests.py -o tests/general/positive/ || python3 run_tests.py -o tests/general/positive/
 	python3 run_tests.py -o tests/general/negative/ || python3 run_tests.py -o tests/general/negative/
 
-
+test_codinter:
+	python3 run_tests.py -target codinter tests/intermediate_code/positive/ || python3 run_tests.py -target codinter tests/intermediate_code/positive/
