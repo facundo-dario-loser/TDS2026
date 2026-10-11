@@ -1,5 +1,8 @@
 #include "semantic_analysis.h"
 
+
+
+
 void semanticAnalysis(AstNode *root) {
     if (!root) ERROR_SEMANTIC("root node is NULL in semanticAnalysis()")
     
@@ -10,6 +13,9 @@ void semanticAnalysis(AstNode *root) {
 
     semanticAnalysisAux(root, &st, &tempCount);
 }
+
+
+
 
 void semanticAnalysisAux(AstNode *root, SymbolTable *st, int *tempCount) {
     if (!root) ERROR_SEMANTIC("root node is NULL in semanticAnalysisAux()")

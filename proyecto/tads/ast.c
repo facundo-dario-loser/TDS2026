@@ -1,5 +1,8 @@
 #include "ast.h"
 
+
+
+
 AstNode * newAstNode(AstNodeConfig *config) {
     AstNode *node = (AstNode*)malloc(sizeof(AstNode));
 
@@ -24,6 +27,9 @@ AstNode * newAstNode(AstNodeConfig *config) {
 
     return node;
 }
+
+
+
 
 void freeAst(AstNode *root) {
     if (root) {
@@ -50,6 +56,9 @@ void freeAst(AstNode *root) {
         DEBUG_AST("%s freed", getAstNodeTypeString(nodeType))
     }
 }
+
+
+
 
 char * getAstNodeTypeString(AstNodeType nodeType) {
     switch (nodeType) {

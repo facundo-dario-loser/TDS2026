@@ -1,8 +1,14 @@
 #include "argument.h"
 
+
+
+
 bool stringEquals(char *str1, char *str2) {
     return strcmp(str1, str2) == 0;
 }
+
+
+
 
 Option getArgumentOption(int argc, char *argv[]) {
     if (argc == 1) {
@@ -17,6 +23,9 @@ Option getArgumentOption(int argc, char *argv[]) {
     ERROR_ARGUMENT("invalid option '%s'\n", argv[1])
 }
 
+
+
+
 Stage getArgumentStage(int argc, char *argv[]) {
     if (argc < 3) {
         ERROR_ARGUMENT("no stage was provided\nUsage: c-tds -target <etapa> nombreArchivo.ctds\n")
@@ -29,6 +38,9 @@ Stage getArgumentStage(int argc, char *argv[]) {
 
     ERROR_ARGUMENT("invalid stage '%s'\n", argv[2])
 }
+
+
+
 
 void checkFileName(int argcIndex, char *argv[]) {
     char *fileName;  // nombre del archivo
@@ -51,6 +63,9 @@ void checkFileName(int argcIndex, char *argv[]) {
     if (!extension) ERROR_ARGUMENT("the file has no extension (the extension must be '.ctds')")
     if (!stringEquals(extension, ".ctds")) ERROR_ARGUMENT("the file extension must be '.ctds' (%s)", fileName)
 }
+
+
+
 
 void processOptionO(int argc, char *argv[]) {
     if (argc < 3) ERROR_ARGUMENT("the name of the executable file was not specified")
@@ -89,6 +104,9 @@ void processOptionO(int argc, char *argv[]) {
 
     freeInstructionLinkedList(instructionList);
 }
+
+
+
 
 void processOptionTarget(int argc, char *argv[]) {
     Stage stage = getArgumentStage(argc, argv);
@@ -145,9 +163,15 @@ void processOptionTarget(int argc, char *argv[]) {
     }
 }
 
+
+
+
 void processOptionOpt(int argc, char *argv[]) {
     TODO("OPTION_OPT 'processOptionOpt()' not implemented yet")
 }
+
+
+
 
 void processOptionDebug(int argc, char *argv[]) {
     debugFlag = true;

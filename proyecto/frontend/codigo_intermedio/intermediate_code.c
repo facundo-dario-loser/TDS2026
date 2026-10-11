@@ -1,5 +1,8 @@
 #include "intermediate_code.h"
 
+
+
+
 Instruction * newInstruction(InstructionConfig *config) {
     Instruction *i = (Instruction*)malloc(sizeof(Instruction));
 
@@ -1115,6 +1118,9 @@ void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction *
     node->children2->symbol->referenceCount++;
     node->symbol->referenceCount++;
 }
+
+
+
 
 void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount) {
     if (!methodCallNode) return;

@@ -1,5 +1,8 @@
 #include "dot.h"
 
+
+
+
 void getNodeLabel(AstNode *node, char label[256]) {
     if (!node) return;
 
@@ -53,6 +56,9 @@ void getNodeLabel(AstNode *node, char label[256]) {
     }
 }
 
+
+
+
 void astToDotAux(AstNode *root, FILE *f) {
     if (!root) return;
 
@@ -68,6 +74,9 @@ void astToDotAux(AstNode *root, FILE *f) {
         astToDotAux(children[i], f);
     }
 }
+
+
+
 
 void astToDot(AstNode *root, char *fileName) {
     char filePath[256] = "dot_files/";

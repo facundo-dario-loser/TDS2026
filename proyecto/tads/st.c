@@ -1,5 +1,8 @@
 #include "st.h"
 
+
+
+
 void newLevel(SymbolTable *st) {
     if (!st) ERROR_ST("cannot open a new level because st is NULL")
 
@@ -8,6 +11,9 @@ void newLevel(SymbolTable *st) {
     level->next  = st->top; 
     st->top      = level;
 }
+
+
+
 
 void closeLevel(SymbolTable *st) {
     if (!st)      ERROR_ST("cannot close the level because st is NULL")
@@ -19,6 +25,9 @@ void closeLevel(SymbolTable *st) {
     // no borro los simbolos del nivel porque estan apuntados por nodos del ast
     free(oldTop);
 }
+
+
+
 
 bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     if (!st) ERROR_ST("the symbol table is null (insertSymbol)")
@@ -60,6 +69,9 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     return true;
 }
 
+
+
+
 Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType) {
     if (!st) ERROR_ST("the symbol table is NULL (searchSymbol)")
 
@@ -78,6 +90,9 @@ Symbol * searchSymbol(SymbolTable *st, char *name, SymbolType sType) {
 
     return NULL;
 }
+
+
+
 
 void printSymbolTable(SymbolTable *st) {
     printf("\n****SymbolTable****\n");
@@ -99,6 +114,9 @@ void printSymbolTable(SymbolTable *st) {
     printf("\n");
 }
 
+
+
+
 // No es necesaria esta funcion ya que al terminar el analisis semantico 
 // los niveles se fueron cerrando eventualmente hasta que no quedo ninguno
 void freeSymbolTable(SymbolTable *st) {
@@ -115,6 +133,9 @@ void freeSymbolTable(SymbolTable *st) {
 
     // deberia liberar st solo si fue creado dinamicamente
 }
+
+
+
 
 void freeSymbol(Symbol *s) {
     if (!s) ERROR_ST("s is NULL (freeSymbol)")
@@ -142,6 +163,9 @@ void freeSymbol(Symbol *s) {
     // deberia hacer free(symbolName) creo, porque lo obtuve con strdup()
 }
 
+
+
+
 char * getSemanticTypeString(SymbolSemanticType semanticType) {
     switch (semanticType) {
         case SYMBOL_SEMANTIC_TYPE_INT:     return "int";
@@ -151,6 +175,9 @@ char * getSemanticTypeString(SymbolSemanticType semanticType) {
         default:                           return "";
     }
 }
+
+
+
 
 Symbol * newSymbol(SymbolConfig *config) {
     if (!config) return NULL;
@@ -175,6 +202,9 @@ Symbol * newSymbol(SymbolConfig *config) {
     return s;
 }
 
+
+
+
 // esto es seguro porque meto los params al comienzo a penas abro el nivel
 // pero si no podria modificar la lista de parametros
 void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList) {
@@ -190,6 +220,9 @@ void insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList) {
     
     PRINT_SYMBOL_TABLE(st)
 }
+
+
+
 
 void printSymbolInfo(Symbol *s) {
     if (!s) return;
@@ -256,6 +289,9 @@ void printSymbolInfo(Symbol *s) {
         }
     }*/
 }
+
+
+
 
 char * getSymbolTypeString(SymbolType sType) {
     switch (sType) {
