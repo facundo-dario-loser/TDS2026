@@ -1,0 +1,9 @@
+void f(int x, int y) {
+    if (x < y) {
+        return ;
+    }
+}
+
+void main() {
+    f(2,4);
+}

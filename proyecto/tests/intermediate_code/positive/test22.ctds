@@ -1,0 +1,10 @@
+void main() {
+    int x, y;
+    boolean a, b;
+
+    x = 4;
+    a = true;
+
+    y = -(-x);
+    b = !(!a);
+}

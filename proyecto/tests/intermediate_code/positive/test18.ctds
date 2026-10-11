@@ -1,0 +1,37 @@
+boolean f(int x, float y, boolean a) {
+    boolean b;
+    if ((x == 1) && (y == 4.0)) {
+        b = true;
+    } else {
+        b = false;
+    }
+
+    return a && b;
+}
+
+int maxInt(int x, int y) {
+    if (x > y) {
+        return x;
+    }
+    return y;
+}
+
+float maxFloat(float x, float y) {
+    if (x > y) {
+        return x;
+    }
+    return y;
+}
+
+boolean isSmaller(int x, int y) {
+    return (x < y);
+}
+
+void main() {
+    int x, y;
+    boolean w;
+
+    x = 9;
+    y = 40;
+    w = f(maxInt(x, 2), maxFloat(4.0, 8.0), isSmaller(y, x));
+}

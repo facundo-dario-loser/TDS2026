@@ -1,0 +1,19 @@
+void main() {
+    int x, y;
+    boolean a;
+
+    if (x < y) {
+        a = true;
+    } else {
+        a = false;
+    }
+
+    {
+        boolean b;
+        if (x > y) {
+            b = true;
+        } else {
+            b = false;
+        }
+    }
+}

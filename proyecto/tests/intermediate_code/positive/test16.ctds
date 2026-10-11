@@ -1,0 +1,23 @@
+int max(int x, int y) {
+    if (x > y) {
+        return x;
+    }
+
+    return y;
+}
+
+boolean notEquals(int x, int y) {
+    return !(x == y);
+}
+
+void main() {
+    int x, y, z;
+
+    x = 40;
+    y = 80;
+    z = 100;
+
+    while (notEquals(x, max(y,z))) {
+        x = x + 1;
+    }
+}

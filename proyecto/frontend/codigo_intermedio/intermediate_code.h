@@ -72,25 +72,13 @@ typedef struct InstructionConfig {
     Symbol             *result;
 } InstructionConfig;
 
-Instruction * newInstruction(InstructionConfig *config);
-
-// inserta la instruccion a la cola
-void insertInstruction(Instruction **tail, Instruction *i);
-
-// dada la raiz del ast, retorna una lista enlazada de instrucciones
-Instruction * generateIntermediateCode(AstNode *root);
-
-// funcion auxiliar para generar el codigo intermedio
-void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount);
-
-// dado un tipo de instruccion lo retorna en forma de string
-char * getInstructionTypeString(InstructionType instType);
-
-// imprime la lista de instrucciones en la terminal
-void printInstructions(Instruction *head);
-
-// libera la lista enlazada de instrucciones
-void freeInstructionLinkedList(Instruction *head);
+Instruction * newInstruction(InstructionConfig *config);                              // dada una condiguracion de instruccion, crea la nueva instruccion 
+void insertInstruction(Instruction **tail, Instruction *i);                           // inserta la instruccion a la cola
+Instruction * generateIntermediateCode(AstNode *root);                                // dada la raiz del ast, retorna una lista enlazada de instrucciones
+void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount); // funcion auxiliar para generar el codigo intermedio
+char * getInstructionTypeString(InstructionType instType);                            // dado un tipo de instruccion lo retorna en forma de string
+void printInstructions(Instruction *head);                                            // imprime la lista de instrucciones en la terminal
+void freeInstructionLinkedList(Instruction *head);                                    // libera la lista enlazada de instrucciones
 
 // funciones para generar codigo intermedio para cada nodo
 void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail, int *labelCount);
@@ -129,16 +117,10 @@ void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labe
 void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *labelCount);
 void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int *labelCount);
 
-// genera codigo intermedio para nodos correspondientes a operaciones binarias aritmeticas (+, -, *, /, %)
-void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
-
-// genera codigo intermedio para nodos correspondientes a operaciones de comparacion (<, >)
-void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
-
-// genera codigo intermedio para nodos correspondientes a operaciones binarias logicas/booleanas (&&, ||)
-void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
-
-// genera instrucciones para evaluar todos arugmentos pasado en la invocacion a un metodo
-void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount);
+// funciones auxiliares
+void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);        // genera codigo intermedio para nodos correspondientes a operaciones binarias aritmeticas (+, -, *, /, %)
+void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);        // genera codigo intermedio para nodos correspondientes a operaciones de comparacion (<, >)
+void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);           // genera codigo intermedio para nodos correspondientes a operaciones binarias logicas/booleanas (&&, ||)
+void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount); // genera instrucciones para evaluar todos arugmentos pasado en la invocacion a un metodo
 
 #endif // INTERMEDIATE_CODE_H

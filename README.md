@@ -119,7 +119,7 @@ Finalmente muestra un resumen (SUMMARY) con los tests que pasaron y los que fall
 **Nota:** si se desea, puede agregar mas tests a las carpetas respectivas y ejecutarlos con las reglas de Make dadas.
 
 ## Documentación
-El archivo `Documentation.md` dentro de `/proyecto` contiene una descripcion mas detallada del proyecto junto con decisiones diseño para la etapa correspondiente.
+El archivo `Documentation.md` dentro de `/proyecto` contiene una descripción mas detallada del proyecto junto con decisiones diseño para la etapa correspondiente.
 
 ## Organización
 Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y archivos:
@@ -130,7 +130,7 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 - `/frontend` contiene subcarpetas correspondientes al frontend del compilador:
     - `/analizador_lexico` contiene el lexer dentro del archivo `lexer.l`.
     - `/analizador_sintactico` contiene el parser en el archivo `parser.y`.
-    - `/analizador_semantico/` contiene los archivos correspodientes a la etapa del análisis semántico `semantic_analysis.h/.c`.
+    - `/analizador_semantico` contiene los archivos correspodientes a la etapa del análisis semántico `semantic_analysis.h/.c`.
     - `/codigo_intermedio` contiene los archivos que implementan la generación de código intermedio `intermediate_code.h/.c`. 
 
 - `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.

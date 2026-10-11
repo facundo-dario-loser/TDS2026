@@ -770,7 +770,8 @@ void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail, int *
     Instruction *i = newInstruction(&config);
     insertInstruction(tail, i);
 
-    returnExprSymbol->referenceCount++;
+    // podria ser null si es un return vacio (return;)
+    if (returnExprSymbol) returnExprSymbol->referenceCount++;
 }
 
 

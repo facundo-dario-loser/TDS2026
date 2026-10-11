@@ -1,0 +1,12 @@
+boolean isAdult(int age) {
+    return ((age > 18) || (age == 18));
+}
+
+void main() {
+    int x;
+
+    x = 1;
+    while (!isAdult(x)) {
+        x = x + 1;
+    }
+}

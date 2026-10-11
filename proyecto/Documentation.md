@@ -2,7 +2,7 @@
 La implementación del generador de código intermedio se encuentra en el path: `/proyecto/frontend/codigo_intermedio/` en los archivos `intermediate_code.h/.c`.
 
 ## Actualizaciones en el AST
-implemente una nueva funcion que dado el tipo de un nodo, lo retorna en forma de string:
+implemente una nueva función que dado el tipo de un nodo, lo retorna en forma de string:
 
 ```
 char * getAstNodeTypeString(AstNodeType nodeType);
@@ -10,7 +10,7 @@ char * getAstNodeTypeString(AstNodeType nodeType);
 Se utiliza para debugear.
 
 ## Actualizaciones en los símbolos y la tabla de simbolos
-agregue esta funcion que dado el tipo de un simbolo, lo retorna en forma de string:
+agregue esta función que dado el tipo de un simbolo, lo retorna en forma de string:
 ```
 char * getSymbolTypeString(SymbolType sType);
 ```
@@ -28,24 +28,24 @@ typedef enum SymbolType {
 Este nuevo tipo de simbolo es útil para la generación de código intermedio ya que hay instrucciones que denotan un label y uno de sus operandos debe apuntar a un simbolo de tipo label justamente.
 
 ## Correciones y actualizaciones en el analizador semántico
-En la funcion que se encarga de analizar semanticamente los nodos para los operadores `<` y `>`:
+En la función que se encarga de analizar semanticamente los nodos para los operadores `<` y `>`:
 ```
 void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount)
 ```
-corregi un error conceptual, ya que antes para los operadores de comparacion solo permitia que sus operandos fueran literales de enteros, reales o un id, pero esto es erroneo ya que por ejemplo no podria usar como uno de sus operando una llamada a un metodo que retorne un int.
+corregi un error conceptual, ya que antes para los operadores de comparación solo permitia que sus operandos fueran literales de enteros, reales o un id, pero esto es erroneo ya que por ejemplo no podria usar como uno de sus operando una llamada a un metodo que retorne un int.
 Entonces modifique el chequeo para que solo permita expresiones aritmeticas (las cuales abarcan a los id y literales enteras o reales y ademas permiten por ejemplo llamadas a metodo que retonen un int o float).
 Ademas agregue warnings de casteo, en donde si uno de los operandos es un float y el otro un int, el operando de tipo int se casteara a float.
 
 ## Instrucciones de código intermedio
-A continuacion se listan y detalla la semántica de cada una de las instrucciones de codigo intermedio que siguen la estructura del codigo de 3 direcciones.
+A continuación se listan y detalla la semántica de cada una de las instrucciones de código intermedio que siguen la estructura del código de 3 direcciones.
 
 Todas las instrucciones tienen esta estructura:
 ```
 INSTRUCTION_NAME op1 op2 result
 ```
-dónde `INSTRUCTION_NAME` es el nombre de la instrucción, `op1` es el operando 1, `op2` el operando 2 y `result` el operando donde se almacena el resultado.
+dónde `INSTRUCTION_NAME` es el nombre de la instrucción, `op1` es el operando 1, `op2` el operando 2 y `result` es donde se almacena el resultado.
 
-**Tipos de instrucciones:**<br><br>
+## Tipos de instrucciones:
 Identifica que hay una declaración de variable global.
 `result` apunta al simbolo de la variable global.
 ```
@@ -366,4 +366,10 @@ void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instructio
 <br>Función auxiliar para generar código intermedio para los nodos del ast  que se corresponden con operaciones binarias lógicas/booleanas (`&&` y `||`).
 ```
 void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+```
+
+<br>Función auxiliar que genera las instrucciones para evaluar todos los argumentos pasados a un método en su invocación.
+```
+void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount);
+
 ```
