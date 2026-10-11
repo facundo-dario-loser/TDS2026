@@ -48,17 +48,21 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     // respuesta: esto ya se hace ya que los params son variables locales
     // y por ende estan insertadas ene l nivel corriente
 
-    Symbol *s         = (Symbol*)malloc(sizeof(Symbol));
-    s->type           = config->type;
-    s->variableType   = config->variableType;
-    s->name           = config->name;
-    s->semanticType   = config->semanticType;
-    s->value          = config->value;
-    s->parameters     = config->parameters;
-    s->next           = NULL;
-    s->referenceCount = 0;
-    s->offset         = 0; // por defecto
-    s->offsetSet      = false;
+    Symbol *s = (Symbol*)malloc(sizeof(Symbol));
+
+    if (!s) ERROR_ST("couldn't allocate memory for s in insertSymbol()")
+
+    s->type                   = config->type;
+    s->variableType           = config->variableType;
+    s->name                   = config->name;
+    s->semanticType           = config->semanticType;
+    s->value                  = config->value;
+    s->parameters             = config->parameters;
+    s->next                   = NULL;
+    s->referenceCount         = 0;
+    s->offset                 = 0;
+    s->offsetSet              = false;
+    s->numberOfLocalVariables = config->numberOfLocalVariables;
 
     s->next       = st->top->head;
     st->top->head = s;
@@ -186,16 +190,17 @@ Symbol * newSymbol(SymbolConfig *config) {
 
     if (!s) ERROR_ST("couldn't allocate memory for s in newSymbol")
 
-    s->type           = config->type;
-    s->variableType   = config->variableType;
-    s->name           = config->name;
-    s->semanticType   = config->semanticType;
-    s->value          = config->value;
-    s->parameters     = config->parameters;
-    s->next           = NULL;
-    s->referenceCount = 0;
-    s->offset         = 0;
-    s->offsetSet      = false;
+    s->type                   = config->type;
+    s->variableType           = config->variableType;
+    s->name                   = config->name;
+    s->semanticType           = config->semanticType;
+    s->value                  = config->value;
+    s->parameters             = config->parameters;
+    s->next                   = NULL;
+    s->referenceCount         = 0;
+    s->offset                 = 0;
+    s->offsetSet              = false;
+    s->numberOfLocalVariables = config->numberOfLocalVariables;
 
     PRINT_SYMBOL(s)
 

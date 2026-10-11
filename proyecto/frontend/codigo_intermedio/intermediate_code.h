@@ -73,12 +73,12 @@ typedef struct InstructionConfig {
 } InstructionConfig;
 
 Instruction * newInstruction(InstructionConfig *config);                              // dada una condiguracion de instruccion, crea la nueva instruccion 
-void insertInstruction(Instruction **tail, Instruction *i);                           // inserta la instruccion a la cola
+void          insertInstruction(Instruction **tail, Instruction *i);                           // inserta la instruccion a la cola
 Instruction * generateIntermediateCode(AstNode *root);                                // dada la raiz del ast, retorna una lista enlazada de instrucciones
-void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount); // funcion auxiliar para generar el codigo intermedio
-char * getInstructionTypeString(InstructionType instType);                            // dado un tipo de instruccion lo retorna en forma de string
-void printInstructions(Instruction *head);                                            // imprime la lista de instrucciones en la terminal
-void freeInstructionLinkedList(Instruction *head);                                    // libera la lista enlazada de instrucciones
+void          generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount); // funcion auxiliar para generar el codigo intermedio
+char        * getInstructionTypeString(InstructionType instType);                            // dado un tipo de instruccion lo retorna en forma de string
+void          printInstructions(Instruction *head);                                            // imprime la lista de instrucciones en la terminal
+void          freeInstructionLinkedList(Instruction *head);                                    // libera la lista enlazada de instrucciones
 
 // funciones para generar codigo intermedio para cada nodo
 void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail, int *labelCount);

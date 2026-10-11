@@ -8,8 +8,6 @@
 #include <stdbool.h>
 #include "../tads/st.h"
 
-//#include "dot.h" ???? problema de dependencia circular
-
 // enum para saber la fuente o de donde viene un mensaje/printf
 typedef enum MessageSource {
     MESSAGE_SOURCE_GLOBAL,              // no proviene de ningun lugar en especifico (no sabia que nombre ponerle y deje GLOBAL)
@@ -95,5 +93,6 @@ char * getMessageSourceString(MessageSource msgSrc);
 
 #define PRINT_SYMBOL_TABLE(symbolTable) { if (debugFlag) printSymbolTable(symbolTable); }
 #define PRINT_SYMBOL(symbol)            { if (debugFlag) printSymbolInfo(symbol); }
+#define PRINT_SYMBOL_OFFSETS(list)      { if (debugFlag) printSymbolOffsets(list); }
 
 #endif // DEBUG_H

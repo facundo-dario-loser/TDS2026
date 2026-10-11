@@ -100,7 +100,9 @@ void processOptionO(int argc, char *argv[]) {
     // ya no es necesario el ast
     freeAst(root);
 
-    // generacion asm
+    // generacion asm (se debe borrar el archivo .s)
+    char *assemblyFileName = generateAssembly(instructionList, outputFileName);
+    remove(assemblyFileName);
 
     freeInstructionLinkedList(instructionList);
 }
@@ -159,7 +161,33 @@ void processOptionTarget(int argc, char *argv[]) {
                                 // aca podria liberar el ast, pero no hace falta en realidad
                              } break;
 
-        case STAGE_ASSEMBLY: TODO("processOptionTarget (STAGE_ASSEMBLY) not implemented yet")
+        case STAGE_ASSEMBLY: {
+                                int parseResult = yyparse();
+    
+                                if (parseResult == 0) {
+                                    DEBUG("sintax analysis done\n")
+                                } else {
+                                    ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
+                                }
+                             
+                                semanticAnalysis(root);
+                                DEBUG("semantic analysis done")
+        
+                                Instruction *instructionList = generateIntermediateCode(root);
+
+                                if (!instructionList)
+                                    ERROR_GLOBAL("instructionList is NULL")
+    
+                                DEBUG("intermediate code generated")
+                                
+                                // ya no es necesario el ast
+                                freeAst(root);
+
+                                // generacion asm (no se borra el archivo generado)
+                                generateAssembly(instructionList, outputFileName);
+
+                                freeInstructionLinkedList(instructionList);
+                             } break;
     }
 }
 
@@ -228,7 +256,8 @@ void processOptionDebug(int argc, char *argv[]) {
     // ya no es necesario el ast
     freeAst(root);
 
-    // generacion asm
+    // generacion asm (no se borra el archivo generado)
+    generateAssembly(instructionList, outputFileName);
 
     freeInstructionLinkedList(instructionList);
 }
