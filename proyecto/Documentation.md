@@ -1,5 +1,6 @@
 # Documentación correspondiente a la entrega del generador de código intermedio.
-La implementación del generador de código intermedio se encuentra en el path: `/proyecto/frontend/codigo_intermedio/` en los archivos `intermediate_code.h/.c`.
+La implementación del generador de código intermedio se encuentra en el path: `/proyecto/frontend/codigo_intermedio/` en los archivos `intermediate_code.h/.c`.<br>
+**Nota**: para visualizar las instrucciones de código intermedio generadas, debe ejecutar el compilador con la opción `-debug`
 
 ## Actualizaciones en el AST
 implemente una nueva función que dado el tipo de un nodo, lo retorna en forma de string:
