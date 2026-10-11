@@ -1,13 +1,14 @@
-C_PROGRAMS =  frontend/analizador_lexico/lex.yy.c         		\
-			  frontend/analizador_sintactico/parser.tab.c 		\
-			  utils/argument.c							   		\
-			  utils/debug.c							   		    \
-			  tads/ast.c 								   		\
-			  tads/st.c 								   		\
-			  utils/dot.c 								   		\
-			  frontend/analizador_semantico/semantic_analysis.c \
-			  frontend/codigo_intermedio/intermediate_code.c    \
-			  backend/generacion_assembly/assembly_gen.c        \
+C_PROGRAMS =  frontend/analizador_lexico/lex.yy.c         		  \
+			  frontend/analizador_sintactico/parser.tab.c 		  \
+			  utils/argument.c							   		  \
+			  utils/debug.c							   		      \
+			  tads/ast.c 								   		  \
+			  tads/st.c 								   		  \
+			  utils/dot.c 								   		  \
+			  frontend/analizador_semantico/semantic_analysis.c   \
+			  frontend/codigo_intermedio/intermediate_code.c      \
+			  backend/generacion_assembly/assembly_gen.c          \
+			  backend/generacion_assembly/assembly_instructions.c \
 			  main.c
 
 main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y $(PROGRAMAS_C)

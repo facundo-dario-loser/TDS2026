@@ -2,13 +2,7 @@
 #define ASSEMBLY_GEN_H
 
 #include "../../frontend/codigo_intermedio/intermediate_code.h"
-
-// macros para escribir las instrucciones de assembly x86 de manera mas legible
-#define ENTER_ASM(f, numberOfLocalVariables) fprintf(f, "\tenter $(8*%d), $0\n", numberOfLocalVariables);
-#define LEAVE_ASM(f)                         fprintf(f, "\tleave\n");
-#define LABEL_ASM(f, name)                   fprintf(f, ".%s:\n", name);
-// ?????
-#define MOV_ASM(f, src, dest)                fprintf(f, "mov %s, %s\n", src, dest);
+#include "assembly_instructions.h"
 
 void setSymbolOffsets(Instruction *list);
 void printSymbolOffsets(Instruction *list);
@@ -65,5 +59,4 @@ void generateAssemblyInstructionJmpFalse(Instruction *i, FILE *f);
 void generateAssemblyInstructionJmp(Instruction *i, FILE *f);
 void generateAssemblyInstructionEqual(Instruction *i, FILE *f);
 
-// void generateAssemblyInstruction(Instruction *i);
 #endif // ASSEMBLY_GEN_H

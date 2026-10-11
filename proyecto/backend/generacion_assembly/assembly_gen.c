@@ -258,7 +258,14 @@ void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionBeginMethod() not implemented yet")
+    DEBUG_ASSEMBLY("instruction BeginMethod visited")
+
+    if (strcmp(i->result->name, "main") == 0) globl(f, "main");
+    methodLabel(f, i->result->name);
+    // TODO: si numberOfLocalVariables es impar deberia sumarle +1?
+    enter(f, i->result->numberOfLocalVariables);
+
+    generateAssemblyAux(i->next, f);
 }
 
 
