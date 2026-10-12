@@ -4,9 +4,6 @@
 #include "../../frontend/codigo_intermedio/intermediate_code.h"
 #include "assembly_instructions.h"
 
-void setSymbolOffsets(Instruction *list);
-void printSymbolOffsets(Instruction *list);
-
 char * generateAssembly(Instruction *list, char *outputFileName);
 void generateAssemblyAux(Instruction *list, FILE *f);
 

@@ -59,3 +59,8 @@ no hay problema ya que tendran diferentes offsets
 
 
 - [SEMANTICO]: si en una condicion o asignacion pongo un metodo que no retorna nada (void), dar un mejor mensaje de error
+
+- [ASSEMBLY]: luego de cada accion dejo todo en memoria (asi es mas facil).
+              los registros solo los uso como puentes. (no hace falta hacer register allocation).
+
+- [ASSEMBLY]: linkear con la libreria standard de C para printear resultado
