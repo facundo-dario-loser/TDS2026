@@ -39,8 +39,20 @@ void mov(FILE *f, Symbol *src, Symbol *dst) {
     if (!dst) ERROR_ASSEMBLY("dst is NULL in mov()")
 
     if ((src->type == SYMBOL_TYPE_VARIABLE) && (src->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
-        fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
-        fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        }
+
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("mov dst(float) = src(float) in mov() not implemented yet")
+        }
+
+        // hago los mismo que en mov IntInt
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) { 
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        }
     }
 
     if ((src->type == SYMBOL_TYPE_VARIABLE) && (src->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
@@ -48,15 +60,20 @@ void mov(FILE *f, Symbol *src, Symbol *dst) {
     }
 
     if (src->type == SYMBOL_TYPE_CONSTANT) {
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT)
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
             fprintf(f, "\tmov, $%d, %%r10\n", src->value.intValue);
             fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        }
 
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
             TODO("mov float_const, dst not implemented yet in mov()")
+        }
 
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)
-            TODO("mov boolean_const, dst not implemented yet in mov()")
+        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+            int booleanConstantValue = src->value.booleanValue ? 1 : 0;
+            fprintf(f, "\tmov $%d, %%r10\n", booleanConstantValue);
+            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        }
     }
 }
 
@@ -286,6 +303,19 @@ void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
             numberOfArgumentsInStack--;
         }
     }
+}
+
+
+
+
+void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1) ERROR_ASSEMBLY("src is NULL in and()")
+    if (!op2) ERROR_ASSEMBLY("dst is NULL in and()")
+
+    fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+    fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+    fprintf(f, "\tand r10, r11\n");
+    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
 }
 
 

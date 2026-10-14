@@ -110,8 +110,10 @@ void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
 
     // si la cantidad de variables que necesito apra el metodo es impar, lo hago par cumando +1
     // para que el stack quede alineado a 16 bytes
-    if ((i->result->numberOfLocalVariables % 2) == 1) i->result->numberOfLocalVariables++;
-    comment(f, "note: 8 extra bytes were added (64 bits) to keep the stack aligned to 16 bytes");
+    if ((i->result->numberOfLocalVariables % 2) == 1) {
+        i->result->numberOfLocalVariables++;
+        comment(f, "note: 8 extra bytes were added (64 bits) to keep the stack aligned to 16 bytes");
+    }
 
     enter(f, i->result->numberOfLocalVariables);
 
@@ -189,7 +191,11 @@ void generateAssemblyInstructionAssignmentFloatFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionAssignmentBoolBool(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionAssignmentBoolBool() not implemented yet")
+    DEBUG_ASSEMBLY("instruction AssignmentBoolBool visited")
+    newLine(f);
+    comment(f, "AssignmentBoolBool");
+    mov(f, i->op1, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -228,7 +234,11 @@ void generateAssemblyInstructionAdditionFloatFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionAnd(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionAnd() not implemented yet")
+    DEBUG_ASSEMBLY("instruction And visited")
+    newLine(f);
+    comment(f, "And");
+    and(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 

@@ -24,6 +24,7 @@ void push(FILE *f, Symbol *src);
 void call(FILE *f, char *methodName);
 void movFromRaxToTemporal(FILE *f, Symbol *temp);
 void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
+void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 
 // funciones auxiliares
 void saveAllArguments(Symbol *methodSymbol, FILE *f);
