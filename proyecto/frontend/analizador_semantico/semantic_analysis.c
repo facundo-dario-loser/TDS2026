@@ -196,12 +196,15 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount) {
         getSymbolParamList(node->children3, &paramList);
     }
 
+    int numberOfParameters = getNumberOfParametersFromMethod(paramList);
+
     // primero inserta el simbolo de la funcion y luego agregar los parametros 
     SymbolConfig methodSymbolConfig = {
-        .type           = SYMBOL_TYPE_METHOD,
-        .name           = methodName,
-        .parameters     = paramList,
-        .semanticType   = returnType,
+        .type               = SYMBOL_TYPE_METHOD,
+        .name               = methodName,
+        .parameters         = paramList,
+        .semanticType       = returnType,
+        .numberOfParameters = numberOfParameters,
     };
 
     bool res = insertSymbol(st, &methodSymbolConfig);

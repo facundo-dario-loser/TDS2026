@@ -63,6 +63,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     s->offset                 = 0;
     s->offsetSet              = false;
     s->numberOfLocalVariables = config->numberOfLocalVariables;
+    s->numberOfParameters     = config->numberOfParameters;
 
     s->next       = st->top->head;
     st->top->head = s;
@@ -201,6 +202,7 @@ Symbol * newSymbol(SymbolConfig *config) {
     s->offset                 = 0;
     s->offsetSet              = false;
     s->numberOfLocalVariables = config->numberOfLocalVariables;
+    s->numberOfParameters     = config->numberOfParameters;
 
     PRINT_SYMBOL(s)
 
@@ -281,7 +283,8 @@ void printSymbolInfo(Symbol *s) {
     printf("NULL\n");
 
     printf("referenceCount: %d\n", s->referenceCount);
-    printf("offset:         %d\n\n", s->offset);
+    printf("offset:         %d\n", s->offset);
+    printf("params size:    %d\n\n", s->numberOfParameters);
 
     /*if (s->parameters) {
         printf("\n****'%s' Parameters Info****\n", s->name);
@@ -306,4 +309,19 @@ char * getSymbolTypeString(SymbolType sType) {
         case SYMBOL_TYPE_LABEL:    return "label";
         default:                   return "?";
     }
+}
+
+
+
+
+int getNumberOfParametersFromMethod(Symbol *params) {
+    int numberOfParameters = 0;
+    Symbol *param = params;
+
+    while (param) {
+        param = param->next;
+        numberOfParameters++;
+    }
+
+    return numberOfParameters;
 }

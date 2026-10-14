@@ -66,3 +66,14 @@ no hay problema ya que tendran diferentes offsets
 - [ASSEMBLY]: linkear con la libreria standard de C para printear resultado
 
 - [ASSEMBLY]: en pasaje de parametros: agregar a la instruccion de cod intermedio argument un operando que sea el numero de argument
+
+- [ASSEMBLY]: no hace falta implementar las operaciones y demas cosas con float
+              (solo generar un comentario que diga en el assembly: aca falta implementar esto)
+              
+- [ASSEMBLY]: extender la gramatica para agregar el extern y linkear con gcc para llamar a mi propia definicion de printInt, printFloat, etc
+
+- ver lo de corto circuito del and y el or 
+
+- podria haer un campo mas de simbolos para metodos para guardar el numero de parametros
+
+- si men anda el fibonacci iterativo y recursivo ya esta

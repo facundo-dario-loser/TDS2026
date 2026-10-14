@@ -2,6 +2,7 @@
 #define ASSEMBLY_INSTRUCTIONS_H
 
 #include <stdio.h>
+#include "../../frontend/codigo_intermedio/intermediate_code.h"
 #include "../../utils/debug.h"
 
 void comment(FILE *f, char *string);
@@ -15,6 +16,14 @@ void movZeroEax(FILE *f); // para indicar que el programa termino correctamente
 void newLine(FILE *f);
 void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void returnFromMethod(FILE *f, Symbol *symbolReturned);
+void label(FILE *f, char *str);
+void jmp(FILE *f, char *label);
+void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument);
+Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction); // pushea el resto de los argumentos (si hay mas de 6) en el stack
+void push(FILE *f, Symbol *src);
+void call(FILE *f, char *methodName);
+void movFromRaxToTemporal(FILE *f, Symbol *temp);
+void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
 
 // funciones auxiliares
 void saveAllArguments(Symbol *methodSymbol, FILE *f);

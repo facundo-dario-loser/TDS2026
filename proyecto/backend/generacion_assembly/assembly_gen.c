@@ -107,11 +107,16 @@ void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
     }
 
     methodLabel(f, i->result->name);
-    // TODO: si numberOfLocalVariables es impar deberia sumarle +1? para que este alineado el stack
+
+    // si la cantidad de variables que necesito apra el metodo es impar, lo hago par cumando +1
+    // para que el stack quede alineado a 16 bytes
+    if ((i->result->numberOfLocalVariables % 2) == 1) i->result->numberOfLocalVariables++;
+    comment(f, "note: 8 extra bytes were added (64 bits) to keep the stack aligned to 16 bytes");
+
     enter(f, i->result->numberOfLocalVariables);
 
     // guardar todos los params pasados en registros/stack a sus posiciones correspondientes en el stack
-    newLine(f);
+    if (i->result->parameters) newLine(f);
     saveAllArguments(i->result, f); 
     generateAssemblyAux(i->next, f);
 }
@@ -124,10 +129,18 @@ void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f) {
     
     newLine(f);
     
-    if (i->result->semanticType == SYMBOL_SEMANTIC_TYPE_VOID) {
+    if ((strcmp(i->result->name, "main") == 0) && (i->result->semanticType == SYMBOL_SEMANTIC_TYPE_VOID)) {
+        comment(f, "note: setting rax with 0 exit code (even if main doesn't return anything)");
         movZeroEax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
+        newLine(f);
     }
     
+    // label de fin del metodo
+    Symbol *methodSymbol    = i->result;
+    char endMethodLabel[64] = ".end_method_";
+    strcat(endMethodLabel, methodSymbol->name);
+    label(f, endMethodLabel);
+
     leave(f);
     ret(f);
     generateAssemblyAux(i->next, f);
@@ -229,14 +242,38 @@ void generateAssemblyInstructionOr(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionArgument(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionArgument() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Argument visited")
+    int numberOfArgument = i->op1->value.intValue;
+
+    newLine(f);
+    comment(f, "PassingArgumentForMethodCall");
+
+    Instruction *nextInstructionToProcess;
+
+    if (numberOfArgument <= 6) {
+        passArgumentToMethodInRegister(f, i->result, numberOfArgument);
+        nextInstructionToProcess = i->next;
+    } else {
+        // pushear este argumento y todos los demas que hayan (si es que los hay)
+        nextInstructionToProcess = passArgumentsToMethodInStack(f, i);
+    }
+
+    generateAssemblyAux(nextInstructionToProcess, f);
 }
 
 
 
 
 void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionCallMethod() not implemented yet")
+    DEBUG_ASSEMBLY("instruction CallMethod visited")
+    newLine(f);
+    comment(f, "CallMethod");
+    call(f, i->op1->name);
+    newLine(f);
+    comment(f, "SavingReturnValueFromMethodInTemporal");
+    movFromRaxToTemporal(f, i->result);
+    popArgumentsFromStackAfterMethodCall(f, i->op1); // solo genera instrucciones si se pasan mas de 6 argumentos
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -248,11 +285,23 @@ void generateAssemblyInstructionReturn(Instruction *i, FILE *f) {
     newLine(f);
     comment(f, "ReturnFromMethod");
 
-    if (i->result) {
-        returnFromMethod(f, i->result);
-    } else {
-        TODO("return ; (empty) in generateAssemblyInstructionReturn() not implemented yet")
-    }
+    if (i->result) returnFromMethod(f, i->result);
+
+    // buscar el final del metodo para obtener el simbolo del metodo al cual pertenece el return
+    Symbol *methodSymbol;
+    Instruction *aux = i;
+
+    while (aux && (aux->type != INSTRUCTION_TYPE_END_METHOD)) aux = aux->next;
+
+    if (!aux)                                     ERROR_ASSEMBLY("aux is NULL in generateAssemblyInstructionReturn()")
+    if (aux->type != INSTRUCTION_TYPE_END_METHOD) ERROR_ASSEMBLY("aux type is not 'INSTRUCTION_TYPE_END_METHOD' in generateAssemblyInstructionReturn()")
+
+    methodSymbol = aux->result;
+
+    // saltar al label del final del metodo
+    char endMethodLabel[64] = ".end_method_";
+    strcat(endMethodLabel, methodSymbol->name);
+    jmp(f, endMethodLabel);
 
     generateAssemblyAux(i->next, f);
 }

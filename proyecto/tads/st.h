@@ -49,6 +49,7 @@ typedef struct Symbol {
     int                offset;                 // es para la generacion de asm (offset respecto de rbp) 
     bool               offsetSet;              // para saber si a una variable o temporal ya se le asigno un offset
     int                numberOfLocalVariables; // se utiliza para metodos solamente (es para saber cuanto espacio reservar en el stack)
+    int                numberOfParameters;     // se utiliza en metodos 
 } Symbol;
 
 typedef struct SymbolConfig {
@@ -59,6 +60,7 @@ typedef struct SymbolConfig {
     SymbolValue        value;
     struct Symbol      *parameters;
     int                numberOfLocalVariables;
+    int                numberOfParameters;
 } SymbolConfig;
 
 // pila de niveles
@@ -83,5 +85,6 @@ Symbol * newSymbol(SymbolConfig *config);                                     //
 void     insertSymbolListInCurrentLevel(SymbolTable *st, Symbol *symbolList); // dada una lista enlazada de simbolos, la inserta en el nivel corriente de la tabla de simbolos
 void     printSymbolInfo(Symbol *s);
 char   * getSymbolTypeString(SymbolType sType);
+int      getNumberOfParametersFromMethod(Symbol *params);
 
 #endif // ST_H
