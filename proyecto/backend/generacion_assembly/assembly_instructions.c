@@ -98,7 +98,17 @@ void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
     // var + var
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        TODO("var + var in add() not implemented yet")
+        // var(int) + var(int)
+        if (op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT && op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tadd %d(%%rbp), %%r10\n", op2->offset);
+            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+        }
+
+        // var(float) + var(float)
+        if (op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT && op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("var(float) + var(float) in add() not implemented yet")
+        }
     }
     
     // var + const
@@ -112,7 +122,7 @@ void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
         // var(float) + const(float)
         if (op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("var(float) + const(float) in add() not yet implemented")
+            TODO("var(float) + const(float) in add() not implemented yet")
         }
     }
     
@@ -124,5 +134,54 @@ void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     // const + const
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
         TODO("const + const in add() not implemented yet")
+    }
+}
+
+
+
+
+void returnFromMethod(FILE *f, Symbol *symbolReturned) {
+    fprintf(f, "\tmov %d(%%rbp), rax\n", symbolReturned->offset);
+}
+
+
+
+
+void saveAllArguments(Symbol *methodSymbol, FILE *f) {
+    if (!methodSymbol) ERROR_ASSEMBLY("method symbol is NULL in saveAllArguments()")
+    
+    // si no tiene parametros, entonces no se le paso ningun argumento
+    if (!methodSymbol->parameters) return;
+    
+    comment(f, "SaveAllArguments");
+
+    Symbol *param        = methodSymbol->parameters;
+    int numberOfArgument = 1;
+
+    while (param) {
+        if (numberOfArgument <= 6) {
+            char *reg = getRegisterForArgument(numberOfArgument);
+            fprintf(f, "\tmov %%%s, %d(%%rbp)\n", reg, param->offset);
+        } else {
+            TODO("save numberOfArgument >= 7 in saveAllArguments() not implemented yet");
+        }
+
+        numberOfArgument++;
+        param = param->next;
+    }
+}
+
+
+
+
+char * getRegisterForArgument(int numberOfArgument) {
+    switch (numberOfArgument) {
+        case 1:  return "rdi";
+        case 2:  return "rsi";
+        case 3:  return "rdx";
+        case 4:  return "rcx";
+        case 5:  return "r8";
+        case 6:  return "r9";
+        default: ERROR_ASSEMBLY("numberOfArgument cannot be mapped to a register in getRegisterForArgument()");
     }
 }

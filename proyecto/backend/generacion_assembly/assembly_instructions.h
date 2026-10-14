@@ -14,5 +14,10 @@ void ret(FILE *f);
 void movZeroEax(FILE *f); // para indicar que el programa termino correctamente
 void newLine(FILE *f);
 void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void returnFromMethod(FILE *f, Symbol *symbolReturned);
+
+// funciones auxiliares
+void saveAllArguments(Symbol *methodSymbol, FILE *f);
+char * getRegisterForArgument(int numberOfArgument); // dado el numero de argumento retorna el registro en el cual se debe guardar o que ay esta guardado
 
 #endif // ASSEMBLY_INSTRUCTIONS_H

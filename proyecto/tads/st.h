@@ -48,7 +48,7 @@ typedef struct Symbol {
     int                referenceCount;         // contador de referencias para liberar el simbolo
     int                offset;                 // es para la generacion de asm (offset respecto de rbp) 
     bool               offsetSet;              // para saber si a una variable o temporal ya se le asigno un offset
-    int                numberOfLocalVariables; // seutiliza para metodos solamente (es para saber cuanto espacio reservar en el stack)
+    int                numberOfLocalVariables; // se utiliza para metodos solamente (es para saber cuanto espacio reservar en el stack)
 } Symbol;
 
 typedef struct SymbolConfig {

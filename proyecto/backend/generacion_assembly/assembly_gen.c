@@ -101,10 +101,18 @@ void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f) {
 void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
     DEBUG_ASSEMBLY("instruction BeginMethod visited")
 
-    if (strcmp(i->result->name, "main") == 0) globl(f, "main");
+    if (strcmp(i->result->name, "main") == 0) {
+        if (i->prev) newLine(f);
+        globl(f, "main");
+    }
+
     methodLabel(f, i->result->name);
     // TODO: si numberOfLocalVariables es impar deberia sumarle +1? para que este alineado el stack
     enter(f, i->result->numberOfLocalVariables);
+
+    // guardar todos los params pasados en registros/stack a sus posiciones correspondientes en el stack
+    newLine(f);
+    saveAllArguments(i->result, f); 
     generateAssemblyAux(i->next, f);
 }
 
@@ -113,8 +121,13 @@ void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
 
 void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f) {
     DEBUG_ASSEMBLY("instruction EndMethod visited")
+    
     newLine(f);
-    movZeroEax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
+    
+    if (i->result->semanticType == SYMBOL_SEMANTIC_TYPE_VOID) {
+        movZeroEax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
+    }
+    
     leave(f);
     ret(f);
     generateAssemblyAux(i->next, f);
@@ -230,7 +243,18 @@ void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionReturn(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionReturn() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Return visited")
+    
+    newLine(f);
+    comment(f, "ReturnFromMethod");
+
+    if (i->result) {
+        returnFromMethod(f, i->result);
+    } else {
+        TODO("return ; (empty) in generateAssemblyInstructionReturn() not implemented yet")
+    }
+
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -442,3 +466,4 @@ void generateAssemblyInstructionJmp(Instruction *i, FILE *f) {
 void generateAssemblyInstructionEqual(Instruction *i, FILE *f) {
     TODO("generateAssemblyInstructionEqual() not implemented yet")
 }
+

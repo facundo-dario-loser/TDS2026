@@ -501,11 +501,29 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
         if (aux) generateIntermediateCodeForMethodCallArguments(node, tail, labelCount);
 
         // pushear o pasar todos los argumentos al metodo
+        int argumentNumber = 1;
+
         while (aux) {
             if (aux->type == AST_NODE_TYPE_LIST_EXPR) {
+                char numberOfArgumentString[24];
+                snprintf(numberOfArgumentString, sizeof(numberOfArgumentString), "%d", argumentNumber);
+                
+                // simbolo que representa el numero de argumento pasado
+                SymbolConfig numberOfArgumentSymbolConfig = {
+                    .type           = SYMBOL_TYPE_CONSTANT,
+                    .name           = strdup(numberOfArgumentString),
+                    .semanticType   = SYMBOL_SEMANTIC_TYPE_INT,
+                    .value.intValue = argumentNumber,
+                };
+
+                argumentNumber++;
+
+                Symbol *argumentNumberSymbol = newSymbol(&numberOfArgumentSymbolConfig);
+
                 // push hijo izq
                 InstructionConfig config = {
                     .type   = INSTRUCTION_TYPE_ARGUMENT,
+                    .op1    = argumentNumberSymbol,
                     .result = aux->children1->symbol,
                 };
 
@@ -513,13 +531,30 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
                 insertInstruction(tail, i);
 
                 aux->children1->symbol->referenceCount++;
+                argumentNumberSymbol->referenceCount++;
 
                 // push los otros args si hay
                 aux = aux->children2;
             } else {
+                char numberOfArgumentString[24];
+                snprintf(numberOfArgumentString, sizeof(numberOfArgumentString), "%d", argumentNumber);
+                
+                // simbolo que representa el numero de argumento pasado
+                SymbolConfig numberOfArgumentSymbolConfig = {
+                    .type           = SYMBOL_TYPE_CONSTANT,
+                    .name           = strdup(numberOfArgumentString),
+                    .semanticType   = SYMBOL_SEMANTIC_TYPE_INT,
+                    .value.intValue = argumentNumber,
+                };
+
+                argumentNumber++;
+
+                Symbol *argumentNumberSymbol = newSymbol(&numberOfArgumentSymbolConfig);
+
                 // es una expr
                 InstructionConfig config = {
                     .type   = INSTRUCTION_TYPE_ARGUMENT,
+                    .op1    = argumentNumberSymbol,
                     .result = aux->symbol,
                 };
 
@@ -527,6 +562,7 @@ void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, i
                 insertInstruction(tail, i);
 
                 aux->symbol->referenceCount++;
+                argumentNumberSymbol->referenceCount++;
 
                 aux = NULL; // ya no hay mas argumentos
             }

@@ -64,3 +64,5 @@ no hay problema ya que tendran diferentes offsets
               los registros solo los uso como puentes. (no hace falta hacer register allocation).
 
 - [ASSEMBLY]: linkear con la libreria standard de C para printear resultado
+
+- [ASSEMBLY]: en pasaje de parametros: agregar a la instruccion de cod intermedio argument un operando que sea el numero de argument
