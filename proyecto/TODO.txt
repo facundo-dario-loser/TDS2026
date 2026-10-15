@@ -77,3 +77,9 @@ no hay problema ya que tendran diferentes offsets
 - podria haer un campo mas de simbolos para metodos para guardar el numero de parametros
 
 - si men anda el fibonacci iterativo y recursivo ya esta
+
+
+- linkear con funciones para printear: 
+   gcc a.s files_to_link/print.c -o main
+
+- agregar caso de variable global a practicamente todas las instrucciones assembly

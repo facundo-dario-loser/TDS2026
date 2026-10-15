@@ -92,7 +92,11 @@ void generateAssemblyAux(Instruction *list, FILE *f) {
 
 
 void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionGlobalVarDecl() not implemented yet")
+    DEBUG_ASSEMBLY("instruction GlobalVarDecl visited")
+    if (!i->prev) dataSegment(f);
+    newLine(f);
+    globalVarDecl(f, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -284,11 +288,17 @@ void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f) {
     DEBUG_ASSEMBLY("instruction CallMethod visited")
     newLine(f);
     comment(f, "CallMethod");
-    call(f, i->op1->name);
-    newLine(f);
-    comment(f, "SavingReturnValueFromMethodInTemporal");
-    movFromRaxToTemporal(f, i->result);
-    newLine(f);
+    
+    Symbol *methodSymbol = i->op1;
+    
+    call(f, methodSymbol->name);
+
+    if (methodSymbol->semanticType != SYMBOL_SEMANTIC_TYPE_VOID) {
+        newLine(f);
+        comment(f, "SavingReturnValueFromMethodInTemporal");
+        movFromRaxToTemporal(f, i->result);
+    }
+
     popArgumentsFromStackAfterMethodCall(f, i->op1); // solo genera instrucciones si se pasan mas de 6 argumentos
     generateAssemblyAux(i->next, f);
 }

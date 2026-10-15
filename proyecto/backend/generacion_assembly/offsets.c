@@ -74,21 +74,21 @@ void setSymbolOffsets(Instruction *list) {
             } break;
 
             default: {
-                if (i->op1 && (i->op1->type != SYMBOL_TYPE_CONSTANT) && !i->op1->offsetSet) {
+                if (i->op1 && (i->op1->type == SYMBOL_TYPE_VARIABLE) && (i->op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && !i->op1->offsetSet) {
                     i->op1->offset    = currentOffset;
                     currentOffset    -= 8;
                     i->op1->offsetSet = true;
                     numberOfLocalVariables++;
                 }
 
-                if (i->op2 && (i->op2->type != SYMBOL_TYPE_CONSTANT) && !i->op2->offsetSet) {
+                if (i->op2 && (i->op2->type == SYMBOL_TYPE_VARIABLE) && (i->op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && !i->op2->offsetSet) {
                     i->op2->offset    = currentOffset;
                     currentOffset    -= 8;
                     i->op2->offsetSet = true;
                     numberOfLocalVariables++;
                 }
 
-                if (i->result && (i->result->type != SYMBOL_TYPE_CONSTANT) && !i->result->offsetSet) {
+                if (i->result && (i->result->type == SYMBOL_TYPE_VARIABLE) && (i->result->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && !i->result->offsetSet) {
                     i->result->offset    = currentOffset;
                     currentOffset       -= 8;
                     i->result->offsetSet = true;

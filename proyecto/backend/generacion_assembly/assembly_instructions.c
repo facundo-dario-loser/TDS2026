@@ -39,40 +39,107 @@ void mov(FILE *f, Symbol *src, Symbol *dst) {
     if (!dst) ERROR_ASSEMBLY("dst is NULL in mov()")
 
     if ((src->type == SYMBOL_TYPE_VARIABLE) && (src->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
-            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("dst(local float variable) = src(local float variable) in mov() not implemented yet")
+            }
+
+            // hago los mismo que en mov IntInt
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) { 
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
         }
 
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("mov dst(float) = src(float) in mov() not implemented yet")
-        }
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
 
-        // hago los mismo que en mov IntInt
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) { 
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
-            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("dst(global float variable) = src(local float variable) in mov() not implemented yet")
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
         }
     }
 
     if ((src->type == SYMBOL_TYPE_VARIABLE) && (src->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
-        TODO("global variable case in mov() not implemented yet")
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("dst(local float variable) = dst(global float variable) in mov() not implemented yet")
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
+        }
+
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("dst(global float variable) = dst(global float variable) in mov() not implemented yet")
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
+        }
     }
 
     if (src->type == SYMBOL_TYPE_CONSTANT) {
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", src->value.intValue);
-            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", src->value.intValue);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("mov float_const, dst not implemented yet in mov()")
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+                int booleanConstantValue = src->value.booleanValue ? 1 : 0;
+                fprintf(f, "\tmov $%d, %%r10\n", booleanConstantValue);
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            }
         }
 
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("mov float_const, dst not implemented yet in mov()")
-        }
+        if (dst->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", src->value.intValue);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
 
-        if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
-            int booleanConstantValue = src->value.booleanValue ? 1 : 0;
-            fprintf(f, "\tmov $%d, %%r10\n", booleanConstantValue);
-            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("mov float_const, dst not implemented yet in mov()")
+            }
+
+            if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+                int booleanConstantValue = src->value.booleanValue ? 1 : 0;
+                fprintf(f, "\tmov $%d, %%r10\n", booleanConstantValue);
+                fprintf(f, "\tmov %%r10, %s(%%rip)\n", dst->name);
+            }
         }
     }
 }
@@ -346,6 +413,7 @@ void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
     if (!methodSymbol) ERROR_ASSEMBLY("methodSymbol is NULL in popArgumentsFromStackAfterMethodCall()")
 
     if (methodSymbol->numberOfParameters > 6) {
+        newLine(f);
         comment(f, "PopingArgumentsFromStack");
         int numberOfArgumentsInStack = methodSymbol->numberOfParameters - 6;
 
@@ -743,6 +811,27 @@ void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     fprintf(f, "\tcqto # extend rax sign to rdx\n");
     fprintf(f, "\tidiv %%r10\n");
     fprintf(f, "\tmov %%rdx, %d(%%rbp) # save the remainder\n", result->offset);
+}
+
+
+
+
+void dataSegment(FILE *f) {
+    fprintf(f, ".data\n");
+}
+
+
+
+
+void globalVarDecl(FILE *f, Symbol *globalVarSymbol) {
+    if (!globalVarSymbol) ERROR_ASSEMBLY("globalVarSymbol is NULL in globalVarDecl()")
+    
+    if ((globalVarSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) || (globalVarSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN)) {
+        fprintf(f, ".globl %s\n", globalVarSymbol->name);
+        fprintf(f, "%s: .quad 0\n", globalVarSymbol->name);
+    } else {
+        TODO("global float variables in globalVarDecl() not implemented yet")
+    }
 }
 
 
