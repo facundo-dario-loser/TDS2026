@@ -5,7 +5,7 @@
 #include "assembly_instructions.h"
 
 char * generateAssembly(Instruction *list, char *outputFileName);
-void generateAssemblyAux(Instruction *list, FILE *f);
+void   generateAssemblyAux(Instruction *list, FILE *f);
 
 void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f);
 void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f);

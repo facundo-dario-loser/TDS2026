@@ -15,6 +15,11 @@ f:
 
 	# ReturnFromMethod
 	mov $200, %rax
+	
+	# printReturnedValue
+	mov %rax, %rdi
+	call printInt
+
 	jmp .end_method_f
 
 .end_method_f:

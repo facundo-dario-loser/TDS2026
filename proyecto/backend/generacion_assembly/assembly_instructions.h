@@ -24,12 +24,9 @@ void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void returnFromMethod(FILE *f, Symbol *symbolReturned);
 void label(FILE *f, char *str);
 void jmp(FILE *f, char *label);
-void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument);
-Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction); // pushea el resto de los argumentos (si hay mas de 6) en el stack
 void push(FILE *f, Symbol *src);
 void call(FILE *f, char *methodName);
 void movFromRaxToTemporal(FILE *f, Symbol *temp);
-void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
 void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType);
@@ -42,7 +39,10 @@ void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 
 // funciones auxiliares
-void saveAllArguments(Symbol *methodSymbol, FILE *f);
-char * getRegisterForArgument(int numberOfArgument); // dado el numero de argumento retorna el registro en el cual se debe guardar o que ay esta guardado
+void          saveAllArguments(Symbol *methodSymbol, FILE *f);
+char        * getRegisterForArgument(int numberOfArgument); // dado el numero de argumento retorna el registro en el cual se debe guardar o que ay esta guardado
+void          passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument);
+Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction); // pushea el resto de los argumentos (si hay mas de 6) en el stack
+void          popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
 
 #endif // ASSEMBLY_INSTRUCTIONS_H
