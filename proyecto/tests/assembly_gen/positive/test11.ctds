@@ -1,0 +1,5 @@
+void main() {
+    boolean a, b;
+    a = true;
+    b = !a;
+}

@@ -5,6 +5,12 @@
 #include "../../frontend/codigo_intermedio/intermediate_code.h"
 #include "../../utils/debug.h"
 
+typedef enum ComparisonType {
+    COMPARISON_TYPE_GREATER, // op1 > op2?  in cmp
+    COMPARISON_TYPE_SMALLER, // op1 < op2?  in cmp
+    COMPARISON_TYPE_EQUAL,   // op1 == op2? in cmp
+} ComparisonType;
+
 void comment(FILE *f, char *string);
 void globl(FILE *f, char *name);
 void methodLabel(FILE *f, char *name);
@@ -25,6 +31,15 @@ void call(FILE *f, char *methodName);
 void movFromRaxToTemporal(FILE *f, Symbol *temp);
 void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
 void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType);
+void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label);
+void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void neg(FILE *f, Symbol *op, Symbol *result);
+void negationBoolean(FILE *f, Symbol *op, Symbol *result);
+void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
+void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 
 // funciones auxiliares
 void saveAllArguments(Symbol *methodSymbol, FILE *f);

@@ -61,7 +61,7 @@ void mov(FILE *f, Symbol *src, Symbol *dst) {
 
     if (src->type == SYMBOL_TYPE_CONSTANT) {
         if ((src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (dst->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov, $%d, %%r10\n", src->value.intValue);
+            fprintf(f, "\tmov $%d, %%r10\n", src->value.intValue);
             fprintf(f, "\tmov %%r10, %d(%%rbp)\n", dst->offset);
         }
 
@@ -172,7 +172,36 @@ void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
 
 void returnFromMethod(FILE *f, Symbol *symbolReturned) {
-    fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+    if (!symbolReturned) ERROR_ASSEMBLY("symbolReturned is NULL in returnFromMethod()")
+
+    if (symbolReturned->type == SYMBOL_TYPE_VARIABLE) {
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+        }
+
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("return flaot variable in returnFromMethod() not implemented yet")
+        }
+
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+        }
+    }
+
+    if (symbolReturned->type == SYMBOL_TYPE_CONSTANT) {
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov $%d, %%rax\n", symbolReturned->value.intValue);
+        }
+
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("return flaot constant in returnFromMethod() not implemented yet")
+        }
+
+        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            int booleanValue = symbolReturned->value.booleanValue ? 1 : 0;
+            fprintf(f, "\tmov $%d, %%rax\n", booleanValue);
+        }
+    }
 }
 
 
@@ -180,7 +209,7 @@ void returnFromMethod(FILE *f, Symbol *symbolReturned) {
 
 void label(FILE *f, char *str) {
     if (!str) ERROR_ASSEMBLY("str is NULL in label()")
-    fprintf(f, "%s:\n", str);
+    fprintf(f, ".%s:\n", str);
 }
 
 
@@ -188,7 +217,7 @@ void label(FILE *f, char *str) {
 
 void jmp(FILE *f, char *label) {
     if (!label) ERROR_ASSEMBLY("label is NULL in jmp()")
-    fprintf(f, "\tjmp %s\n", label);
+    fprintf(f, "\tjmp .%s\n", label);
 }
 
 
@@ -210,7 +239,7 @@ void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberO
         }
 
         if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-            TODO("argument symbol type variable boolean in passArgumentToMethodInRegister() not implemented yet")
+            fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
         }
     }
 
@@ -224,7 +253,8 @@ void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberO
         }
 
         if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-            TODO("argumentSymbol type constant boolean in passArgumentToMethodInRegister() not implemented yet")
+            int booleanValue = argumentSymbol->value.booleanValue ? 1 : 0;
+            fprintf(f, "\tmov $%d, %%%s\n", booleanValue, reg);
         }
     }
 }
@@ -244,6 +274,8 @@ Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruc
 
     // se pushean los argumentos en orden inverso
     while ((aux->prev->type == INSTRUCTION_TYPE_ARGUMENT) && (aux->prev->op1->value.intValue >= 6)) {
+        newLine(f);
+        comment(f, "PassingArgumentForMethodCall");
         push(f, aux->result);
         aux = aux->prev;
     }
@@ -259,15 +291,34 @@ void push(FILE *f, Symbol *src) {
     
     if (src->type == SYMBOL_TYPE_VARIABLE) {
         if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            // TODO: si es int, boolean, float
             fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
-            fprintf(f, "\tpush %%r10\n");
-        } else {
-            TODO("src is not int not implemented yet in push()")
+        } 
+
+        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("push float variable in push() not implemented yet")
         }
-    } else {
-        TODO("src is is constant not implemented yet in push()")
+
+        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+        }
     }
+
+    if (src->type == SYMBOL_TYPE_CONSTANT) {
+        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov $%d, %%r10\n", src->value.intValue);
+        }
+
+        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("push float constant in push() not implemented yet")
+        }
+
+        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            int booleanValue = src->value.booleanValue ? 1 : 0;
+            fprintf(f, "\tmov $%d, %%r10\n", booleanValue);
+        }
+    }
+
+    fprintf(f, "\tpush %%r10\n");
 }
 
 
@@ -290,7 +341,7 @@ void movFromRaxToTemporal(FILE *f, Symbol *temp) {
 
 
 // Nota: esto solo funciona teniendo en cuenta que no estoy manipulando floats (que usan otros registros llamados xmm...)
-//       y por ende en una llamda se puede llegar a usar mas de 6 registros para pasar los argumentos
+//       y por ende en una llamada se puede llegar a usar mas de 6 registros para pasar los argumentos
 void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
     if (!methodSymbol) ERROR_ASSEMBLY("methodSymbol is NULL in popArgumentsFromStackAfterMethodCall()")
 
@@ -309,13 +360,389 @@ void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
 
 
 void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
-    if (!op1) ERROR_ASSEMBLY("src is NULL in and()")
-    if (!op2) ERROR_ASSEMBLY("dst is NULL in and()")
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in and()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in and()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in and()")
 
     fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
     fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
     fprintf(f, "\tand r10, r11\n");
     fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
+}
+
+
+
+
+void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in or()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in or()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in or()")
+
+    fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+    fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+    fprintf(f, "\tor r10, r11\n");
+    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
+}
+
+
+
+// calcula: op1 - op2. Luego se chequea de acuerdo al resultado: es op1, mayor, menor o igual que op2
+void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in cmp()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in cmp()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in cmp()")
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        }   
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("comparison between float(variable) and float(variable) in cmp() not implemented yet")
+        }
+    }
+    
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("comparison between float(variable) and float(constant) in cmp() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);       
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("comparison between float(constant) and float(variable) in cmp() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        }   
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("comparison between float(constant) and float(constant) in cmp() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\tcmp %%r11, %%r10\n");
+    fprintf(f, "\tmov $0, %%r11\n");
+    fprintf(f, "\tmov $1, %%r10\n");
+    
+    switch (compType) {
+        case COMPARISON_TYPE_GREATER: {
+            fprintf(f, "\tcmovg %%r10, %%r11\n"); // r10 > r11?
+        } break;
+        
+        case COMPARISON_TYPE_SMALLER: {
+            fprintf(f, "\tcmovl %%r10, %%r11\n"); // r10 < r11?
+        } break;
+        
+        case COMPARISON_TYPE_EQUAL: {
+            fprintf(f, "\tcmove %%r10, %%r11\n"); // r10 == r11?
+        }
+    }
+
+    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
+}
+
+
+
+
+void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label) {
+    if (!label) ERROR_ASSEMBLY("label is NULL in jmpToLabelIfFalse()")
+    fprintf(f, "\tmov %d(%%rbp), %%r10\n", cond->offset);
+    fprintf(f, "\tmov $0, %%r11\n");
+    fprintf(f, "\tcmp %%r10, %%r11\n");
+    fprintf(f, "\tje .%s\n", label);
+}
+
+
+
+
+void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in imul()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in imul()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in imul()")
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) * op2(float variable) in imul() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) * op2(float constant) in imul() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) * op2(float variable) in imul() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) * op2(float constant) in imul() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\timul %%r10, %%r11\n");
+    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
+}
+
+
+
+
+void neg(FILE *f, Symbol *op, Symbol *result) {
+    if (!op)     ERROR_ASSEMBLY("op is NULL in neg()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in neg()")
+
+    if (op->type == SYMBOL_TYPE_VARIABLE) {
+        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+        }
+
+        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("-op(float variable) in neg() not implemented yet")
+        }
+    }
+
+    if (op->type == SYMBOL_TYPE_CONSTANT) {
+        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            fprintf(f, "\tmov $%d, %%r10\n", op->value.intValue);
+        }
+
+        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            TODO("-op(float constant) in neg() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\tneg %%r10\n");
+    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+}
+
+
+
+
+void negationBoolean(FILE *f, Symbol *op, Symbol *result) {
+    if (!op)     ERROR_ASSEMBLY("op1 is NULL in xor()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in xor()")
+
+    if (op->type == SYMBOL_TYPE_VARIABLE) {
+        fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+    }
+
+    if (op->type == SYMBOL_TYPE_CONSTANT) {
+        int opBooleanValue = op->value.booleanValue ? 1 : 0;
+        fprintf(f, "\tmov $%d, %%r10\n", opBooleanValue);
+    }
+
+    fprintf(f, "\txor $1, %%r10\n");
+    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+}
+
+
+
+// result = op1 / op2
+void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in idiv()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in idiv()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in idiv()")
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) / op2(float variable) in idiv() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) / op2(float constant) in idiv() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) / op2(float variable) in idiv() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) / op2(float constant) in idiv() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\tcqto # extend rax sign to rdx\n");
+    fprintf(f, "\tidiv %%r10\n");
+    fprintf(f, "\tmov %%rax, %d(%%rbp) # save the quotient\n", result->offset);
+}
+
+
+
+
+void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in sub()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in sub()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in sub()")
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) - op2(float variable) in sub() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tsub $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) - op2(float constant) in sub() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) - op2(float variable) in sub() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tsub $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) - op2(float constant) in sub() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+}
+
+
+
+// igual a la division pero en lugar de quedarme con lo que tiene el rax(cociente),
+// me quedo con lo que tiene el rdx(resto)
+void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
+    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in mod()")
+    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in mod()")
+    if (!result) ERROR_ASSEMBLY("result is NULL in mod()")
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) / op2(float variable) in mod() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float variable) / op2(float constant) in mod() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) / op2(float variable) in mod() not implemented yet")
+        }
+    }
+
+    if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        }
+
+        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+            TODO("op1(float constant) / op2(float constant) in mod() not implemented yet")
+        }
+    }
+
+    fprintf(f, "\tcqto # extend rax sign to rdx\n");
+    fprintf(f, "\tidiv %%r10\n");
+    fprintf(f, "\tmov %%rdx, %d(%%rbp) # save the remainder\n", result->offset);
 }
 
 
@@ -337,7 +764,10 @@ void saveAllArguments(Symbol *methodSymbol, FILE *f) {
             char *reg = getRegisterForArgument(numberOfArgument);
             fprintf(f, "\tmov %%%s, %d(%%rbp)\n", reg, param->offset);
         } else {
-            TODO("save numberOfArgument >= 7 in saveAllArguments() not implemented yet");
+            int numberOfStackArgument = numberOfArgument - 6;
+            int argumentOffset = 8*numberOfStackArgument + 8;
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", argumentOffset);
+            fprintf(f, "\tmov %%r10, %d(%%rbp)\n", param->offset);
         }
 
         numberOfArgument++;

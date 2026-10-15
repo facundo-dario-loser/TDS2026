@@ -1,0 +1,12 @@
+void main() {
+    boolean a;
+    int x;
+
+    x = 4;
+
+    if (x < 2) {
+        a = true;
+    } else {
+        a = false;
+    }
+}

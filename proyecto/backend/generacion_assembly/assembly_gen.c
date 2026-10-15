@@ -108,7 +108,7 @@ void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
 
     methodLabel(f, i->result->name);
 
-    // si la cantidad de variables que necesito apra el metodo es impar, lo hago par cumando +1
+    // si la cantidad de variables que necesito para el metodo es impar, lo hago par sumando +1
     // para que el stack quede alineado a 16 bytes
     if ((i->result->numberOfLocalVariables % 2) == 1) {
         i->result->numberOfLocalVariables++;
@@ -117,7 +117,7 @@ void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
 
     enter(f, i->result->numberOfLocalVariables);
 
-    // guardar todos los params pasados en registros/stack a sus posiciones correspondientes en el stack
+    // guardar todos los argumentos pasados en registros/stack a sus posiciones correspondientes en el stack
     if (i->result->parameters) newLine(f);
     saveAllArguments(i->result, f); 
     generateAssemblyAux(i->next, f);
@@ -132,14 +132,14 @@ void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f) {
     newLine(f);
     
     if ((strcmp(i->result->name, "main") == 0) && (i->result->semanticType == SYMBOL_SEMANTIC_TYPE_VOID)) {
-        comment(f, "note: setting rax with 0 exit code (even if main doesn't return anything)");
+        comment(f, "note: setting rax with exit code 0 (even if main doesn't return anything)");
         movZeroEax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
         newLine(f);
     }
     
     // label de fin del metodo
     Symbol *methodSymbol    = i->result;
-    char endMethodLabel[64] = ".end_method_";
+    char endMethodLabel[64] = "end_method_";
     strcat(endMethodLabel, methodSymbol->name);
     label(f, endMethodLabel);
 
@@ -152,7 +152,10 @@ void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionLabel(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionLabel() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Label visited")
+    newLine(f);
+    label(f, i->result->name);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -245,7 +248,11 @@ void generateAssemblyInstructionAnd(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionOr(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionOr() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Or visited")
+    newLine(f);
+    comment(f, "Or");
+    or(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -255,12 +262,11 @@ void generateAssemblyInstructionArgument(Instruction *i, FILE *f) {
     DEBUG_ASSEMBLY("instruction Argument visited")
     int numberOfArgument = i->op1->value.intValue;
 
-    newLine(f);
-    comment(f, "PassingArgumentForMethodCall");
-
     Instruction *nextInstructionToProcess;
 
     if (numberOfArgument <= 6) {
+        newLine(f);
+        comment(f, "PassingArgumentForMethodCall");
         passArgumentToMethodInRegister(f, i->result, numberOfArgument);
         nextInstructionToProcess = i->next;
     } else {
@@ -282,6 +288,7 @@ void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f) {
     newLine(f);
     comment(f, "SavingReturnValueFromMethodInTemporal");
     movFromRaxToTemporal(f, i->result);
+    newLine(f);
     popArgumentsFromStackAfterMethodCall(f, i->op1); // solo genera instrucciones si se pasan mas de 6 argumentos
     generateAssemblyAux(i->next, f);
 }
@@ -309,7 +316,7 @@ void generateAssemblyInstructionReturn(Instruction *i, FILE *f) {
     methodSymbol = aux->result;
 
     // saltar al label del final del metodo
-    char endMethodLabel[64] = ".end_method_";
+    char endMethodLabel[64] = "end_method_";
     strcat(endMethodLabel, methodSymbol->name);
     jmp(f, endMethodLabel);
 
@@ -320,7 +327,11 @@ void generateAssemblyInstructionReturn(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionSubtractionIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionSubtractionIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction SubtractionIntInt")
+    newLine(f);
+    comment(f, "SubtractionIntInt");
+    sub(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -348,7 +359,11 @@ void generateAssemblyInstructionSubtractionFloatFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionMultiplicationIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionMutiplicationIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction MultiplicationIntInt visited")
+    newLine(f);
+    comment(f, "MultiplicationIntInt");
+    imul(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -376,7 +391,11 @@ void generateAssemblyInstructionMultiplicationFloatFloat(Instruction *i, FILE *f
 
 
 void generateAssemblyInstructionDivisionIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionDivisionIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction DivisionIntInt")
+    newLine(f);
+    comment(f, "DivisionIntInt");
+    idiv(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -404,7 +423,11 @@ void generateAssemblyInstructionDivisionFloatFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionModIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionModIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction ModIntInt")
+    newLine(f);
+    comment(f, "ModIntInt");
+    mod(f, i->op1, i->op2, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -432,7 +455,11 @@ void generateAssemblyInstructionModFloatFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionComparisonSmallerIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionComparisonSmallerIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction ComparisonSmaller visited")
+    newLine(f);
+    comment(f, "ComparisonSmallerIntInt");
+    cmp(f, i->op1, i->op2, i->result, COMPARISON_TYPE_SMALLER);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -460,7 +487,11 @@ void generateAssemblyInstructionComparisonSmallerFloatFloat(Instruction *i, FILE
 
 
 void generateAssemblyInstructionComparisonGreaterIntInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionComparisonGreaterIntInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction ComparisonGreaterIntInt visited")
+    newLine(f);
+    comment(f, "ComparisonGreaterIntInt");
+    cmp(f, i->op1, i->op2, i->result, COMPARISON_TYPE_GREATER);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -488,7 +519,11 @@ void generateAssemblyInstructionComparisonGreaterFloatFloat(Instruction *i, FILE
 
 
 void generateAssemblyInstructionUnaryMinusInt(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionUnaryMinusInt() not implemented yet")
+    DEBUG_ASSEMBLY("instruction UNaryMinusInt visited")
+    newLine(f);
+    comment(f, "UnaryMinusInt");
+    neg(f, i->op1, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
@@ -502,27 +537,43 @@ void generateAssemblyInstructionUnaryMinusFloat(Instruction *i, FILE *f) {
 
 
 void generateAssemblyInstructionNegation(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionNegation() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Negation visited")
+    newLine(f);
+    comment(f, "Negation");
+    negationBoolean(f, i->op1, i->result);
+    generateAssemblyAux(i->next, f);
 }
 
 
 
 
 void generateAssemblyInstructionJmpFalse(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionJmpFalse() not implemented yet")
+    DEBUG_ASSEMBLY("instruction JmpFalse visited")
+    newLine(f);
+    comment(f, "JmpFalse");
+    jmpToLabelIfFalse(f, i->op1, i->result->name);
+    generateAssemblyAux(i->next, f);
 }
 
 
 
 
 void generateAssemblyInstructionJmp(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionJmp() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Jmp visited")
+    newLine(f);
+    comment(f, "Jmp");
+    jmp(f, i->result->name);
+    generateAssemblyAux(i->next, f);
 }
 
 
 
 
 void generateAssemblyInstructionEqual(Instruction *i, FILE *f) {
-    TODO("generateAssemblyInstructionEqual() not implemented yet")
+    DEBUG_ASSEMBLY("instruction Equal visited")
+    newLine(f);
+    comment(f, "ComparisonEqual");
+    cmp(f, i->op1, i->op2, i->result, COMPARISON_TYPE_EQUAL);
+    generateAssemblyAux(i->next, f);
 }
 

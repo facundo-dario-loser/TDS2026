@@ -1,0 +1,10 @@
+int f(int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8) {
+    return 200;
+}
+
+void main() {
+    int x, y, z;
+    x = 20;
+    y = 40;
+    z = f(x, y, 8, 9, 10, 11, 12, 13);
+}
