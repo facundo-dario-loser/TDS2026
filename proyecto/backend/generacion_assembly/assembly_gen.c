@@ -104,9 +104,10 @@ void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f) {
 
 void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f) {
     DEBUG_ASSEMBLY("instruction BeginMethod visited")
+    newLine(f);
 
     if (strcmp(i->result->name, "main") == 0) {
-        if (i->prev) newLine(f);
+        //if (i->prev) newLine(f);
         globl(f, "main");
     }
 

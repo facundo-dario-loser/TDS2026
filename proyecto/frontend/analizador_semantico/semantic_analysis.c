@@ -345,7 +345,8 @@ void analysisNodeParam(AstNode *node, SymbolTable *st, int *tempCount) {
 
     SymbolConfig config = (SymbolConfig){
         .type         = SYMBOL_TYPE_VARIABLE,
-        .variableType = SYMBOL_VARIABLE_TYPE_PARAMETER,
+        .variableType = SYMBOL_VARIABLE_TYPE_LOCAL, // anteriormente era SYMBOL_VARIABLE_TYPE_PARAMETER, pero no lo utilice en ningun lado
+                                                    // y ademas me trajo mas problemas en la generacion de assembly
         .name         = symbolName,
         .semanticType = symbolSemanticType,
     };

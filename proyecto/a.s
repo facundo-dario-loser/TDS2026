@@ -3,27 +3,41 @@
 .globl x
 x: .quad 0
 
-.globl y
-y: .quad 0
+f:
+	enter $(8*2), $0
 
-.globl z
-z: .quad 0
+	# SaveAllArguments
+	mov %rdi, -8(%rbp)
+
+	# AdditionIntInt
+	mov x(%rip), %r10
+	add -8(%rbp), %r10
+	mov %r10, -16(%rbp)
+
+	# ReturnFromMethod
+	mov -16(%rbp), %rax
+	jmp .end_method_f
+
+.end_method_f:
+	leave
+	ret
 
 .globl main
 main:
-	enter $(8*0), $0
+	enter $(8*2), $0
+
+	# PassingArgumentForMethodCall
+	mov $4, %rdi
+
+	# CallMethod
+	call f
+
+	# SavingReturnValueFromMethodInTemporal
+	mov %rax, -8(%rbp)
 
 	# AssignmentIntInt
-	mov $4, %r10
-	mov %r10, x(%rip)
-
-	# AssignmentIntInt
-	mov $2, %r10
-	mov %r10, y(%rip)
-
-	# AssignmentIntInt
-	mov x(%rip), %r10
-	mov %r10, z(%rip)
+	mov -8(%rbp), %r10
+	mov %r10, -16(%rbp)
 
 	# note: setting rax with exit code 0 (even if main doesn't return anything)
 	mov $0, %rax
