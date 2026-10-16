@@ -1,0 +1,17 @@
+boolean a;
+
+void main() {
+    boolean b, c;
+
+    a = true;
+    b = false;
+
+    // !local
+    c = !b;
+
+    // !global
+    c = !a;
+
+    // !const
+    c = !true;
+}

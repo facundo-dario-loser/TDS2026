@@ -1,0 +1,17 @@
+int x;
+
+void main() {
+    int y, z;
+
+    x = 1;
+    y = 2;
+
+    // -local
+    z = -y;
+
+    // -global
+    z = -x;
+
+    // -const
+    z = -4;
+}

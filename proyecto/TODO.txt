@@ -83,3 +83,22 @@ no hay problema ya que tendran diferentes offsets
    gcc a.s files_to_link/print.c -o main
 
 - agregar caso de variable global a practicamente todas las instrucciones assembly
+
+- implementar el and y or con corto circuito (en el codigo de 3 dir)
+  // 1. Evaluar A
+  [Evaluar A y guardar en tA]
+  if_false tA goto .L_falso     // Si A es false, saltamos directo (Cortocircuito: B no se evalúa)
+  
+  // 2. Si A era true, evaluamos B
+  [Evaluar B y guardar en tB]
+  if_false tB goto .L_falso     // Si B es false, resultado es false
+
+  // 3. Si ambos eran true
+  R = true
+  goto .L_fin
+
+.L_falso:
+  R = false
+
+.L_fin:
+

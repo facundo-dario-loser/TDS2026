@@ -1,0 +1,12 @@
+int x;
+
+int f() {
+    return x;
+}
+
+void main() {
+    int y;
+    x = 2;
+
+    y = f();
+}

@@ -1,0 +1,10 @@
+int x, y;
+
+int f(int a, int b, int c, int d, int e, int f, int g, int h) {
+    return a + b + c + d + e + f + g;
+}
+
+void main() {
+    int z;
+    z = f(1, 2, 3, 4, 5, 6, x, y);
+}

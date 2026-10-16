@@ -302,16 +302,32 @@ void returnFromMethod(FILE *f, Symbol *symbolReturned) {
     if (!symbolReturned) ERROR_ASSEMBLY("symbolReturned is NULL in returnFromMethod()")
 
     if (symbolReturned->type == SYMBOL_TYPE_VARIABLE) {
-        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+        if (symbolReturned->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+            }
+
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("return float local variable in returnFromMethod() not implemented yet")
+            }
+
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+            }
         }
 
-        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("return flaot variable in returnFromMethod() not implemented yet")
-        }
+        if (symbolReturned->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", symbolReturned->name);
+            }
 
-        if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", symbolReturned->offset);
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("return float global variable in returnFromMethod() not implemented yet")
+            }
+
+            if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", symbolReturned->name);
+            }
         }
     }
 
@@ -321,7 +337,7 @@ void returnFromMethod(FILE *f, Symbol *symbolReturned) {
         }
 
         if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("return flaot constant in returnFromMethod() not implemented yet")
+            TODO("return float constant in returnFromMethod() not implemented yet")
         }
 
         if (symbolReturned->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
@@ -357,16 +373,32 @@ void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberO
     char *reg = getRegisterForArgument(numberOfArgument);
     
     if (argumentSymbol->type == SYMBOL_TYPE_VARIABLE) {
-        if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
+        if (argumentSymbol->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
+            }
+
+            if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("argument symbol type local variable float in passArgumentToMethodInRegister() not implemented yet")
+            }
+
+            if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
+            }
         }
 
-        if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("argument symbol type variable float in passArgumentToMethodInRegister() not implemented yet")
-        }
+        if (argumentSymbol->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %s(%%rip), %%%s\n", argumentSymbol->name, reg);
+            }
 
-        if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-            fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("argument symbol type global variable float in passArgumentToMethodInRegister() not implemented yet")
+            }
+
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %s(%%rip), %%%s\n", argumentSymbol->name, reg);
+            }
         }
     }
 
@@ -417,16 +449,32 @@ void push(FILE *f, Symbol *src) {
     if (!src) ERROR_ASSEMBLY("src is NULL in push()")
     
     if (src->type == SYMBOL_TYPE_VARIABLE) {
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
-        } 
+        if (src->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+            } 
 
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("push float variable in push() not implemented yet")
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("push float local variable in push() not implemented yet")
+            }
+
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+            }
         }
 
-        if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", src->offset);
+        if (src->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+            }
+
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("push float global variable in push() not implemented yet")
+            }
+
+            if (src->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", src->name);
+            }
         }
     }
 
@@ -486,7 +534,7 @@ void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
 
 
 
-
+// TODO: implementar con corto circuito
 void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!op1)    ERROR_ASSEMBLY("op1 is NULL in and()")
     if (!op2)    ERROR_ASSEMBLY("op2 is NULL in and()")
@@ -500,7 +548,7 @@ void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
 
 
-
+// TODO: implementar con corto circuito
 void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!op1)    ERROR_ASSEMBLY("op1 is NULL in or()")
     if (!op2)    ERROR_ASSEMBLY("op2 is NULL in or()")
@@ -521,35 +569,78 @@ void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compT
     if (!result) ERROR_ASSEMBLY("result is NULL in cmp()")
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
-        }   
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+            }   
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("comparison between float(variable) and float(variable) in cmp() not implemented yet")
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("comparison between float(local variable) and float(local variable) in cmp() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+            fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+            fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
         }
     }
     
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("comparison between float(local variable) and float(constant) in cmp() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("comparison between float(variable) and float(constant) in cmp() not implemented yet")
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+            }
+
+            if ((op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("comparison between float(global variable) and float(constant) in cmp() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
-            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);       
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);       
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("comparison between float(constant) and float(local variable) in cmp() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("comparison between float(constant) and float(variable) in cmp() not implemented yet")
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("comparison between float(constant) and float(global variable) in cmp() not implemented yet")
+            }
         }
     }
 
@@ -605,35 +696,96 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in imul()")
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) * op2(float local variable) in imul() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) * op2(float variable) in imul() not implemented yet")
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) * op2(float global variable) in imul() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) * op2(float local variable) in imul() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) * op2(float global variable) in imul() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) * op2(float constant) in imul() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) * op2(float constant) in imul() not implemented yet")
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) * op2(constant) in imul() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
-            fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float constant) * op2(float local variable) in imul() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float constant) * op2(float variable) in imul() not implemented yet")
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(constant) * op2(float global variable) in imul() not implemented yet")
+            }
         }
     }
 
@@ -660,12 +812,24 @@ void neg(FILE *f, Symbol *op, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in neg()")
 
     if (op->type == SYMBOL_TYPE_VARIABLE) {
-        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+        if (op->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if (op->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+            }
+
+            if (op->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("-op(float local variable) in neg() not implemented yet")
+            }
         }
 
-        if (op->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-            TODO("-op(float variable) in neg() not implemented yet")
+        if (op->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if (op->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op->name);
+            }
+
+            if (op->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+                TODO("-op(float global variable) in neg() not implemented yet")
+            }
         }
     }
 
@@ -691,7 +855,13 @@ void negationBoolean(FILE *f, Symbol *op, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in xor()")
 
     if (op->type == SYMBOL_TYPE_VARIABLE) {
-        fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+        if (op->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op->offset);
+        }
+
+        if (op->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            fprintf(f, "\tmov %s(%%rip), %%r10\n", op->name);
+        }
     }
 
     if (op->type == SYMBOL_TYPE_CONSTANT) {
@@ -712,35 +882,96 @@ void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in idiv()")
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float local variable) in idiv() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) / op2(float variable) in idiv() not implemented yet")
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float global variable) in idiv() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(float local variable) in idiv() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(float global variable) in idiv() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
-            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float constant) in idiv() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) / op2(float constant) in idiv() not implemented yet")
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(constant) in idiv() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float constant) / op2(float local variable) in idiv() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float constant) / op2(float variable) in idiv() not implemented yet")
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%rax\n", op1->value.intValue);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(constant) / op2(float global variable) in idiv() not implemented yet")
+            }
         }
     }
 
@@ -769,35 +1000,96 @@ void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in sub()")
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) - op2(float local variable) in sub() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) - op2(float variable) in sub() not implemented yet")
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tsub %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) - op2(float global variable) in sub() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) - op2(float local variable) in sub() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tsub %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) - op2(float global variable) in sub() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-            fprintf(f, "\tsub $%d, %%r10\n", op2->value.intValue);
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                fprintf(f, "\tsub $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float variable) - op2(float constant) in sub() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) - op2(float constant) in sub() not implemented yet")
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+                fprintf(f, "\tsub $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) - op2(float constant) in sub() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
-            fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tsub %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float constant) - op2(float local variable) in sub() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float constant) - op2(float variable) in sub() not implemented yet")
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tsub %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(constant) - op2(float global variable) in sub() not implemented yet")
+            }
         }
     }
 
@@ -817,6 +1109,7 @@ void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
 
 
+
 // igual a la division pero en lugar de quedarme con lo que tiene el rax(cociente),
 // me quedo con lo que tiene el rdx(resto)
 void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
@@ -825,35 +1118,96 @@ void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!result) ERROR_ASSEMBLY("result is NULL in mod()")
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float local variable) in mod() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) / op2(float variable) in mod() not implemented yet")
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float global variable) in mod() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(float local variable) in mod() not implemented yet")
+            }
+        }
+
+        if ((op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) && (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL)) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(float global variable) in mod() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_VARIABLE) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
-            fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float local variable) / op2(float constant) in mod() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float variable) / op2(float constant) in mod() not implemented yet")
+        if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+                fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float global variable) / op2(constant) in mod() not implemented yet")
+            }
         }
     }
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
-            fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(float constant) / op2(float local variable) in mod() not implemented yet")
+            }
         }
 
-        if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
-            TODO("op1(float constant) / op2(float variable) in mod() not implemented yet")
+        if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                fprintf(f, "\tmov $%d, %%rax\n", op1->value.intValue);
+                fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+            }
+
+            if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT)) {
+                TODO("op1(constant) / op2(float global variable) in mod() not implemented yet")
+            }
         }
     }
 

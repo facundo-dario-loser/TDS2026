@@ -1,0 +1,38 @@
+int x, y;
+
+void main() {
+    int z, w;
+    boolean a;
+
+    x = 1;
+    y = 2;
+    z = 3;
+    w = 4;
+
+    // local < local
+    a = z < w;
+
+    // local < global
+    a = z < x;
+
+    // local < const
+    a = z < 4;
+
+    // global < local
+    a = x < z;
+
+    // global < global
+    a = x < y;
+
+    // global < const
+    a = x < 8;
+
+    // const < local
+    a = 9 < z;
+
+    // const < global
+    a = 9 < x;
+
+    // const < const
+    a = 9 < 14;
+}
