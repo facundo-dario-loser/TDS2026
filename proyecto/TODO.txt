@@ -12,21 +12,10 @@ generar el svg:
 dot -Tsvg file.dot -o ast.svg
 
 
-[SEMANTICO] diferenciar entre varaible redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
+[SEMANTICO] diferenciar entre variable redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
 
 - [BUG creo?]: en las macros de debug por ahi hay como un bug que se imprime repetido algunas cosas.
 - escribir la doc del analisis semantico 
-
-- [METHOD CALL]: todos los temporales son variables locales, pero el temporal de main seria global?
-                 ya que main se llama globalmente?
-                 si es asi modificar analysisNodeMethodCall para dependiendo del nombre decirle al temporal si es
-                 local o global.
-
-- [COD INTER]:
-parametros de metodo podria generar info: 
-
-- [COD INTER]: los argumentos pasados en uan invocacion se guardan en registros 
-               por convencion, y si faltan registros se guardan en la pila
 
 si tengo 
 
@@ -47,25 +36,14 @@ no hay problema ya que tendran diferentes offsets
 
 - [CASTEOS]: los voy a hacer en la generacion de assembly
 
-- [COD INTER]: podria asignar los offsets en la generacion de codigo intermedio
-- agregar contador de variables locales de una funcion en el analisis semantico
-
 - en target codinter: imprimir por lo menos las instrucciones (y algo parecido en las otras etapas)
-
-- en cod inter: finalmente deberia generar una instruccion que sea call main? ya que es el punto de entrada
-
-- assembly: dentro de un metodo lo primero que deberia hacer es guardar los argumentos (si es que tiene) de los registros al stack
-            por convencion los argumentos se pasan en el stack
-
 
 - [SEMANTICO]: si en una condicion o asignacion pongo un metodo que no retorna nada (void), dar un mejor mensaje de error
 
-- [ASSEMBLY]: luego de cada accion dejo todo en memoria (asi es mas facil).
-              los registros solo los uso como puentes. (no hace falta hacer register allocation).
+- [NOTA_ASSEMBLY]: luego de cada accion dejo todo en memoria (asi es mas facil).
+                   los registros solo los uso como puentes. (no hace falta hacer register allocation).
 
 - [ASSEMBLY]: linkear con la libreria standard de C para printear resultado
-
-- [ASSEMBLY]: en pasaje de parametros: agregar a la instruccion de cod intermedio argument un operando que sea el numero de argument
 
 - [ASSEMBLY]: no hace falta implementar las operaciones y demas cosas con float
               (solo generar un comentario que diga en el assembly: aca falta implementar esto)
@@ -74,31 +52,9 @@ no hay problema ya que tendran diferentes offsets
 
 - ver lo de corto circuito del and y el or 
 
-- podria haer un campo mas de simbolos para metodos para guardar el numero de parametros
-
-- si men anda el fibonacci iterativo y recursivo ya esta
-
+- si me anda el fibonacci iterativo y recursivo ya esta
 
 - linkear con funciones para printear: 
    gcc a.s files_to_link/print.c -o main
 
-- agregar caso de variable global a practicamente todas las instrucciones assembly
-
-- implementar el and y or con corto circuito (en el codigo de 3 dir)
-  // 1. Evaluar A
-  [Evaluar A y guardar en tA]
-  if_false tA goto .L_falso     // Si A es false, saltamos directo (Cortocircuito: B no se evalúa)
-  
-  // 2. Si A era true, evaluamos B
-  [Evaluar B y guardar en tB]
-  if_false tB goto .L_falso     // Si B es false, resultado es false
-
-  // 3. Si ambos eran true
-  R = true
-  goto .L_fin
-
-.L_falso:
-  R = false
-
-.L_fin:
-
+- llamar en argument.c a gcc para ensamblar el assembly

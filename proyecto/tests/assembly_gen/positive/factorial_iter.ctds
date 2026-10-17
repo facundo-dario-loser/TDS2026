@@ -1,0 +1,22 @@
+int factorial_iterativo(int n) {
+    int acum;
+
+    if (n == 0) {
+        return 1;
+    }
+
+    acum = 1;
+
+    while (n > 0) {
+        acum = acum * n;
+        n = n - 1;
+    }
+
+    return acum;
+}
+
+void main() {
+    int x;
+
+    x = factorial_iterativo(4);
+}

@@ -1,0 +1,14 @@
+// se debe llamar con acum = 1
+int factorial_recursivo_cola(int n, int acum) {
+    if (n == 0) {
+        return acum;
+    }
+
+    return factorial_recursivo_cola(n-1, acum*n);
+}
+
+void main() {
+    int x;
+
+    x = factorial_recursivo_cola(4, 1);
+}

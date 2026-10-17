@@ -1,0 +1,13 @@
+int factorial_recursivo_pila(int n) {
+    if (n == 0) {
+        return 1;
+    }
+
+    return n * factorial_recursivo_pila(n-1);
+}
+
+void main() {
+    int x;
+
+    x = factorial_recursivo_pila(4);
+}
