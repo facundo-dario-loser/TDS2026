@@ -52,6 +52,7 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_UNARY_MINUS_FLOAT,              // result(float) = -op1(float)
     INSTRUCTION_TYPE_NEGATION,                       // result(boolean) = !op1(boolean)
     INSTRUCTION_TYPE_JMP_FALSE,                      // salta a la etiqueta del result si op1 es false (salto condicional)
+    INSTRUCTION_TYPE_JMP_TRUE,                       // salta a la etiqueta del result si op1 es true (salto condicional)
     INSTRUCTION_TYPE_JMP,                            // salto incondicional. salta lal label/etiqueta de result
     INSTRUCTION_TYPE_EQUAL,                          // result(boolean) = a == b
 } InstructionType;

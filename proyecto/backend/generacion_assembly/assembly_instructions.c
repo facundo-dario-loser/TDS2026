@@ -705,6 +705,32 @@ void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label) {
 
 
 
+void jmpToLabelIfTrue(FILE *f, Symbol *cond, char *label) {
+    if (!label) ERROR_ASSEMBLY("label is NULL in jmpToLabelIfTrue()")
+
+    if (cond->type == SYMBOL_TYPE_VARIABLE) {
+        if (cond->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
+            fprintf(f, "\tmov %d(%%rbp), %%r10\n", cond->offset);
+        }
+        
+        if (cond->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
+            fprintf(f, "\tmov %s(%%rip), %%r10\n", cond->name);
+        }
+    }
+
+    if (cond->type == SYMBOL_TYPE_CONSTANT) {
+        int booleanValue = cond->value.booleanValue ? 1 : 0;
+        fprintf(f, "\tmov $%d, %%r10\n", booleanValue);
+    }
+
+    fprintf(f, "\tmov $1, %%r11\n");
+    fprintf(f, "\tcmp %%r10, %%r11\n");
+    fprintf(f, "\tje .%s\n", label);
+}
+
+
+
+
 void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if (!op1)    ERROR_ASSEMBLY("op1 is NULL in imul()")
     if (!op2)    ERROR_ASSEMBLY("op2 is NULL in imul()")

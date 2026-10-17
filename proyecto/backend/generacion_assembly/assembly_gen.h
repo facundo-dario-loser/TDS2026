@@ -53,6 +53,7 @@ void generateAssemblyInstructionUnaryMinusInt(Instruction *i, FILE *f);
 void generateAssemblyInstructionUnaryMinusFloat(Instruction *i, FILE *f);
 void generateAssemblyInstructionNegation(Instruction *i, FILE *f);
 void generateAssemblyInstructionJmpFalse(Instruction *i, FILE *f);
+void generateAssemblyInstructionJmpTrue(Instruction *i, FILE *f);
 void generateAssemblyInstructionJmp(Instruction *i, FILE *f);
 void generateAssemblyInstructionEqual(Instruction *i, FILE *f);
 

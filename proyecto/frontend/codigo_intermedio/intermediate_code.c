@@ -115,6 +115,7 @@ char * getInstructionTypeString(InstructionType instType) {
         case INSTRUCTION_TYPE_LABEL:                          return "LABEL"; 
         case INSTRUCTION_TYPE_JMP:                            return "JMP";
         case INSTRUCTION_TYPE_JMP_FALSE:                      return "JMP_FALSE";
+        case INSTRUCTION_TYPE_JMP_TRUE:                       return "JMP_TRUE";
         case INSTRUCTION_TYPE_ASSIGNMENT_INT_INT:             return "ASSIGNMENT_INT_INT";
         case INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT:           return "ASSIGNMENT_INT_FLOAT";
         case INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT:           return "ASSIGNMENT_FLOAT_INT";
@@ -1076,7 +1077,143 @@ void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *lab
 
 void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount) {
     DEBUG_IR("node Or visited")
-    generateIntermediateCodeLogicalBinaryOperation(node, tail, labelCount);
+    
+    // generar instrucciones primero para evaluar la expr del operando izquierdo
+    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
+
+    char labelTrueName[64] = "label_";
+    char labelCountStr[16];
+
+    snprintf(labelCountStr, sizeof(labelCountStr), "%d", *labelCount);
+    strcat(labelTrueName, labelCountStr);
+
+    SymbolConfig labelTrueSymbolConfig = {
+        .type           = SYMBOL_TYPE_LABEL,
+        .name           = strdup(labelTrueName),
+        .value.intValue = (*labelCount),
+    };
+
+    (*labelCount)++;
+
+    Symbol *labelTrueSymbol = newSymbol(&labelTrueSymbolConfig);
+
+    InstructionConfig jmpTrueOp1InstConfig = {
+        .type   = INSTRUCTION_TYPE_JMP_TRUE,
+        .op1    = node->children1->symbol,
+        .result = labelTrueSymbol,
+    };
+
+    Instruction *jmpTrueOp1Inst = newInstruction(&jmpTrueOp1InstConfig);
+    insertInstruction(tail, jmpTrueOp1Inst);
+    
+    node->children1->symbol->referenceCount++;
+    labelTrueSymbol->referenceCount++;
+
+    // generar instrucciones segundo para evaluar la expr del operando derecho
+    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
+
+    InstructionConfig jmpTrueOp2InstConfig = {
+        .type   = INSTRUCTION_TYPE_JMP_TRUE,
+        .op1    = node->children2->symbol,
+        .result = labelTrueSymbol,
+    };
+
+    Instruction *jmpTrueOp2Inst = newInstruction(&jmpTrueOp2InstConfig);
+    insertInstruction(tail, jmpTrueOp2Inst);
+
+    node->children2->symbol->referenceCount++;
+    labelTrueSymbol->referenceCount++;
+
+    char constFalseName[16] = "false";
+
+    SymbolConfig falseConstSymbolConfig = {
+        .type               = SYMBOL_TYPE_CONSTANT,
+        .semanticType       = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+        .name               = strdup(constFalseName),
+        .value.booleanValue = false,
+    };
+
+    Symbol *falseConstSymbol = newSymbol(&falseConstSymbolConfig);
+    
+    InstructionConfig assignmentFalseInstConfig = {
+        .type   = INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL,
+        .op1    = falseConstSymbol,
+        .result = node->symbol,
+    };
+
+    Instruction *assignmentFalseInst = newInstruction(&assignmentFalseInstConfig);
+    insertInstruction(tail, assignmentFalseInst);
+
+    falseConstSymbol->referenceCount++;
+    node->symbol->referenceCount++;
+
+    char labelFalseName[64] = "label_";
+
+    snprintf(labelCountStr, sizeof(labelCountStr), "%d", *labelCount);
+    strcat(labelFalseName, labelCountStr);
+    
+    SymbolConfig labelFalseSymbolConfig = {
+        .type           = SYMBOL_TYPE_LABEL,
+        .name           = strdup(labelFalseName),
+        .value.intValue = (*labelCount),
+    };
+
+    (*labelCount)++;
+
+    Symbol *labelFalseSymbol = newSymbol(&labelFalseSymbolConfig);
+
+    InstructionConfig jmpInstConfig = {
+        .type   = INSTRUCTION_TYPE_JMP,
+        .result = labelFalseSymbol,
+    };
+
+    Instruction *jmpInst = newInstruction(&jmpInstConfig);
+    insertInstruction(tail, jmpInst);
+
+    labelFalseSymbol->referenceCount++;
+
+    InstructionConfig labelTrueInstConfig = {
+        .type   = INSTRUCTION_TYPE_LABEL,
+        .result = labelTrueSymbol,
+    };
+
+    Instruction *labelTrueInst = newInstruction(&labelTrueInstConfig);
+    insertInstruction(tail, labelTrueInst);
+
+    labelTrueSymbol->referenceCount++;
+
+    char constTrueName[16] = "true";
+
+    SymbolConfig constTrueSymbolConfig = {
+        .type               = SYMBOL_TYPE_CONSTANT,
+        .semanticType       = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+        .name               = strdup(constTrueName),
+        .value.booleanValue = true,
+    };
+
+    Symbol *constTrueSymbol = newSymbol(&constTrueSymbolConfig);
+
+    InstructionConfig assignmentTrueInstConfig = {
+        .type   = INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL,
+        .op1    = constTrueSymbol,
+        .result = node->symbol,
+    };
+
+    Instruction *assignmentTrueInst = newInstruction(&assignmentTrueInstConfig);
+    insertInstruction(tail, assignmentTrueInst);
+
+    constTrueSymbol->referenceCount++;
+    node->symbol->referenceCount++;
+
+    InstructionConfig labelFalseInstConfig = {
+        .type   = INSTRUCTION_TYPE_LABEL,
+        .result = labelFalseSymbol,
+    };
+
+    Instruction *labelFalseInst = newInstruction(&labelFalseInstConfig);
+    insertInstruction(tail, labelFalseInst);
+
+    labelFalseSymbol->referenceCount++;
 }
 
 

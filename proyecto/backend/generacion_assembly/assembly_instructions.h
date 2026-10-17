@@ -31,6 +31,7 @@ void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType);
 void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label);
+void jmpToLabelIfTrue(FILE *f, Symbol *cond, char *label);
 void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void neg(FILE *f, Symbol *op, Symbol *result);
 void negationBoolean(FILE *f, Symbol *op, Symbol *result);

@@ -1,0 +1,14 @@
+boolean f(int x) {
+    return x > 2;
+}
+
+void main() {
+    boolean a, b, c;
+    int x;
+
+    x = 4;
+    a = true;
+    b = false;
+    
+    c = a && f(4);
+}

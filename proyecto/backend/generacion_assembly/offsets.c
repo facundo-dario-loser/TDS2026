@@ -69,6 +69,18 @@ void setSymbolOffsets(Instruction *list) {
                 i = i->next;
             } break;
 
+            case INSTRUCTION_TYPE_JMP_TRUE: {
+                // solo el temporal del op1 se le podria asignar un offset
+                if (i->op1 && (i->op1->type != SYMBOL_TYPE_CONSTANT) && !i->op1->offsetSet) {
+                    i->op1->offset    = currentOffset;
+                    currentOffset    -= 8;
+                    i->op1->offsetSet = true;
+                    numberOfLocalVariables++;
+                }
+
+                i = i->next;
+            } break;
+
             case INSTRUCTION_TYPE_JMP: {
                 i = i->next; // no hace falta setear ningun offset
             } break;
@@ -138,6 +150,12 @@ void printSymbolOffsets(Instruction *list) {
             } break;
 
             case INSTRUCTION_TYPE_JMP_FALSE: {
+                if (i->op1->type != SYMBOL_TYPE_CONSTANT)
+                    printf("symbol variable: %s (offset: %d)\n", i->op1->name, i->op1->offset);
+                i = i->next;
+            } break;
+
+            case INSTRUCTION_TYPE_JMP_TRUE: {
                 if (i->op1->type != SYMBOL_TYPE_CONSTANT)
                     printf("symbol variable: %s (offset: %d)\n", i->op1->name, i->op1->offset);
                 i = i->next;

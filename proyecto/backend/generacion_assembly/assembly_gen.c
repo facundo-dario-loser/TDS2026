@@ -83,6 +83,7 @@ void generateAssemblyAux(Instruction *list, FILE *f) {
         case INSTRUCTION_TYPE_UNARY_MINUS_FLOAT:              generateAssemblyInstructionUnaryMinusFloat(list, f);             break;
         case INSTRUCTION_TYPE_NEGATION:                       generateAssemblyInstructionNegation(list, f);                    break;
         case INSTRUCTION_TYPE_JMP_FALSE:                      generateAssemblyInstructionJmpFalse(list, f);                    break;
+        case INSTRUCTION_TYPE_JMP_TRUE:                       generateAssemblyInstructionJmpTrue(list, f);                     break;
         case INSTRUCTION_TYPE_JMP:                            generateAssemblyInstructionJmp(list, f);                         break;
         case INSTRUCTION_TYPE_EQUAL:                          generateAssemblyInstructionEqual(list, f);                       break;
     }
@@ -563,6 +564,17 @@ void generateAssemblyInstructionJmpFalse(Instruction *i, FILE *f) {
     newLine(f);
     comment(f, "JmpFalse");
     jmpToLabelIfFalse(f, i->op1, i->result->name);
+    generateAssemblyAux(i->next, f);
+}
+
+
+
+
+void generateAssemblyInstructionJmpTrue(Instruction *i, FILE *f) {
+    DEBUG_ASSEMBLY("instruction JmpTrue visited")
+    newLine(f);
+    comment(f, "JmpTrue");
+    jmpToLabelIfTrue(f, i->op1, i->result->name);
     generateAssemblyAux(i->next, f);
 }
 
