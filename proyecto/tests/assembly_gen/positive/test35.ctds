@@ -1,0 +1,8 @@
+void main() {
+    boolean a, b, c;
+    int x, y;
+
+    b = x < y;
+    c = x == y;
+    a = b && c;
+}

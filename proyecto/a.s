@@ -1,129 +1,64 @@
-.data
-
-.globl x
-x: .quad 0
-
-.globl y
-y: .quad 0
 
 .globl main
 main:
-	enter $(8*12), $0
+	enter $(8*8), $0
 
-	# AssignmentIntInt
+	# ComparisonSmallerIntInt
+	mov -8(%rbp), %r10
+	mov -16(%rbp), %r11
+	cmp %r11, %r10
+	mov $0, %r11
 	mov $1, %r10
-	mov %r10, x(%rip)
+	cmovl %r10, %r11
+	mov %r11, -24(%rbp)
 
-	# AssignmentIntInt
-	mov $2, %r10
-	mov %r10, y(%rip)
-
-	# AssignmentIntInt
-	mov $3, %r10
-	mov %r10, -8(%rbp)
-
-	# AssignmentIntInt
-	mov $4, %r10
-	mov %r10, -16(%rbp)
-
-	# ModIntInt
-	mov -8(%rbp), %rax
-	mov -16(%rbp), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -24(%rbp) # save the remainder
-
-	# AssignmentIntInt
+	# AssignmentBoolBool
 	mov -24(%rbp), %r10
 	mov %r10, -32(%rbp)
 
-	# ModIntInt
-	mov -8(%rbp), %rax
-	mov x(%rip), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -40(%rbp) # save the remainder
+	# ComparisonEqual
+	mov -8(%rbp), %r10
+	mov -16(%rbp), %r11
+	cmp %r11, %r10
+	mov $0, %r11
+	mov $1, %r10
+	cmove %r10, %r11
+	mov %r11, -40(%rbp)
 
-	# AssignmentIntInt
+	# AssignmentBoolBool
 	mov -40(%rbp), %r10
-	mov %r10, -32(%rbp)
+	mov %r10, -48(%rbp)
 
-	# ModIntInt
-	mov -8(%rbp), %rax
-	mov $4, %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -48(%rbp) # save the remainder
+	# JmpFalse
+	mov -32(%rbp), %r10
+	mov $0, %r11
+	cmp %r10, %r11
+	je .label_0
 
-	# AssignmentIntInt
+	# JmpFalse
 	mov -48(%rbp), %r10
-	mov %r10, -32(%rbp)
+	mov $0, %r11
+	cmp %r10, %r11
+	je .label_0
 
-	# ModIntInt
-	mov x(%rip), %rax
-	mov -8(%rbp), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -56(%rbp) # save the remainder
+	# AssignmentBoolBool
+	mov $1, %r10
+	mov %r10, -56(%rbp)
 
-	# AssignmentIntInt
+	# Jmp
+	jmp .label_1
+
+.label_0:
+
+	# AssignmentBoolBool
+	mov $0, %r10
+	mov %r10, -56(%rbp)
+
+.label_1:
+
+	# AssignmentBoolBool
 	mov -56(%rbp), %r10
-	mov %r10, -32(%rbp)
-
-	# ModIntInt
-	mov x(%rip), %rax
-	mov y(%rip), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -64(%rbp) # save the remainder
-
-	# AssignmentIntInt
-	mov -64(%rbp), %r10
-	mov %r10, -32(%rbp)
-
-	# ModIntInt
-	mov x(%rip), %rax
-	mov $8, %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -72(%rbp) # save the remainder
-
-	# AssignmentIntInt
-	mov -72(%rbp), %r10
-	mov %r10, -32(%rbp)
-
-	# ModIntInt
-	mov $9, %r10
-	mov -8(%rbp), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -80(%rbp) # save the remainder
-
-	# AssignmentIntInt
-	mov -80(%rbp), %r10
-	mov %r10, -32(%rbp)
-
-	# ModIntInt
-	mov $9, %rax
-	mov x(%rip), %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -88(%rbp) # save the remainder
-
-	# AssignmentIntInt
-	mov -88(%rbp), %r10
-	mov %r10, -32(%rbp)
-
-	# ModIntInt
-	mov $9, %r10
-	mov $14, %r10
-	cqto # extend rax sign to rdx
-	idiv %r10
-	mov %rdx, -96(%rbp) # save the remainder
-
-	# AssignmentIntInt
-	mov -96(%rbp), %r10
-	mov %r10, -32(%rbp)
+	mov %r10, -64(%rbp)
 
 	# note: setting rax with exit code 0 (even if main doesn't return anything)
 	mov $0, %rax
