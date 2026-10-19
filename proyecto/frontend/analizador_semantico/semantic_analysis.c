@@ -27,6 +27,7 @@ void semanticAnalysisAux(AstNode *root, SymbolTable *st, int *tempCount) {
         case AST_NODE_TYPE_VAR_DECL:            analysisNodeVarDecl(root, st, tempCount);           break;            
         case AST_NODE_TYPE_METHOD_DECL_LIST:    analysisNodeMethodDeclList(root, st, tempCount);    break;     
         case AST_NODE_TYPE_METHOD_DECL:         analysisNodeMethodDecl(root, st, tempCount);        break;         
+        case AST_NODE_TYPE_EXTERN_METHOD_DECL:  analysisNodeMethodDecl(root, st, tempCount);        break;
         case AST_NODE_TYPE_LIST_ID:             analysisNodeListId(root, st, tempCount);            break;            
         case AST_NODE_TYPE_ID:                  analysisNodeId(root, st, tempCount);                break;                  
         case AST_NODE_TYPE_PARAMS:              analysisNodeParams(root, st, tempCount);            break;              
@@ -217,14 +218,15 @@ void analysisNodeMethodDecl(AstNode *node, SymbolTable *st, int *tempCount) {
                                               // aunque no haria falta guardar en la declaracion
     functionSymbol->referenceCount++;
 
-    // cuerpo de la funcion
-    if (node->children4) {
+    // cuerpo de la funcion (solo se analiza si no es un metodo externo)
+    if (node->children4 && (node->type == AST_NODE_TYPE_METHOD_DECL)) {
         node->children4->isFunctionBlock = true;
         semanticAnalysisAux(node->children4, st, tempCount);
     }
 
     // chequear que si la funcion retorna algo entonces en el cuerpo esten los respectivos return's
-    if (hasReturn) {
+    // solo se chequea si no es un emtodo externo (porque no tenemos el cuerpo)
+    if (hasReturn && (node->type == AST_NODE_TYPE_METHOD_DECL)) {
         if (!checkIfFunctionHasReturn(node->children4)) 
             ERROR_SEMANTIC("function signature of '%s' says it returns an '%s', but the body miss return's statatements (line: %d)", functionSymbol->name, strReturnType, node->line)
     }

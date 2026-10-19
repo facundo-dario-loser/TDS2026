@@ -24,6 +24,7 @@ else                      { DEBUG_LEXER("ELSE");                      return ELS
 while                     { DEBUG_LEXER("WHILE");                     return WHILE;                                             }
 return                    { DEBUG_LEXER("RETURN");                    return RETURN;                                            }
 ==                        { DEBUG_LEXER("EQUAL");                     return EQUAL;                                             }
+extern                    { DEBUG_LEXER("EXTERN");                    return EXTERN;                                            }
 true                      { DEBUG_LEXER("BOOL_LITERAL(true)");        yylval.boolValue  = true;           return BOOL_LITERAL;  }
 false                     { DEBUG_LEXER("BOOL_LITERAL(false)");       yylval.boolValue  = false;          return BOOL_LITERAL;  }
 [0-9][0-9]*               { DEBUG_LEXER("INT_LITERAL(%s)", yytext);   yylval.intValue   = atoi(yytext);   return INT_LITERAL;   }

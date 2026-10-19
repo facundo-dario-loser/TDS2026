@@ -1,3 +1,5 @@
+extern void printInt(int n);
+
 int factorial_iterativo(int n) {
     int acum;
 
@@ -19,4 +21,5 @@ void main() {
     int x;
 
     x = factorial_iterativo(4);
+    printInt(x);
 }

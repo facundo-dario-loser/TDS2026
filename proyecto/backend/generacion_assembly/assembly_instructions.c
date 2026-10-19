@@ -161,7 +161,7 @@ void ret(FILE *f) {
 
 
 
-void movZeroEax(FILE *f) {
+void movZeroRax(FILE *f) {
     fprintf(f, "\tmov $0, %%rax\n");
 }
 
@@ -501,6 +501,11 @@ void push(FILE *f, Symbol *src) {
 
 void call(FILE *f, char *methodName) {
     if (!methodName) ERROR_ASSEMBLY("methodName is NULL in call()")
+    
+    // deberia ser asi esto? (hardcodeado)
+    if ((strcmp(methodName, "printInt") == 0) ||
+        (strcmp(methodName, "printBoolean") == 0)) movZeroRax(f);
+
     fprintf(f, "\tcall %s\n", methodName);
 }
 

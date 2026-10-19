@@ -74,7 +74,8 @@ extern int yydebug;
     EQUAL = 270,                   /* EQUAL  */
     AND = 271,                     /* AND  */
     OR = 272,                      /* OR  */
-    UMINUS = 273                   /* UMINUS  */
+    EXTERN = 273,                  /* EXTERN  */
+    UMINUS = 274                   /* UMINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -91,7 +92,7 @@ union YYSTYPE
     char    *strValue;
     AstNode *node;
 
-#line 95 "parser.tab.h"
+#line 96 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

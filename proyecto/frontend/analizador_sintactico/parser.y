@@ -36,7 +36,7 @@ AstNode *root = NULL;
 %type  <node>       p global_decl_list var_decl method_decl_list method_decl type list_id params block param block_elems statements statement expr method_call list_expr
 
 // VOID en realidad tiene tipo AstNode pero como no se usa en ningun lado no hace falta
-%token VOID INT BOOLEAN FLOAT IF ELSE WHILE RETURN EQUAL AND OR
+%token VOID INT BOOLEAN FLOAT IF ELSE WHILE RETURN EQUAL AND OR EXTERN
 
 // precendencia (de menor a mayor)
 %left OR
@@ -93,6 +93,24 @@ method_decl: type ID '(' params ')' block {
                                             AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $2, .line = yylineno});
                                             $$               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children4 = $5, .line = yylineno});
                                           }
+           | EXTERN type ID '(' params ')' ';' {
+                                                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $3, .line = yylineno});
+                                                $$             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EXTERN_METHOD_DECL, .children1 = $2, .children2 = auxID, .children3 = $5, .line = yylineno});
+                                               }
+           | EXTERN type ID '(' ')' ';'        {
+                                                AstNode *auxID = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $3, .line = yylineno});
+                                                $$             = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EXTERN_METHOD_DECL, .children1 = $2, .children2 = auxID, .line = yylineno});
+                                               }
+           | EXTERN VOID ID '(' params ')' ';' {
+                                                AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID, .line = yylineno});
+                                                AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $3, .line = yylineno});
+                                                $$               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EXTERN_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .children3 = $5, .line = yylineno});
+                                               }
+           | EXTERN VOID ID '(' ')' ';'        {
+                                                AstNode *auxVoid = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_VOID, .line = yylineno});
+                                                AstNode *auxID   = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_ID, .value.strValue = $3, .line = yylineno});
+                                                $$               = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_EXTERN_METHOD_DECL, .children1 = auxVoid, .children2 = auxID, .line = yylineno});
+                                               }
            ;
 
 params: param ',' params { $$ = newAstNode(&(AstNodeConfig){.type = AST_NODE_TYPE_PARAMS, .children1 = $1, .children2 = $3, .line = yylineno}); } 

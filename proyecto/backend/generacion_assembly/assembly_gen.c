@@ -137,7 +137,7 @@ void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f) {
     
     if ((strcmp(i->result->name, "main") == 0) && (i->result->semanticType == SYMBOL_SEMANTIC_TYPE_VOID)) {
         comment(f, "note: setting rax with exit code 0 (even if main doesn't return anything)");
-        movZeroEax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
+        movZeroRax(f); // se hace siempre aunque main sea void (para indicar que el programa termino correctamente)
         newLine(f);
     }
     

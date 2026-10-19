@@ -1,0 +1,5 @@
+extern void printInt(int n);
+
+void main() {
+    printInt(4);
+}

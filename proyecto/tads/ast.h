@@ -12,8 +12,8 @@ typedef enum AstNodeType {
     AST_NODE_TYPE_P,                   // todo el programa
     AST_NODE_TYPE_GLOBAL_DECL_LIST,    // declaraciones de todo el programa
     AST_NODE_TYPE_VAR_DECL,            // declaracion de variable
-    AST_NODE_TYPE_METHOD_DECL_LIST,    // declaracion de metodo/funcion
-    AST_NODE_TYPE_METHOD_DECL,         // tipo de una variable o valor de retorno de una funcion
+    AST_NODE_TYPE_METHOD_DECL_LIST,    // declaraciones de metodos
+    AST_NODE_TYPE_METHOD_DECL,         // declaracion de metodo
     AST_NODE_TYPE_LIST_ID,             // lista de identificadores (para declaracion de variables)
     AST_NODE_TYPE_ID,                  // identificador de variable o metodo/funcion
     AST_NODE_TYPE_PARAMS,              // lista de parametros para una funcion
@@ -37,13 +37,14 @@ typedef enum AstNodeType {
     AST_NODE_TYPE_MULTIPLICATION,      // *
     AST_NODE_TYPE_DIVISION,            // /
     AST_NODE_TYPE_MOD,                 // %
-    AST_NODE_TYPE_COMPARISON_SMALLER, // <
-    AST_NODE_TYPE_COMPARISON_GREATER, // >
+    AST_NODE_TYPE_COMPARISON_SMALLER,  // <
+    AST_NODE_TYPE_COMPARISON_GREATER,  // >
     AST_NODE_TYPE_EQUAL,               // ==
     AST_NODE_TYPE_AND,                 // &&
     AST_NODE_TYPE_OR,                  // ||
     AST_NODE_TYPE_MINUS,               // -expr
     AST_NODE_TYPE_NEGATION,            // !expr
+    AST_NODE_TYPE_EXTERN_METHOD_DECL,  // declaracion de metodo externo
 } AstNodeType;
 
 typedef union AstNodeValue {

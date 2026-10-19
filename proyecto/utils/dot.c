@@ -53,6 +53,7 @@ void getNodeLabel(AstNode *node, char label[256]) {
         case AST_NODE_TYPE_OR:                  snprintf(label, 256, "||");                                       break;
         case AST_NODE_TYPE_MINUS:               snprintf(label, 256, "-");                                        break;
         case AST_NODE_TYPE_NEGATION:            snprintf(label, 256, "!");                                        break;
+        case AST_NODE_TYPE_EXTERN_METHOD_DECL:  snprintf(label, 256, "EXTERN_METHOD_DECL");                       break;
     }
 }
 

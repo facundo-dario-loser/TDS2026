@@ -97,6 +97,7 @@ char * getAstNodeTypeString(AstNodeType nodeType) {
         case AST_NODE_TYPE_OR:                 return "node Or";
         case AST_NODE_TYPE_MINUS:              return "node Minus";
         case AST_NODE_TYPE_NEGATION:           return "node Negation";
+        case AST_NODE_TYPE_EXTERN_METHOD_DECL: return "node ExternMethodDecl";
         default:                               return "node ?";
     }
 }
