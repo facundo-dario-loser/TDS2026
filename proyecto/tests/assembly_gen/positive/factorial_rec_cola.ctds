@@ -1,3 +1,5 @@
+extern void printInt(int n);
+
 // se debe llamar con acum = 1
 int factorial_recursivo_cola(int n, int acum) {
     if (n == 0) {

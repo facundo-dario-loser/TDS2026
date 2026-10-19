@@ -1,4 +1,6 @@
 
+.text
+
 factorial_iterativo:
 	enter $(8*6), $0
 
@@ -81,10 +83,11 @@ factorial_iterativo:
 
 .globl main
 main:
-	enter $(8*2), $0
+	# note: 8 extra bytes were added (64 bits) to keep the stack aligned to 16 bytes
+	enter $(8*4), $0
 
 	# PassingArgumentForMethodCall
-	mov $4, %rdi
+	mov $3, %rdi
 
 	# CallMethod
 	call factorial_iterativo
@@ -92,12 +95,21 @@ main:
 	# SavingReturnValueFromMethodInTemporal
 	mov %rax, -8(%rbp)
 
+	# PassingArgumentForMethodCall
+	mov -8(%rbp), %rdi
+
+	# CallMethod
+	call factorial_iterativo
+
+	# SavingReturnValueFromMethodInTemporal
+	mov %rax, -16(%rbp)
+
 	# AssignmentIntInt
-	mov -8(%rbp), %r10
-	mov %r10, -16(%rbp)
+	mov -16(%rbp), %r10
+	mov %r10, -24(%rbp)
 
 	# PassingArgumentForMethodCall
-	mov -16(%rbp), %rdi
+	mov -24(%rbp), %rdi
 
 	# CallMethod
 	mov $0, %rax

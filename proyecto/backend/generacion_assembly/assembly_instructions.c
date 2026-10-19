@@ -1270,6 +1270,13 @@ void globalVarDecl(FILE *f, Symbol *globalVarSymbol) {
 
 
 
+void text(FILE *f) {
+    fprintf(f, ".text\n");
+}
+
+
+
+
 void saveAllArguments(Symbol *methodSymbol, FILE *f) {
     if (!methodSymbol) ERROR_ASSEMBLY("method symbol is NULL in saveAllArguments()")
     

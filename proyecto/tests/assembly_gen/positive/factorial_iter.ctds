@@ -20,6 +20,9 @@ int factorial_iterativo(int n) {
 void main() {
     int x;
 
-    x = factorial_iterativo(4);
+    // factorial 3 = 6
+    // factorial 6 = 720
+
+    x = factorial_iterativo(factorial_iterativo(3));
     printInt(x);
 }

@@ -1,3 +1,5 @@
+extern void printInt(int n);
+
 int factorial_recursivo_pila(int n) {
     if (n == 0) {
         return 1;

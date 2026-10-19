@@ -58,3 +58,18 @@ no hay problema ya que tendran diferentes offsets
    gcc a.s files_to_link/print.c -o main
 
 - llamar en argument.c a gcc para ensamblar el assembly
+
+
+sobre el ast:
+- propagacion de constantes
+- eliminacion cod muerto (if, return, while)
+
+
+- reusar offset
+lista de offsets libres 
+
+lista offsets libres lo hago con temporales
+
+con variables si se complica no hacerlo
+
+- si multiplicas dividis por 2 -> shiftear (constantes)

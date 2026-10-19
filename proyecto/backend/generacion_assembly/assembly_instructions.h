@@ -38,6 +38,7 @@ void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void dataSegment(FILE *f);
 void globalVarDecl(FILE *f, Symbol *globalVarSymbol);
+void text(FILE *f);
 
 // funciones auxiliares
 void          saveAllArguments(Symbol *methodSymbol, FILE *f);
