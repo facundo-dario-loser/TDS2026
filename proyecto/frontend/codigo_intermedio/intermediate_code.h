@@ -19,8 +19,6 @@ typedef enum InstructionType {
     INSTRUCTION_TYPE_ADDITION_INT_FLOAT,             // result(float) = op1(int) + op2(float)
     INSTRUCTION_TYPE_ADDITION_FLOAT_INT,             // result(float) = op1(float) + op2(int)
     INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT,           // result(float) = op1(float) + op2(float)
-    INSTRUCTION_TYPE_AND,                            // result(boolean) = op1(boolean) && op2(boolean)
-    INSTRUCTION_TYPE_OR,                             // result(boolean) = op1(boolean) || op2(boolean)
     INSTRUCTION_TYPE_ARGUMENT,                       // pasar arg en un registro o en la pila (en llamada a un metodo)
     INSTRUCTION_TYPE_CALL_METHOD,           
     INSTRUCTION_TYPE_RETURN,

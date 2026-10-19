@@ -20,8 +20,6 @@ void generateAssemblyInstructionAdditionIntInt(Instruction *i, FILE *f);
 void generateAssemblyInstructionAdditionIntFloat(Instruction *i, FILE *f);
 void generateAssemblyInstructionAdditionFloatInt(Instruction *i, FILE *f);
 void generateAssemblyInstructionAdditionFloatFloat(Instruction *i, FILE *f);
-void generateAssemblyInstructionAnd(Instruction *i, FILE *f);
-void generateAssemblyInstructionOr(Instruction *i, FILE *f);
 void generateAssemblyInstructionArgument(Instruction *i, FILE *f);
 void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f);
 void generateAssemblyInstructionReturn(Instruction *i, FILE *f);

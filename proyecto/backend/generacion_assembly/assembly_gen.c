@@ -50,8 +50,6 @@ void generateAssemblyAux(Instruction *list, FILE *f) {
         case INSTRUCTION_TYPE_ADDITION_INT_FLOAT:             generateAssemblyInstructionAdditionIntFloat(list, f);            break;
         case INSTRUCTION_TYPE_ADDITION_FLOAT_INT:             generateAssemblyInstructionAdditionFloatInt(list, f);            break;
         case INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT:           generateAssemblyInstructionAdditionFloatFloat(list, f);          break;
-        case INSTRUCTION_TYPE_AND:                            generateAssemblyInstructionAnd(list, f);                         break;
-        case INSTRUCTION_TYPE_OR:                             generateAssemblyInstructionOr(list, f);                          break;
         case INSTRUCTION_TYPE_ARGUMENT:                       generateAssemblyInstructionArgument(list, f);                    break;
         case INSTRUCTION_TYPE_CALL_METHOD:                    generateAssemblyInstructionCallMethod(list, f);                  break;           
         case INSTRUCTION_TYPE_RETURN:                         generateAssemblyInstructionReturn(list, f);                      break;
@@ -237,28 +235,6 @@ void generateAssemblyInstructionAdditionFloatInt(Instruction *i, FILE *f) {
 
 void generateAssemblyInstructionAdditionFloatFloat(Instruction *i, FILE *f) {
     TODO("generateAssemblyInstructionAdditionFloatFloat() not implemented yet")
-}
-
-
-
-
-void generateAssemblyInstructionAnd(Instruction *i, FILE *f) {
-    DEBUG_ASSEMBLY("instruction And visited")
-    newLine(f);
-    comment(f, "And");
-    and(f, i->op1, i->op2, i->result);
-    generateAssemblyAux(i->next, f);
-}
-
-
-
-
-void generateAssemblyInstructionOr(Instruction *i, FILE *f) {
-    DEBUG_ASSEMBLY("instruction Or visited")
-    newLine(f);
-    comment(f, "Or");
-    or(f, i->op1, i->op2, i->result);
-    generateAssemblyAux(i->next, f);
 }
 
 

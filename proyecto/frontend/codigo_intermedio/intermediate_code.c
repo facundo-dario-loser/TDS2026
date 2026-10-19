@@ -125,8 +125,6 @@ char * getInstructionTypeString(InstructionType instType) {
         case INSTRUCTION_TYPE_ADDITION_INT_FLOAT:             return "ADDITION_INT_FLOAT";
         case INSTRUCTION_TYPE_ADDITION_FLOAT_INT:             return "ADDITION_FLOAT_INT";
         case INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT:           return "ADDITION_FLOAT_FLOAT";
-        case INSTRUCTION_TYPE_AND:                            return "AND";
-        case INSTRUCTION_TYPE_OR:                             return "OR";
         case INSTRUCTION_TYPE_ARGUMENT:                       return "ARGUMENT";
         case INSTRUCTION_TYPE_CALL_METHOD:                    return "CALL_METHOD";
         case INSTRUCTION_TYPE_RETURN:                         return "RETURN";
@@ -1387,36 +1385,6 @@ void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instructio
 
     InstructionConfig config = {
         .type   = comparisonBinaryOpType,
-        .op1    = node->children1->symbol,
-        .op2    = node->children2->symbol,
-        .result = node->symbol,
-    };
-
-    Instruction *i = newInstruction(&config);
-    insertInstruction(tail, i);
-
-    node->children1->symbol->referenceCount++;
-    node->children2->symbol->referenceCount++;
-    node->symbol->referenceCount++;
-}
-
-
-
-
-void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount) {
-    if (node->children1) generateIntermediateCodeAux(node->children1, tail, labelCount);
-    if (node->children2) generateIntermediateCodeAux(node->children2, tail, labelCount);
-
-    InstructionType binaryLogicalOpType;
-
-    switch (node->type) {
-        case AST_NODE_TYPE_AND: binaryLogicalOpType = INSTRUCTION_TYPE_AND; break;
-        case AST_NODE_TYPE_OR:  binaryLogicalOpType = INSTRUCTION_TYPE_OR;  break;
-        default: ERROR_IR("invalid binary logical operation")
-    }
-
-    InstructionConfig config = {
-        .type   = binaryLogicalOpType,
         .op1    = node->children1->symbol,
         .op2    = node->children2->symbol,
         .result = node->symbol,

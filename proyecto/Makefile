@@ -37,3 +37,6 @@ test_general: build/c-tds
 
 test_codinter:
 	python3 run_tests.py -target codinter tests/intermediate_code/positive/ || python3 run_tests.py -target codinter tests/intermediate_code/positive/
+
+test_assembly_gen:
+	python3 run_tests.py -o tests/assembly_gen/positive/ || python3 run_tests.py -o tests/assembly_gen/positive/

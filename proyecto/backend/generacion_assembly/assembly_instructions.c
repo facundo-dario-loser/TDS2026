@@ -534,33 +534,6 @@ void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol) {
 
 
 
-// TODO: implementar con corto circuito
-void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
-    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in and()")
-    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in and()")
-    if (!result) ERROR_ASSEMBLY("result is NULL in and()")
-
-    fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-    fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
-    fprintf(f, "\tand r10, r11\n");
-    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
-}
-
-
-
-// TODO: implementar con corto circuito
-void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
-    if (!op1)    ERROR_ASSEMBLY("op1 is NULL in or()")
-    if (!op2)    ERROR_ASSEMBLY("op2 is NULL in or()")
-    if (!result) ERROR_ASSEMBLY("result is NULL in or()")
-
-    fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
-    fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
-    fprintf(f, "\tor r10, r11\n");
-    fprintf(f, "\tmov %%r11, %d(%%rbp)\n", result->offset);
-}
-
-
 
 // calcula: op1 - op2. Luego se chequea de acuerdo al resultado: es op1, mayor, menor o igual que op2
 void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType) {

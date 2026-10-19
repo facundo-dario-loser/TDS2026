@@ -4,7 +4,7 @@ import sys
 
 binary_name     = "c-tds.exe" if os.name == 'nt' else "c-tds"
 COMPILER        = os.path.join("build", binary_name)
-FLAG_COMPILER = sys.argv[1] if len(sys.argv) > 1 else "-debug"
+FLAG_COMPILER   = sys.argv[1] if len(sys.argv) > 1 else "-debug"
 STAGE           = None
 TEST_DIR        = None
 

@@ -27,8 +27,6 @@ void jmp(FILE *f, char *label);
 void push(FILE *f, Symbol *src);
 void call(FILE *f, char *methodName);
 void movFromRaxToTemporal(FILE *f, Symbol *temp);
-void and(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
-void or(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType);
 void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label);
 void jmpToLabelIfTrue(FILE *f, Symbol *cond, char *label);
