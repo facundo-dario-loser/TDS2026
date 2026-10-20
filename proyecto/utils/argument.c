@@ -102,9 +102,14 @@ void processOptionO(int argc, char *argv[]) {
 
     // generacion asm (se debe borrar el archivo .s)
     char *assemblyFileName = generateAssembly(instructionList, outputFileName);
-    remove(assemblyFileName);
 
     freeInstructionLinkedList(instructionList);
+    
+    char command[256];
+    snprintf(command, sizeof(command), "gcc %s files_to_link/print.c -o %s", assemblyFileName, outputFileName);
+    system(command);
+
+    remove(assemblyFileName);
 }
 
 
@@ -113,7 +118,7 @@ void processOptionO(int argc, char *argv[]) {
 void processOptionTarget(int argc, char *argv[]) {
     Stage stage = getArgumentStage(argc, argv);
 
-    char *outputFileName = "a"; // por default
+    char *outputFileName = getFileNameFromPath(argv[3]);
 
     if (argc < 4) ERROR_ARGUMENT("the path to the source file was not provided")
     checkFileName(3, argv);
@@ -159,6 +164,8 @@ void processOptionTarget(int argc, char *argv[]) {
     
                                 DEBUG("intermediate code generated")
                                 // aca podria liberar el ast, pero no hace falta en realidad
+
+                                printInstructions(instructionList);
                              } break;
 
         case STAGE_ASSEMBLY: {
@@ -203,7 +210,7 @@ void processOptionOpt(int argc, char *argv[]) {
 
 void processOptionDebug(int argc, char *argv[]) {
     debugFlag = true;
-    char *outputFileName = "a"; // default executable name
+    char *outputFileName = getFileNameFromPath(argv[2]);
 
     if (argc < 3) ERROR_ARGUMENT("the path to the source file was not provided")
     checkFileName(2, argv);
@@ -257,7 +264,37 @@ void processOptionDebug(int argc, char *argv[]) {
     freeAst(root);
 
     // generacion asm (no se borra el archivo generado)
-    generateAssembly(instructionList, outputFileName);
+    char *assemblyFileName = generateAssembly(instructionList, outputFileName);
 
     freeInstructionLinkedList(instructionList);
+
+    char command[256];
+    snprintf(command, sizeof(command), "gcc %s files_to_link/print.c -o %s", assemblyFileName, outputFileName);
+    system(command);
+}
+
+
+
+
+char * getFileNameFromPath(char *pathToFile) {
+    if (!pathToFile) ERROR_ARGUMENT("pathToFile is NULL in getFileNameFromPath()")
+
+    char *lastSlash = strrchr(pathToFile, '/');
+    char *fileName = pathToFile;
+
+    if (lastSlash) fileName = lastSlash + 1;
+
+    char *dot = strrchr(fileName, '.');
+
+    char fileNameWithoutExtension[256];
+
+    if (dot) {
+        size_t lengthWithoutExtension = dot - fileName;
+        snprintf(fileNameWithoutExtension, lengthWithoutExtension + 1, "%s", fileName);
+    } else {
+        snprintf(fileNameWithoutExtension, sizeof(fileNameWithoutExtension), "%s", fileName);
+    }
+
+    // check: free the memory later
+    return strdup(fileNameWithoutExtension);
 }

@@ -49,4 +49,6 @@ void processOptionTarget(int argc, char *argv[]); // ejecuta el compilador con l
 void processOptionOpt(int argc, char *argv[]);    // ejecuta el compilador con la opcion '-opt'
 void processOptionDebug(int argc, char *argv[]);  // ejecuta el compilador con la opcion '-debug'
 
+char * getFileNameFromPath(char *pathToFile);
+
 #endif // ARGUMENT_H
