@@ -378,11 +378,11 @@ void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberO
                 fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
             }
 
-            if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
                 TODO("argument symbol type local variable float in passArgumentToMethodInRegister() not implemented yet")
             }
 
-            if (argumentSymbol->type == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
+            if (argumentSymbol->semanticType == SYMBOL_SEMANTIC_TYPE_BOOLEAN) {
                 fprintf(f, "\tmov %d(%%rbp), %%%s\n", argumentSymbol->offset, reg);
             }
         }

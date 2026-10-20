@@ -1,0 +1,13 @@
+// testeando el corto circuito del and y el or
+
+boolean infiniteLoop() {
+    while (true) {}
+    return true;
+}
+
+void main() {
+    boolean a;
+
+    a = (false && infiniteLoop());
+    a = (true || infiniteLoop());
+}

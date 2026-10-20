@@ -1,0 +1,12 @@
+// testeando que no termina nunca el or
+
+boolean infiniteLoop() {
+    while (true) {}
+    return true;
+}
+
+void main() {
+    boolean a;
+
+    //a = (infiniteLoop() || true);
+}

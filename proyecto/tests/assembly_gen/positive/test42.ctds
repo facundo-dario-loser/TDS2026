@@ -1,0 +1,12 @@
+// chequeando que no termina nunca el and
+
+boolean infiniteLoop() {
+    while (true) {}
+    return true;
+}
+
+void main() {
+    boolean a;
+
+    //a = (infiniteLoop() && false);
+}

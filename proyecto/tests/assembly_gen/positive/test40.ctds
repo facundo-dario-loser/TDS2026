@@ -1,0 +1,13 @@
+extern void printBoolean(boolean n);
+
+void main() {
+    boolean a, b, c;
+
+    a = true;
+    b = false;
+    c = a && b;
+    printBoolean(c);
+
+    c = a || b;
+    printBoolean(c);
+}

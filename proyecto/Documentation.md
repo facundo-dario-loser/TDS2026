@@ -23,6 +23,11 @@ method_decl: ...
            ;
 ```
 
+Dentro de la carpeta `proyecto/files_to_link` contiene el archivo `print.c` con funciones para printear enteros y booleanos. De esta manera ahora es posible debugear programas linkeando el assembly generado por el compilador `c-tds` con este archivo de C para printear valores y variables.
+Para usar alguna de estas funciones en un programa escribir entre las declaraciones de métodos:
+- `extern void printInt(int n);`
+- `extern void printBoolean(boolean n);`
+
 
 ## Actualizaciones en el AST
 Se agrego un nuevo tipo de nodo: `AST_NODE_TYPE_EXTERN_METHOD_DECL`.

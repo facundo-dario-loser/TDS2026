@@ -29,16 +29,19 @@ frontend/analizador_sintactico/
 bison parser.y
 cd ..
 
-gcc frontend/analizador_lexico/lex.yy.c               \
-	frontend/analizador_sintactico/parser.tab.c       \
-	utils/argument.c							      \
-	utils/debug.c							          \
-    tads/ast.c 								          \
-    tads/st.c 								          \
-	utils/dot.c 								      \
-    frontend/analizador_semantico/semantic_analysis.c \
-    frontend/codigo_intermedio/intermediate_code.c    \
-	main.c -o build/c-tds
+gcc frontend/analizador_lexico/lex.yy.c         		\
+	frontend/analizador_sintactico/parser.tab.c 		\
+	utils/argument.c							   		\
+	utils/debug.c							   		    \
+	tads/ast.c 								   		    \
+	tads/st.c 								   		    \
+	utils/dot.c 								   		\
+	frontend/analizador_semantico/semantic_analysis.c   \
+	frontend/codigo_intermedio/intermediate_code.c      \
+	backend/generacion_assembly/assembly_gen.c          \
+	backend/generacion_assembly/assembly_instructions.c \
+	backend/generacion_assembly/offsets.c 			    \
+    main.c
 ```
 
 Esto creará un ejecutable llamado `c-tds` dentro de la carpeta `/proyecto/build/`.
@@ -65,7 +68,7 @@ Ejemplo para ejecutar en la terminal:<br>
 - `scan` ejecutar solo el análisis léxico.
 - `parse` ejecutar hasta el análisis sintáctico.
 - `codinter` ejecutar hasta la generación de código intermedio de bajo nivel.
-- `assembly` ejecutar hasta la generación de assembly (no implementado aun).
+- `assembly` ejecutar hasta la generación de assembly.
 
 **Ejemplos de uso**
 
@@ -86,6 +89,7 @@ Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/lexer`: tests para la etapa del analisis lexico.
 - `/parser`: tests para la etapa del analisis sintactico.
 - `/intermediate_code`: tests para la etapa de generación de código intermedio.
+- `/assembly_gen`: tests para la etapa de la generación de assembly.
 - `/general`: tests generales para todas las etapas del compilador.
 
 Cada una de estas carpetas a su vez tiene dos subcarpetas `/positive` y `/negative` con tests que deben pasar y tests que no deben pasar respectivemente. 
@@ -106,6 +110,11 @@ make test_parser
 Ejecutar los tests para la etapa de **código intermedio**:
 ```
 make test_codinter
+```
+
+Ejecutar los tests **generación de assembly**:
+```
+make test_assembly_gen
 ```
 
 Ejecutar los tests **generales**:
@@ -133,11 +142,14 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
     - `/analizador_semantico` contiene los archivos correspodientes a la etapa del análisis semántico `semantic_analysis.h/.c`.
     - `/codigo_intermedio` contiene los archivos que implementan la generación de código intermedio `intermediate_code.h/.c`. 
 
+- `backend/generacion_assembly` contiene los archivos que implementan la generación de assembly.
+
 - `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.
     - `/lexer` contiene tests correspondientes a la etapa del analisis lexico.
     - `/parser` contiene tests correspondientes a la etapa del analisis sintactico.
     - `/general` contiene tests que no corresponden a ninguna etapa en concreto.
     - `/intermediate_code` contiene tests correspondientes a la etapa de generación de código intermedio.
+    - `assembly_gen` contiene tests correspondientes a la etapa de generación de assembly.
 
 - `/utils` contiene archivos con utilidades.
     - `argument.h/.c` tiene funciones para obtener los argumentos y opciones con los que se ejecuta el compilador.
@@ -149,6 +161,8 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
     - `st.h/.c` es la implementacion de la tabla de simbolos.
 
 - `/dot_files` aca se guardan los archivos `.dot` generados.
+
+- `files_to_link` cotiene un archivo de c con funciones para printear enteros (`printInt`) y booleanos(`printBoolean`). Este archivo se puede linkear con un programa del lenguaje ctds para poder imprimir valores. 
 
 **Nota**: los archivos `.dot` solamente se generan si se ejecuta el compilador con la opcion `-debug`.
 
