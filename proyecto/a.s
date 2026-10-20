@@ -1,11 +1,12 @@
 
 .text
 
-factorial_iterativo:
+factorial_recursivo_cola:
 	enter $(8*6), $0
 
 	# SaveAllArguments
 	mov %rdi, -8(%rbp)
+	mov %rsi, -16(%rbp)
 
 	# ComparisonEqual
 	mov -8(%rbp), %r10
@@ -14,70 +15,48 @@ factorial_iterativo:
 	mov $0, %r11
 	mov $1, %r10
 	cmove %r10, %r11
-	mov %r11, -16(%rbp)
+	mov %r11, -24(%rbp)
 
 	# JmpFalse
-	mov -16(%rbp), %r10
+	mov -24(%rbp), %r10
 	mov $0, %r11
 	cmp %r10, %r11
 	je .label_0
 
 	# ReturnFromMethod
-	mov $1, %rax
-	jmp .end_method_factorial_iterativo
+	mov -16(%rbp), %rax
+	jmp .end_method_factorial_recursivo_cola
 
 .label_0:
-
-	# AssignmentIntInt
-	mov $1, %r10
-	mov %r10, -24(%rbp)
-
-.label_1:
-
-	# ComparisonGreaterIntInt
-	mov -8(%rbp), %r10
-	mov $0, %r11
-	cmp %r11, %r10
-	mov $0, %r11
-	mov $1, %r10
-	cmovg %r10, %r11
-	mov %r11, -32(%rbp)
-
-	# JmpFalse
-	mov -32(%rbp), %r10
-	mov $0, %r11
-	cmp %r10, %r11
-	je .label_2
-
-	# MultiplicationIntInt
-	mov -24(%rbp), %r10
-	mov -8(%rbp), %r11
-	imul %r10, %r11
-	mov %r11, -40(%rbp)
-
-	# AssignmentIntInt
-	mov -40(%rbp), %r10
-	mov %r10, -24(%rbp)
 
 	# SubtractionIntInt
 	mov -8(%rbp), %r10
 	sub $1, %r10
-	mov %r10, -48(%rbp)
+	mov %r10, -32(%rbp)
 
-	# AssignmentIntInt
-	mov -48(%rbp), %r10
-	mov %r10, -8(%rbp)
+	# MultiplicationIntInt
+	mov -16(%rbp), %r10
+	mov -8(%rbp), %r11
+	imul %r10, %r11
+	mov %r11, -40(%rbp)
 
-	# Jmp
-	jmp .label_1
+	# PassingArgumentForMethodCall
+	mov -32(%rbp), %rdi
 
-.label_2:
+	# PassingArgumentForMethodCall
+	mov -40(%rbp), %rsi
+
+	# CallMethod
+	call factorial_recursivo_cola
+
+	# SavingReturnValueFromMethodInTemporal
+	mov %rax, -48(%rbp)
 
 	# ReturnFromMethod
-	mov -24(%rbp), %rax
-	jmp .end_method_factorial_iterativo
+	mov -48(%rbp), %rax
+	jmp .end_method_factorial_recursivo_cola
 
-.end_method_factorial_iterativo:
+.end_method_factorial_recursivo_cola:
 	leave
 	ret
 
@@ -89,8 +68,11 @@ main:
 	# PassingArgumentForMethodCall
 	mov $3, %rdi
 
+	# PassingArgumentForMethodCall
+	mov $1, %rsi
+
 	# CallMethod
-	call factorial_iterativo
+	call factorial_recursivo_cola
 
 	# SavingReturnValueFromMethodInTemporal
 	mov %rax, -8(%rbp)
@@ -98,8 +80,11 @@ main:
 	# PassingArgumentForMethodCall
 	mov -8(%rbp), %rdi
 
+	# PassingArgumentForMethodCall
+	mov $1, %rsi
+
 	# CallMethod
-	call factorial_iterativo
+	call factorial_recursivo_cola
 
 	# SavingReturnValueFromMethodInTemporal
 	mov %rax, -16(%rbp)

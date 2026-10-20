@@ -60,16 +60,68 @@ no hay problema ya que tendran diferentes offsets
 - llamar en argument.c a gcc para ensamblar el assembly
 
 
-sobre el ast:
-- propagacion de constantes
-- eliminacion cod muerto (if, return, while)
+**OPTIMIZACIONES:**
 
+// sobre el ast:
+- propagacion de constantes: esto es basicamente agarrar todas las expresiones 
+  que tengan constante y resolverlas en tiempo de compilacion.
 
-- reusar offset
+  por ej si tengo:
+  (1 + 2)
+
+  node Add -> children1: 1
+           -> children2: 2
+  
+  lo resuelvo y me queda:
+  3
+
+  y en el ast reemplazo el nodo de suma por:
+  node Const
+
+- eliminacion cod muerto (if, return, while) (esto se debe hacer
+  luego de la propagacion de constantes).
+
+// reusar offset
 lista de offsets libres 
-
 lista offsets libres lo hago con temporales
-
 con variables si se complica no hacerlo
 
+osea ahora tengo 
+
+{
+    int temp1; (offset -8)
+}
+
+{
+    int temp2; (offset -16)
+}
+
+pero podria hacer:
+
+{
+    int temp1; (offset -8)
+}
+
+{
+    int temp2; (offset -8)
+}
+
+ya que luego de cerrar el primer bloque temp1 no se usa mas 
+y podria reusar el offset para que el frame quede mas chico
+
+una posible implementacion: 
+esto podria hacerlo sobre la lista de instrucciones de cod 3 dir
+puedo agregar nuevas instrucciones que sean:
+
+INSTRUCTION_TYPE_BEGIN_BLOCK
+INSTRUCTION_TYPE_END_BLOCK
+
+como tengo un offsetCount, entonces al cerrar un bloque podria
+sumarle a offsetCount +8 tantas veces como temporales habia en el bloque cerrado
+por ahora solo concentrarme en temporales. Con variables es un poco mas
+complicado, pero podria intentarlo despues
+
+pero si esto no anda en el cod de 3 dir, seguro lo puedo hacer sobre el ast
+
+// optimizaciones ad-hoc
 - si multiplicas dividis por 2 -> shiftear (constantes)

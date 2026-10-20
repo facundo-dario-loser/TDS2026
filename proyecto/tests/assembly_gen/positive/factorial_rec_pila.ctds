@@ -11,5 +11,6 @@ int factorial_recursivo_pila(int n) {
 void main() {
     int x;
 
-    x = factorial_recursivo_pila(4);
+    x = factorial_recursivo_pila(factorial_recursivo_pila(3));
+    printInt(x);
 }

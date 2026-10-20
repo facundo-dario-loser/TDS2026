@@ -1,376 +1,295 @@
-# Documentación correspondiente a la entrega del generador de código intermedio.
-La implementación del generador de código intermedio se encuentra en el path: `/proyecto/frontend/codigo_intermedio/` en los archivos `intermediate_code.h/.c`.<br>
-**Nota**: para visualizar las instrucciones de código intermedio generadas, debe ejecutar el compilador con la opción `-debug`
+# Documentación correspondiente a la entrega del generador de código objeto.
+La implementación del generador de código objeto se encuentra en el path: `/proyecto/backend/generacion_assembly` en los archivos:<br> 
+- `offsets.h/.c`.
+- `assembly_instructions.h/.c`
+- `assembly_gen.h/.c`
+
+## Actualizaciones en el lexer
+Ahora puede reconocer un nuevo token para la palabra reservada `extern`.
+
+```
+extern { DEBUG_LEXER("EXTERN"); return EXTERN; }
+```
+
+## Actualizaciones en el parser
+Se extendio la gramática para permitir el uso de métodos externos (definidos en otro archivo).
+
+```
+method_decl: ...
+           | EXTERN type ID '(' params ')' ';' { ... }
+           | EXTERN type ID '(' ')' ';'        { ... }
+           | EXTERN VOID ID '(' params ')' ';' { ... }
+           | EXTERN VOID ID '(' ')' ';'        { ... }
+           ;
+```
+
 
 ## Actualizaciones en el AST
-implemente una nueva función que dado el tipo de un nodo, lo retorna en forma de string:
-
-```
-char * getAstNodeTypeString(AstNodeType nodeType);
-```
-Se utiliza para debugear.
+Se agrego un nuevo tipo de nodo: `AST_NODE_TYPE_EXTERN_METHOD_DECL`.
+Sirve para representar las declaraciones de métodos externos en el AST.
 
 ## Actualizaciones en los símbolos y la tabla de simbolos
-agregue esta función que dado el tipo de un simbolo, lo retorna en forma de string:
+Se agregaron nuevos campos a los simbolos
 ```
-char * getSymbolTypeString(SymbolType sType);
+typedef struct Symbol {
+    ...
+    int numberOfLocalVariables;
+    int numberOfParameters;
+} Symbol;
 ```
-Se utiliza para debugear.
 
-Por otro lado agregue un nuevo tipo de simbolo que es el de label
+- `numberOfLocalVariables`: se utliza en métodos y es para saber el numero de variables locales (contando a los parametros tambien) que tiene. Esto es util para la generacion de assembly ya que en la llamada de un metodo se reserva espacio en el frame para las variables locales y parametros restandole al stack pointer un valor de acuerdo a cuantos bytes se necesiten.
+
+- `numberOfParameters`: se utiliza en métodos y permite saber el numero de parametros del mismo. Esto es util en la generacion de assembly ya que si el numero de parametros es mayor a 6, entonces se hace pop de la pila al terminar la llamada a un metodo tantas veces como sea necesario (se hace numberOfParameters - 6 veces).
+
+Tambien se agrego esta función
+
 ```
-typedef enum SymbolType {
-    SYMBOL_TYPE_VARIABLE,
-    SYMBOL_TYPE_METHOD,
-    SYMBOL_TYPE_CONSTANT,
-    SYMBOL_TYPE_LABEL,    // <----
-} SymbolType;
+int getNumberOfParametersFromMethod(Symbol *params);
 ```
-Este nuevo tipo de simbolo es útil para la generación de código intermedio ya que hay instrucciones que denotan un label y uno de sus operandos debe apuntar a un simbolo de tipo label justamente.
+
+que dada la cabeza de la lista de parametros de un metodo, retorna la cantidad que hay. Luego este valor se usa para setear el campo `numberOfParameters` de un simbolo.
 
-## Correciones y actualizaciones en el analizador semántico
-En la función que se encarga de analizar semanticamente los nodos para los operadores `<` y `>`:
+## Actualizaciones en el analizador semántico
+En la funcion `semanticAnalysisAux`, se agrego un caso para analizar el nodo de declaración externa de metodo:
 ```
-void analysisComparisonOperator(AstNode *comparisonOpNode, SymbolTable *st, int *tempCount)
+case AST_NODE_TYPE_EXTERN_METHOD_DECL: 
+analysisNodeMethodDecl(root, st, tempCount); break;
 ```
-corregi un error conceptual, ya que antes para los operadores de comparación solo permitia que sus operandos fueran literales de enteros, reales o un id, pero esto es erroneo ya que por ejemplo no podria usar como uno de sus operando una llamada a un metodo que retorne un int.
-Entonces modifique el chequeo para que solo permita expresiones aritmeticas (las cuales abarcan a los id y literales enteras o reales y ademas permiten por ejemplo llamadas a metodo que retonen un int o float).
-Ademas agregue warnings de casteo, en donde si uno de los operandos es un float y el otro un int, el operando de tipo int se casteara a float.
 
-## Instrucciones de código intermedio
-A continuación se listan y detalla la semántica de cada una de las instrucciones de código intermedio que siguen la estructura del código de 3 direcciones.
+En ese caso reutilice la misma función `analysisNodeMethodDecl` que ya tenia y lo unico que le tuve que modificar es que analice el cuerpo del metodo solamente si es un nodo de tipo declaración de metodo (no externo):
 
-Todas las instrucciones tienen esta estructura:
 ```
-INSTRUCTION_NAME op1 op2 result
+if (node->children4 && (node->type == AST_NODE_TYPE_METHOD_DECL)) {
+        node->children4->isFunctionBlock = true;
+        semanticAnalysisAux(node->children4, st, tempCount);
+    }
 ```
-dónde `INSTRUCTION_NAME` es el nombre de la instrucción, `op1` es el operando 1, `op2` el operando 2 y `result` es donde se almacena el resultado.
 
-## Tipos de instrucciones:
-Identifica que hay una declaración de variable global.
-`result` apunta al simbolo de la variable global.
+Entonces en el caso de metodos externos, lo unico que se hace es insertar su simbolo correspondiente en la tabla de simbolos.
+
+## Actualizaciones en el generador de código intermedio
+Elimine las instrucciones de tipo `And` y `Or` ya que las operaciones `&&` y `||` las cambie para que tengan corto-circuito traduciendolas en comparaciones, saltos a labels y asignaciones.
+
+## Seteo de offsets
+En los archivos `offsets.h/.c` que se encuentran en el path `proyecto/backend/generacion_assembly` se implementa el seteo de offsets a los simbolos (son offsets respecto del rbp). Los archivos contienen las siguientes funciones:
+
+Setea los offsets a todos los simbolos recorriendo la lista de instrucciones de codigo intermedio.
 ```
-INSTRUCTION_TYPE_GLOBAL_VAR_DECL
+void setSymbolOffsets(Instruction *list);
 ```
 
-<br>Esta es una pseudo instrucción ya que hace de etiqueta/label para identificar que comienza la declaración de un método.
-`result` apunta al simbolo del método.
+printea el offset asignado a cada simbolo recorriendo la lista de código intermedio.
 ```
-INSTRUCTION_TYPE_BEGIN_METHOD
+void printSymbolOffsets(Instruction *list);
 ```
+
+## generador de assembly
+Para la generación de assembly se generan instrucciones para la arquitectura x86_64. Se asumio que todas las variables son de 64 bits (8 bytes). Los archivos `assembly_gen.h/.c` que se encuentran en el path `proyecto/backend/generacion_assembly` implementan las funciones para generar el código assembly para cada tipo de instrucción de código intermedio.
 
-<br>Esta es una pseudo instrucción ya que hace de etiqueta/label para identificar que termina la declaración de un método.
-`result` apunta al simbolo del método.
+La función `generateAssembly` es la principal y se encarga de crear el archivo assembly y luego llamar a `generateAssemblyAux` la cual a su vez recorre la lista de instrucciones de código intermedio y genera las instrucciones de assembly llamando a otras funciones. El nombre del archivo de assembly generado viene dado por `outputFileName`.
 ```
-INSTRUCTION_TYPE_END_METHOD
+char * generateAssembly(Instruction *list, char *outputFileName);
+void   generateAssemblyAux(Instruction *list, FILE *f);
 ```
 
-<br>Esta es una pseudo instrucción que sirve para denotar un label en el código. `result` apunta al simbolo del label.
+Funciones para generar instrucciones de assembly x86_64 para cada tipo de instrucción de código intermedio.
 ```
-INSTRUCTION_TYPE_LABEL
+void generateAssemblyInstructionGlobalVarDecl(Instruction *i, FILE *f);
+void generateAssemblyInstructionBeginMethod(Instruction *i, FILE *f);
+void generateAssemblyInstructionEndMethod(Instruction *i, FILE *f);
+void generateAssemblyInstructionLabel(Instruction *i, FILE *f);
+void generateAssemblyInstructionAssignmentIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionAssignmentIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionAssignmentFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionAssignmentFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionAssignmentBoolBool(Instruction *i, FILE *f);
+void generateAssemblyInstructionAdditionIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionAdditionIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionAdditionFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionAdditionFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionArgument(Instruction *i, FILE *f);
+void generateAssemblyInstructionCallMethod(Instruction *i, FILE *f);
+void generateAssemblyInstructionReturn(Instruction *i, FILE *f);
+void generateAssemblyInstructionSubtractionIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionSubtractionIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionSubtractionFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionSubtractionFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionMultiplicationIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionMultiplicationIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionMultiplicationFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionMultiplicationFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionDivisionIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionDivisionIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionDivisionFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionDivisionFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionModIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionModIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionModFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionModFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonSmallerIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonSmallerIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonSmallerFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonSmallerFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonGreaterIntInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonGreaterIntFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonGreaterFloatInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionComparisonGreaterFloatFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionUnaryMinusInt(Instruction *i, FILE *f);
+void generateAssemblyInstructionUnaryMinusFloat(Instruction *i, FILE *f);
+void generateAssemblyInstructionNegation(Instruction *i, FILE *f);
+void generateAssemblyInstructionJmpFalse(Instruction *i, FILE *f);
+void generateAssemblyInstructionJmpTrue(Instruction *i, FILE *f);
+void generateAssemblyInstructionJmp(Instruction *i, FILE *f);
+void generateAssemblyInstructionEqual(Instruction *i, FILE *f);
 ```
 
-<br>Conjunto de instrucciones instrucciones que indican que hay una asignación en donde a una variable de tipo int o float se le asigna una expresión de tipo int o float.
-El `op1` apunta al simbolo de la expresión y `result` apunta al simbolo de la variable a la cual se le asigna la expresión.
+
+## funciones que generan instrucciones assembly
+Las funciones de los archivos `assembly_gen.h/.c` llaman a otras funciones a su vez que se encargan de escribir en un archivo las instrucciones de assembly. Estas otras funciones estan implementadas en los archivos `assembly_instructions.h/.c` ubicados en el path `proyecto/backend/generacion_assembly`.
+
+<br>Se creo este struct para diferenciar entre comparaciones `<`, `>` y `==`. El mismo se usa en la funcion `cmp()`.
 ```
-INSTRUCTION_TYPE_ASSIGNMENT_INT_INT     // result(int)   = op1(int)
-INSTRUCTION_TYPE_ASSIGNMENT_INT_FLOAT   // result(int)   = op1(float)
-INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_INT   // result(float) = op1(int) 
-INSTRUCTION_TYPE_ASSIGNMENT_FLOAT_FLOAT // result(float) = op1(float)
+typedef enum ComparisonType {
+    COMPARISON_TYPE_GREATER, // op1 > op2?  in cmp
+    COMPARISON_TYPE_SMALLER, // op1 < op2?  in cmp
+    COMPARISON_TYPE_EQUAL,   // op1 == op2? in cmp
+} ComparisonType;
 ```
 
-<br>Instrucción que indica que hay una asignación en donde a una variable de tipo boolean se le asigna una expresión booleana.
-El `op1` apunta al simbolo de la expresión y `result` apunta al simbolo de la variable a la cual se le asigna la expresión.
+<br>**Lista de funciones:**
+<br>**Nota**: Muchas de estas funciones tienen en cuenta el tipo de los operandos (int, boolean o float) y si ademas son constantes, variables globales o variables locales. 
+<br><br>Escribe un comentario de assembly (con `#`) en el archivo.
 ```
-INSTRUCTION_TYPE_ASSIGNMENT_BOOL_BOOL // result(boolean) = op1(boolean)
+void comment(FILE *f, char *string);
 ```
-
-<br>Instrucción que denota la operación 'and' lógico (&&). `op1` apunta al simbolo de la expresión izquierda del and y `op2` apunta al simbolo de la expresión derecha. `result` apunta al simbolo donde se guardara el resultado del and.
+<br>Escribe la directiva `.globl` para el ensamblador.
 ```
-INSTRUCTION_TYPE_AND // result(boolean) = op1(boolean) && op2(boolean)
+void globl(FILE *f, char *name);
 ```
-
-<br>Instrucción que denota la operación 'or' lógico (||). `op1` apunta al simbolo de la expresión izquierda del or y `op2` apunta al simbolo de la expresión derecha. `result` apunta al simbolo donde se guardara el resultado del or.
+<br>Escribe un label de método en el archivo.
 ```
-INSTRUCTION_TYPE_OR // result(boolean) = op1(boolean) || op2(boolean)
+void methodLabel(FILE *f, char *name);
 ```
-
-<br>Instrucción que indica que se esta pasando un argumento para la invocación de un método. Luego en Assembly se interpreta como que se debe pasar el argumento en un registro o en la pila si no hay mas lugar. `result` apunta al simbolo del argumento. 
+<br>Escribe la instrucción `enter` en el archivo.
 ```
-INSTRUCTION_TYPE_ARGUMENT
+void enter(FILE *f, int numberOfBytes);
 ```
-
-<br>Instrucción que indica que hay una llamada a un método. `op1` apunta al simbolo del método y si es que este retorna una expresión, entonces `result` apunta al simbolo del temporal donde se almacenara el resultado de la invocación.
+<br>Escribe la instrucción `mov src, dst` en el archivo.
 ```
-INSTRUCTION_TYPE_CALL_METHOD
+void mov(FILE *f, Symbol *src, Symbol *dst);
 ```
-
-<br>Instrucción que denota un return. `result` apunta al simbolo de la expresión que se retorna.
+<br>Escribe la instruccion `leave` en el archivo.
 ```
-INSTRUCTION_TYPE_RETURN
+void leave(FILE *f);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una suma entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la suma.
+<br>Escribe la instrucción `ret` en el archivo.
 ```
-// result(int) = op1(int) + op2(int)
-INSTRUCTION_TYPE_ADDITION_INT_INT
-
-// result(float) = op1(int) + op2(float)
-INSTRUCTION_TYPE_ADDITION_INT_FLOAT
-
-// result(float) = op1(float) + op2(int)
-INSTRUCTION_TYPE_ADDITION_FLOAT_INT
-
-// result(float) = op1(float) + op2(float)
-INSTRUCTION_TYPE_ADDITION_FLOAT_FLOAT
+void ret(FILE *f);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una resta entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la resta.
+<br>Escribe la instrucción `mov $0, %rax` en el archivo.
 ```
-// result(int) = op1(int) - op2(int)
-INSTRUCTION_TYPE_SUBTRACTION_INT_INT
-
-// result(float) = op1(int) - op2(float)
-INSTRUCTION_TYPE_SUBTRACTION_INT_FLOAT
-
-// result(float) = op1(float) - op2(int)
-INSTRUCTION_TYPE_SUBTRACTION_FLOAT_INT
-
-// result(float) = op1(float) - op2(float)
-INSTRUCTION_TYPE_SUBTRACTION_FLOAT_FLOAT
+void movZeroRax(FILE *f);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una multiplicación entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la multiplicación.
+<br>Genera una nueva linea en el archivo.
 ```
-// result(int) = op1(int) * op2(int)
-INSTRUCTION_TYPE_MULTIPLICATION_INT_INT
-
-// result(float) = op1(int) * op2(float)
-INSTRUCTION_TYPE_MULTIPLICATION_INT_FLOAT
-
-// result(float) = op1(float) * op2(int)
-INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_INT
-
-// result(float) = op1(float) * op2(float)
-INSTRUCTION_TYPE_MULTIPLICATION_FLOAT_FLOAT
+void newLine(FILE *f);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una división entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la división.
+<br>Escribe las instrucciones `add op1, op2` y `mov op2, result` en el archivo.
 ```
-// result(int) = op1(int) / op2(int)
-INSTRUCTION_TYPE_DIVISION_INT_INT
-
-// result(float) = op1(int) / op2(float)
-INSTRUCTION_TYPE_DIVISION_INT_FLOAT
-
-// result(float) = op1(float) / op2(int)
-INSTRUCTION_TYPE_DIVISION_FLOAT_INT
-
-// result(float) = op1(float) / op2(float)
-INSTRUCTION_TYPE_DIVISION_FLOAT_FLOAT
+void add(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una operación de móodulo entre dos operandos que puede ser de tipo int o float. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado del móodulo.
+<br>Escribe las instrucciones para setear el registro `rax` con el valor que retorna un método (esta función se llama con un método que retorne una expresión obviamente).
 ```
-// result(int) = op1(int) % op2(int)
-INSTRUCTION_TYPE_MOD_INT_INT
-
-// result(float) = op1(int) % op2(float)
-INSTRUCTION_TYPE_MOD_INT_FLOAT
-
-// result(float) = op1(float) % op2(int)
-INSTRUCTION_TYPE_MOD_FLOAT_INT
-
-// result(float) = op1(float) % op2(float)
-INSTRUCTION_TYPE_MOD_FLOAT_FLOAT
+void returnFromMethod(FILE *f, Symbol *symbolReturned);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una operación de comparación `<`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la operación.
+<br>Escribe un label en el archivo.
 ```
-// result(boolean) = op1(int) < op2(int) 
-INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_INT
-
-// result(boolean) = op1(int) < op2(float)
-INSTRUCTION_TYPE_COMPARISON_SMALLER_INT_FLOAT
-
-// result(boolean) = op1(float) < op2(int)
-INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_INT
-
-// result(boolean) = op1(float) < op2(float)
-INSTRUCTION_TYPE_COMPARISON_SMALLER_FLOAT_FLOAT
+void label(FILE *f, char *str);
 ```
-
-<br>Conjunto de instrucciones que indican que hay una operación de comparación `>`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacenara el resultado de la operación.
+<br>Escribe la instrucción `jmp label` en el archivo.
 ```
-// result(boolean) = op1(int) > op2(int) 
-INSTRUCTION_TYPE_COMPARISON_GREATER_INT_INT
-
-// result(boolean) = op1(int) > op2(float)
-INSTRUCTION_TYPE_COMPARISON_GREATER_INT_FLOAT
-
-// result(boolean) = op1(float) > op2(int)
-INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_INT
-
-// result(boolean) = op1(float) > op2(float)
-INSTRUCTION_TYPE_COMPARISON_GREATER_FLOAT_FLOAT
+void jmp(FILE *f, char *label);
 ```
-
-<br>Conjunto de instrucciones que indican que se multiplico por -1 a una expresión aritmetica (se aplico el `-` unario a la expresión). `op1` apunta al simbolo del operando y `result` apunta al simbolo del temporal donde de almacenara el resultado de aplicarle el `-` a la expresión.
+<br>Escribe las instrucciones `mov src, %r10` y `push %r10` en el archivo.
 ```
-INSTRUCTION_TYPE_UNARY_MINUS_INT   // result(int)   = -op1(int)
-INSTRUCTION_TYPE_UNARY_MINUS_FLOAT // result(float) = -op2(float)
+void push(FILE *f, Symbol *src);
 ```
-
-<br>Instrucción que denota la operación de negación `!`. `op1` apunta al simbolo del operando y `result` apunta al simbolo donde se almacenara el resultado de la operación.
+<br>Genera el código para llamar a una rutina: `call nombre_rutina`.
 ```
-INSTRUCTION_TYPE_NEGATION // result(boolean) = !op1(boolean)
+void call(FILE *f, char *methodName);
 ```
-<br>Instrucción que indica un salto/jump condicional. `op1` apunta al simbolo del operando (que es un booleano) y `result` apunta a un simbolo que denota una etiqueta/label. Si `op1` es false entonces se saltaria a la etiqueta de `result`.
+<br>Genera la instrucción `mov %rax, temp`.
 ```
-INSTRUCTION_TYPE_JMP_FALSE // if (!op1(boolean)) goto result(label)
+void movFromRaxToTemporal(FILE *f, Symbol *temp);
 ```
-
-<br>Instrucción que indica un salto/jump incondicional. `result` apunta a un simbolo que denota la etiqueta/label a la que se salta.
+<br>Genera las intrucciones para hacer una comparación entre `op1` y `op2` dependiendo del valor de `compType` y deja el resultado de dicha comparacion en `result` (deja 0 o 1 en `result`).
 ```
-INSTRUCTION_TYPE_JMP // goto result(label)
+void cmp(FILE *f, Symbol *op1, Symbol *op2, Symbol *result, ComparisonType compType);
 ```
-
-<br>Instrucción que indica que hay una operación de comparación por iguales `==`. `op1` apunta al simbolo del operando izquierdo, `op2` apunta al simbolo del operando derecho y `result` apunta al simbolo del temporal donde se almacena el resultado de la comparación.
+<br>Escribe instrucciones para hacer un salto a `label` si `cond` es falsa.
 ```
-INSTRUCTION_TYPE_EQUAL // result(boolean) = op1 == op2
+void jmpToLabelIfFalse(FILE *f, Symbol *cond, char *label);
 ```
-
-## Estructura de una instrucción
-La implentación de las instrucciones y la generación de código intermedio se encuentra en el path `frontend/codigo_intermedio` en los archivos `intermediate_code.h/.c`.
-
+<br>Escribe instrucciones para hacer un salto a `label` si `cond` es verdadera.
 ```
-typedef struct Instruction {
-    InstructionType    type;
-    Symbol             *op1;
-    Symbol             *op2;
-    Symbol             *result;
-    struct Instruction *next;
-    struct Instruction *prev;
-} Instruction;
+void jmpToLabelIfTrue(FILE *f, Symbol *cond, char *label);
 ```
-
-Dónde:
-- **type**: es el tipo de la instrucción (alguno de los ya listados anteriormente).
-- **op1**: puntero al simbolo del operando 1.
-- **op2**: puntero al simbolo del operando 2.
-- **result**: puntero al simbolo del resultado. 
-- **next**: puntero a la proxima instrucción.
-- **prev**: puntero a la instrucción previa.
-
-Como resultado de la generación de código intermedio se retorna una lista doblemente enlazada de instrucciones (por eso existen los campos `next` y `prev`).
-
-Por otro lado también implemente esta estructura:
-
+<br>Genera instrucciones para multiplicar `op1` con `op2` (`imul op1, op2`) y luego para guardar el resultado de la multiplicacion en `result`.
 ```
-typedef struct InstructionConfig {
-    InstructionType    type;
-    Symbol             *op1;
-    Symbol             *op2;
-    Symbol             *result;
-} InstructionConfig;
+void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 ```
-
-que contiene todos los campos que se podria llegar a setear en la creación de una nueva instrucción. Sigue la misma lógica que ya utilice con los nodos y simbolos comom explique anteriormente en las entregas respectivas. 
-La razón de este struct es para que la función que crea una isntrucción solo tome un parámetro que es este config. Esto me evita hacer varias funciones para crear una instrucción o tener que hacer una función pero con muchos parametros. Ademas me permite pasar solo los campos que me interesan.  
-
-## Funciones del generador de código intermedio
-
-Función que dada la configuración de una instrucción crea una nueva instrucción y la retorna.
+<br>Escribe instrucciones para negar (multiplicar por -1) el valor de `result` usando la instrucción `neg` (`result` es un simbolo de tipo int o float).
 ```
-Instruction * newInstruction(InstructionConfig *config);
+void neg(FILE *f, Symbol *op, Symbol *result);
 ```
-
-<br>Función que dada una instrucción y la cola de una lista enlazada, inserta la instrucción al final de la lista.
+<br>Genera instrucciones para invertir el valor de `result` (es un simbolo de tipo boolean).
 ```
-void insertInstruction(Instruction **tail, Instruction *i);
+void negationBoolean(FILE *f, Symbol *op, Symbol *result);
 ```
-
-<br>Función que genera el código intermedio. Toma como parametro la raiz del ast y retorna una lista doblemente enlazada de isntrucciones. Llama a la función auxiliar de abajo.
+<br>Escribe instrucciones para hacer una division (`result` = `op1`/`op2`). Primero se mueve al registro `rax` el valor de op1 y se extiende el signo del mismo hacia el registro `rdx`. Luego se divide por el valor que tenga el registro `r10`. El resultado de la division queda en el `rax`.
 ```
-Instruction * generateIntermediateCode(AstNode *root);
+void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 ```
-
-<br>Función auxiliar que genera el código intermedio. Toma como parametro la raiz del ast, la cola de una lista enlazada y un contador de labels. Cada vez que inserta una nueva instrucción en la lista lo hace al final de la misma usando el puntero a la cola y ademas necesita llevar el contador de labels ya que los mismos se identifican por su numero (label_1, label_2, etc).
+<br>Escribe instrucciones para hacer una resta (`result` = `op1` - `op2`).
 ```
-void generateIntermediateCodeAux(AstNode *root, Instruction **tail, int *labelCount);
+void sub(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 ```
-
-<br>Función que dado el tipo de una instrucción, lo retorna en forma de string.
+<br>Genera instrucciones para hacer la operación de modulo (`result` = `op1` % `op2`). Es igual a la función de para hacer una division, pero al final se queda con el resto de la misma que se ubica en el registro `rdx`.
 ```
-char * getInstructionTypeString(InstructionType instType);
+void mod(FILE *f, Symbol *op1, Symbol *op2, Symbol *result);
 ```
-
-<br>Función que dada la cabeza de una lista enlazada de instrucciones, las imprime a todas en la terminal.
+<br>Escribe la directiva de ensamblador `.data` en el archivo.
 ```
-void printInstructions(Instruction *head);
+void dataSegment(FILE *f);
 ```
-
-<br>Función que dada la cabeza de una lista enlazada de instrucciones, libera la memoria para cada una.
+<br>Escribe directivas de ensamblador para una variable local en el archivo assembly. Todas las variables ocupan 64 bits.
 ```
-void freeInstructionLinkedList(Instruction *head);
+void globalVarDecl(FILE *f, Symbol *globalVarSymbol);
 ```
-
-<br>Funciones para generan instrucciones de código intermedio para cada tipo de nodo del ast. Todas toman un puntero al nodo, la cola de la lista de instrucciones y el contador de labels. 
+<br>Escribe la directiva de ensamblador `.text` en el archivo.
 ```
-void generateIntermediateCodeNodeP(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeGlobalDeclList(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeVarDecl(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMethodDeclList(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMethodDecl(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeListId(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeId(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeParams(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeVoid(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeParam(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeBlock(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeBlockElems(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeStatements(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeType(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeAssignment(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMethodCall(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeIfElse(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeWhile(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeReturn(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeListExpr(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeIntLiteral(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeFloatLiteral(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeBoolLiteral(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeAddition(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeSubtraction(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMultiplication(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeDivision(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMod(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeComparisonSmaller(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeComparisonGreater(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeEqual(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeAnd(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeOr(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeMinus(AstNode *node, Instruction **tail, int *labelCount);
-void generateIntermediateCodeNodeNegation(AstNode *node, Instruction **tail, int *labelCount);
+void text(FILE *f);
 ```
 
-<br>Función auxiliar para generar código intermedio para los nodos del ast que se corresponden con operaciones binarias aritmeticas (`+`, `-`, `*`, `/` y `%`).
+<br>**Funciones auxiliares:**<br>
+<br>Se utiliza para salvar todos los argumentos pasados a una rutina. Salva los primeros 6 argumentos de los registros y el resto si es que los hay los salva desde el stack. Todos los argumentos salvados los almacena en el stack nuevamente copiando los valores solamente. Esto implementa justamente el pasaje de parametros por copia/valor.
 ```
-void generateIntermediateCodeArithmeticBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+void saveAllArguments(Symbol *methodSymbol, FILE *f);
 ```
-
-<br>Función auxiliar para generar código intermedio para los los nodos del ast que se corresponden con operaciones binarias de comparación (`<` y `>`).
+<br>Esta función mapea un numero entre 1 y 6 a un registro. Se utiliza para pasar argumentos a una rutina o salvarlos dentro de la misma.
 ```
-void generateIntermediateCodeComparisonBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+char * getRegisterForArgument(int numberOfArgument);
 ```
-
-<br>Función auxiliar para generar código intermedio para los nodos del ast  que se corresponden con operaciones binarias lógicas/booleanas (`&&` y `||`).
+<br>Genera instrucciones para pasar un argumento a un registro. Dado el argumento y el numero de argumento, mapea a que registro se lo debe salvar y lo guarda ahi.
 ```
-void generateIntermediateCodeLogicalBinaryOperation(AstNode *node, Instruction **tail, int *labelCount);
+void passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument);
 ```
-
-<br>Función auxiliar que genera las instrucciones para evaluar todos los argumentos pasados a un método en su invocación.
+<br>Dada una instrucción de tipo `INSTRUCTION_TYPE_ARGUMENT` cuyo número de argumento que se pasa es mayor a 6, lo que hace es seguir recorriendo la lista de instrucciones hasta llegar a la ultima instruccion de este tipo. Luego de esto comienza a pushear cada argumento en la pila y va recorriendo la lista en orden inverso hasta llegar a la instrucción que se paso originalmente. Esto justamente implementa la convencion de que si se pasan mas de 6 argumentos a un método, se debe hacer en el stack pusheandolos en orden inverso para que el metodo los reciba en el mismo orden que los tiene en sus parametros dado por el perfil del método.
 ```
-void generateIntermediateCodeForMethodCallArguments(AstNode *methodCallNode, Instruction **tail, int *labelCount);
-
+Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction);
+```
+<br>Si se pasaron argumentos a un metodo en el stack, los popea de la pila luego de la llamada al mismo. En cada pop guarda el valor en el registro `r10`.
+```
+void popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
 ```

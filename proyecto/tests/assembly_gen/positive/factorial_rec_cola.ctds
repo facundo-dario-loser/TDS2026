@@ -12,5 +12,6 @@ int factorial_recursivo_cola(int n, int acum) {
 void main() {
     int x;
 
-    x = factorial_recursivo_cola(4, 1);
+    x = factorial_recursivo_cola(factorial_recursivo_cola(3, 1), 1);
+    printInt(x);
 }
