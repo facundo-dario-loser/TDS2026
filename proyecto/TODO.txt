@@ -124,4 +124,4 @@ complicado, pero podria intentarlo despues
 pero si esto no anda en el cod de 3 dir, seguro lo puedo hacer sobre el ast
 
 // optimizaciones ad-hoc
-- si multiplicas dividis por 2 -> shiftear (constantes)
+- si multiplicas o dividis por 2 -> shiftear (constantes)

@@ -1,0 +1,4 @@
+#ifndef REUSE_OFFSETS_H
+#define REUSE_OFFSETS_H
+
+#endif // REUSE_OFFSETS_H
