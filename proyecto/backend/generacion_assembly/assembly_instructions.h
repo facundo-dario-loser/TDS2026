@@ -41,10 +41,10 @@ void globalVarDecl(FILE *f, Symbol *globalVarSymbol);
 void text(FILE *f);
 
 // funciones auxiliares
-void          saveAllArguments(Symbol *methodSymbol, FILE *f);
-char        * getRegisterForArgument(int numberOfArgument); // dado el numero de argumento retorna el registro en el cual se debe guardar o que ay esta guardado
-void          passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument);
-Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction); // pushea el resto de los argumentos (si hay mas de 6) en el stack
-void          popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);
+void          saveAllArguments(Symbol *methodSymbol, FILE *f);                                       // salva todos los argumentos pasados dentro de un metodo
+char        * getRegisterForArgument(int numberOfArgument);                                          // mapea un numero entre 1 y 6 a un registro (para pasar argumentos a metodos o salvarlos dentro del mismo)
+void          passArgumentToMethodInRegister(FILE *f, Symbol *argumentSymbol, int numberOfArgument); // pasa el argumento dado al metodo a travez de un registro
+Instruction * passArgumentsToMethodInStack(FILE *f, Instruction *argumentInstruction);               // pushea el resto de los argumentos (si hay mas de 6) en el stack
+void          popArgumentsFromStackAfterMethodCall(FILE *f, Symbol *methodSymbol);                   // popea todos los argumentos pasados en el stack a un metodo
 
 #endif // ASSEMBLY_INSTRUCTIONS_H

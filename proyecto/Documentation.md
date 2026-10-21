@@ -163,7 +163,7 @@ typedef enum ComparisonType {
 ```
 
 <br>**Lista de funciones:**
-<br>**Nota**: Muchas de estas funciones tienen en cuenta el tipo de los operandos (int, boolean o float) y si ademas son constantes, variables globales o variables locales. 
+<br>**Nota**: estas funciones tienen en cuenta el tipo de los operandos (int, boolean o float) y si ademas son constantes, variables globales o variables locales. 
 <br><br>Escribe un comentario de assembly (con `#`) en el archivo.
 ```
 void comment(FILE *f, char *string);
