@@ -100,6 +100,9 @@ void processOptionO(int argc, char *argv[]) {
     // ya no es necesario el ast
     freeAst(root);
 
+    // setear los offsets para todos los simbolos de variables locales, parametros y temporales
+    setSymbolOffsets(instructionList);
+
     // generacion asm (se debe borrar el archivo .s)
     char *assemblyFileName = generateAssembly(instructionList, outputFileName);
 
@@ -192,6 +195,9 @@ void processOptionTarget(int argc, char *argv[]) {
                                 // ya no es necesario el ast
                                 freeAst(root);
 
+                                // setear los offsets para todos los simbolos de variables locales, parametros y temporales
+                                setSymbolOffsets(instructionList);
+
                                 // generacion asm (no se borra el archivo generado)
                                 generateAssembly(instructionList, outputFileName);
 
@@ -243,6 +249,9 @@ void processOptionOpt(int argc, char *argv[]) {
     deadCodeElimination(&root);
 
     astToDot(root, fileName);
+
+    // optimizacion de reuso de offsets
+    setOffsetsInAstWithReuse(root);
 
     Instruction *instructionList = generateIntermediateCode(root);
 
@@ -321,6 +330,10 @@ void processOptionDebug(int argc, char *argv[]) {
 
     // ya no es necesario el ast
     freeAst(root);
+
+    // setear los offsets para todos los simbolos de variables locales, parametros y temporales
+    setSymbolOffsets(instructionList);
+    PRINT_SYMBOL_OFFSETS(instructionList)
 
     // generacion asm (no se borra el archivo generado)
     char *assemblyFileName = generateAssembly(instructionList, outputFileName);

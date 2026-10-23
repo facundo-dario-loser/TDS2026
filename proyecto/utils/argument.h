@@ -13,6 +13,7 @@
 #include "dot.h"
 #include "../frontend/analizador_semantico/semantic_analysis.h"
 #include "../frontend/codigo_intermedio/intermediate_code.h"
+#include "../backend/generacion_assembly/offsets.h"
 #include "../backend/generacion_assembly/assembly_gen.h"
 #include "../optimizaciones/constant_propagation.h"
 #include "../optimizaciones/dead_code_elimination.h"

@@ -11,10 +11,6 @@ char * generateAssembly(Instruction *list, char *outputFileName) {
     if (!outputFileName)
         ERROR_ASSEMBLY("outputFileName is NULL in generateAssembly()")
 
-    // setear los offsets para todos los simbolos de variables locales, parametros y temporales
-    setSymbolOffsets(list);
-    PRINT_SYMBOL_OFFSETS(list)
-
     // obtener el nombre del archivo assembly
     char assemblyFileName[64] = "";
     strcat(assemblyFileName, outputFileName);
