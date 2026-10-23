@@ -1,0 +1,11 @@
+int f(int x, int y) {
+    x = (2 + 4) + (5 * 5);
+    y = (8 / 4) - x;
+
+    return x + y; 
+}
+
+void main() {
+    boolean a;
+    a = (f(1, 2) == (9*9));
+}

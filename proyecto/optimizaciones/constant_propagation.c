@@ -48,7 +48,7 @@ void constantPropagation(AstNode **root) {
 
 
 void constantPropagationNodeMethodDeclList(AstNode **node) {
-    printf("node methodDeclList visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node methodDeclList visited");
     constantPropagation(&(*node)->children1);
     constantPropagation(&(*node)->children2);
 }
@@ -57,7 +57,7 @@ void constantPropagationNodeMethodDeclList(AstNode **node) {
 
 
 void constantPropagationNodeMethodDecl(AstNode **node) {
-    printf("node methodDecl visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node methodDecl visited");
     constantPropagation(&(*node)->children4);
 }
 
@@ -65,7 +65,7 @@ void constantPropagationNodeMethodDecl(AstNode **node) {
 
 
 void constantPropagationNodeStatements(AstNode **node) {
-    printf("node NodeStatements visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node NodeStatements visited");
     constantPropagation(&(*node)->children1);
     constantPropagation(&(*node)->children2);
 }
@@ -74,7 +74,7 @@ void constantPropagationNodeStatements(AstNode **node) {
 
 
 void constantPropagationNodeAssignment(AstNode **node) {
-    printf("node Assignment visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Assignment visited");
     constantPropagation(&(*node)->children2);
 }
 
@@ -82,7 +82,7 @@ void constantPropagationNodeAssignment(AstNode **node) {
 
 
 void constantPropagationNodeMethodCall(AstNode **node) {
-    printf("node methodCall visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node methodCall visited");
     if ((*node)->children2) constantPropagation(&(*node)->children2);
 }
 
@@ -90,7 +90,7 @@ void constantPropagationNodeMethodCall(AstNode **node) {
 
 
 void constantPropagationNodeIfElse(AstNode **node) {
-    printf("node IfElse visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node IfElse visited");
     constantPropagation(&(*node)->children1);
     constantPropagation(&(*node)->children2);
     constantPropagation(&(*node)->children3);
@@ -100,7 +100,7 @@ void constantPropagationNodeIfElse(AstNode **node) {
 
 
 void constantPropagationNodeWhile(AstNode **node) {
-    printf("node While visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node While visited");
     constantPropagation(&(*node)->children1);
     constantPropagation(&(*node)->children2);
 }
@@ -109,7 +109,7 @@ void constantPropagationNodeWhile(AstNode **node) {
 
 
 void constantPropagationNodeReturn(AstNode **node) {
-    printf("node Return visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Return visited");
     if ((*node)->children1) constantPropagation(&(*node)->children1);
 }
 
@@ -117,7 +117,7 @@ void constantPropagationNodeReturn(AstNode **node) {
 
 
 void constantPropagationNodeListExpr(AstNode **node) {
-    printf("node ListExpr visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node ListExpr visited");
     constantPropagation(&(*node)->children1);
     constantPropagation(&(*node)->children2);
 }
@@ -126,7 +126,7 @@ void constantPropagationNodeListExpr(AstNode **node) {
 
 
 void constantPropagationNodeAddition(AstNode **node) {
-    printf("node Addition visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Addition visited");
     constantPropagationNodeArithmeticBinaryOperation(node);
 }
 
@@ -134,7 +134,7 @@ void constantPropagationNodeAddition(AstNode **node) {
 
 
 void constantPropagationNodeSubtraction(AstNode **node) {
-    printf("node Subtraction visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Subtraction visited");
     constantPropagationNodeArithmeticBinaryOperation(node);
 }
 
@@ -142,7 +142,7 @@ void constantPropagationNodeSubtraction(AstNode **node) {
 
 
 void constantPropagationNodeMultiplication(AstNode **node) {
-    printf("node Multiplication visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Multiplication visited");
     constantPropagationNodeArithmeticBinaryOperation(node);
 }
 
@@ -150,7 +150,7 @@ void constantPropagationNodeMultiplication(AstNode **node) {
 
 
 void constantPropagationNodeDivision(AstNode **node) {
-    printf("node Division visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Division visited");
     constantPropagationNodeArithmeticBinaryOperation(node);
 }
 
@@ -158,7 +158,7 @@ void constantPropagationNodeDivision(AstNode **node) {
 
 
 void constantPropagationNodeMod(AstNode **node) {
-    printf("node Mod visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Mod visited");
     // warning: solo funciona con operandos ints (en c % solo opera con enteros)
     // TODO: ver como manejar el caso cuando alguno de los operandos es float
     constantPropagationNodeArithmeticBinaryOperation(node);
@@ -168,7 +168,7 @@ void constantPropagationNodeMod(AstNode **node) {
 
 
 void constantPropagationNodeComparisonSmaller(AstNode **node) {
-    printf("node ComparisonSmaller visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node ComparisonSmaller visited");
     constantPropagationNodeComparison(node);
 }
 
@@ -176,7 +176,7 @@ void constantPropagationNodeComparisonSmaller(AstNode **node) {
 
 
 void constantPropagationNodeComparisonGreater(AstNode **node) {
-    printf("node ComparisonGreater visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node ComparisonGreater visited");
     constantPropagationNodeComparison(node);
 }
 
@@ -184,7 +184,7 @@ void constantPropagationNodeComparisonGreater(AstNode **node) {
 
 
 void constantPropagationNodeEqual(AstNode **node) {
-    printf("node Equal visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Equal visited");
     constantPropagationNodeComparison(node);
 }
 
@@ -192,7 +192,7 @@ void constantPropagationNodeEqual(AstNode **node) {
 
 
 void constantPropagationNodeAnd(AstNode **node) {
-    printf("node And visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node And visited");
     constantPropagationNodeBooleanBinaryOperation(node);
 }
 
@@ -200,7 +200,7 @@ void constantPropagationNodeAnd(AstNode **node) {
 
 
 void constantPropagationNodeOr(AstNode **node) {
-    printf("node Or visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Or visited");
     constantPropagationNodeBooleanBinaryOperation(node);
 }
 
@@ -208,60 +208,89 @@ void constantPropagationNodeOr(AstNode **node) {
 
 
 void constantPropagationNodeMinus(AstNode **node) {
-    printf("node Minus visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Minus visited");
     constantPropagation(&(*node)->children1);
 
-    SymbolValue         constValue;
-    SymbolSemanticType  constSymbolSemanticType;
-    char                constSymbolName[16];
-    AstNodeType         constNodeType;
-    AstNodeValue        constNodeValue;
+    if ((*node)->children1->symbol->type == SYMBOL_TYPE_CONSTANT) {
+        SymbolValue         constValue;
+        SymbolSemanticType  constSymbolSemanticType;
+        char                constSymbolName[16];
+        AstNodeType         constNodeType;
+        AstNodeValue        constNodeValue;
 
-    if ((*node)->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
-        constValue.intValue     = -(*node)->children1->symbol->value.intValue;
-        constSymbolSemanticType = SYMBOL_SEMANTIC_TYPE_INT;
-        constNodeType           = AST_NODE_TYPE_INT_LITERAL;
-        constNodeValue.intValue = constValue.intValue;
-        snprintf(constSymbolName, sizeof(constSymbolName), "%d", constValue.intValue);
+        if ((*node)->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_INT) {
+            constValue.intValue     = -(*node)->children1->symbol->value.intValue;
+            constSymbolSemanticType = SYMBOL_SEMANTIC_TYPE_INT;
+            constNodeType           = AST_NODE_TYPE_INT_LITERAL;
+            constNodeValue.intValue = constValue.intValue;
+            snprintf(constSymbolName, sizeof(constSymbolName), "%d", constValue.intValue);
+        }
+
+        if ((*node)->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
+            constValue.floatValue     = -(*node)->children1->symbol->value.floatValue;
+            constSymbolSemanticType   = SYMBOL_SEMANTIC_TYPE_FLOAT;
+            constNodeType             = AST_NODE_TYPE_FLOAT_LITERAL,
+            constNodeValue.floatValue = constValue.floatValue;
+            snprintf(constSymbolName, sizeof(constSymbolName), "%f", constValue.floatValue);
+        }
+
+        freeAst((*node));
+
+        SymbolConfig constSymbolConfig = {
+            .type         = SYMBOL_TYPE_CONSTANT,
+            .semanticType = constSymbolSemanticType,
+            .value        = constValue,
+            .name         = strdup(constSymbolName),
+        };
+
+        Symbol *constSymbol = newSymbol(&constSymbolConfig);
+
+        AstNodeConfig constNodeConfig = {
+            .type   = constNodeType,
+            .symbol = constSymbol,
+            .value  = constNodeValue,
+        };
+
+        (*node) = newAstNode(&constNodeConfig);
+        constSymbol->referenceCount++;
     }
-
-    if ((*node)->children1->symbol->semanticType == SYMBOL_SEMANTIC_TYPE_FLOAT) {
-        constValue.floatValue     = -(*node)->children1->symbol->value.floatValue;
-        constSymbolSemanticType   = SYMBOL_SEMANTIC_TYPE_FLOAT;
-        constNodeType             = AST_NODE_TYPE_FLOAT_LITERAL,
-        constNodeValue.floatValue = constValue.floatValue;
-        snprintf(constSymbolName, sizeof(constSymbolName), "%f", constValue.floatValue);
-    }
-
-    freeAst((*node));
-
-    SymbolConfig constSymbolConfig = {
-        .type         = SYMBOL_TYPE_CONSTANT,
-        .semanticType = constSymbolSemanticType,
-        .value        = constValue,
-        .name         = strdup(constSymbolName),
-    };
-
-    Symbol *constSymbol = newSymbol(&constSymbolConfig);
-
-    AstNodeConfig constNodeConfig = {
-        .type   = constNodeType,
-        .symbol = constSymbol,
-        .value  = constNodeValue,
-    };
-
-    (*node) = newAstNode(&constNodeConfig);
-    constSymbol->referenceCount++;
 }
 
 
 
 
 void constantPropagationNodeNegation(AstNode **node) {
-    printf("node Negation visited\n");
+    DEBUG_OPT_CONSTANT_PROPAGATION("node Negation visited");
     constantPropagation(&(*node)->children1);
 
-    // ...
+    if ((*node)->children1->symbol->type == SYMBOL_TYPE_CONSTANT) {
+        bool constValue = !(*node)->children1->symbol->value.booleanValue;
+        char constSymbolName[16];
+
+        snprintf(constSymbolName, sizeof(constSymbolName), "%s", constValue ? "true" : "false");
+
+        freeAst((*node));
+
+        SymbolConfig constSymbolConfig = {
+            .type               = SYMBOL_TYPE_CONSTANT,
+            .name               = strdup(constSymbolName),
+            .semanticType       = SYMBOL_SEMANTIC_TYPE_BOOLEAN,
+            .value.booleanValue = constValue,
+        };
+
+        Symbol *constSymbol = newSymbol(&constSymbolConfig);
+
+        AstNodeConfig constNodeConfig = {
+            .type               = AST_NODE_TYPE_BOOL_LITERAL,
+            .symbol             = constSymbol,
+            .value.booleanValue = constValue,
+        };
+
+        AstNode *constNode = newAstNode(&constNodeConfig);
+
+        (*node) = constNode;
+        constSymbol->referenceCount++;
+    }
 }
 
 

@@ -10,16 +10,17 @@
 
 // enum para saber la fuente o de donde viene un mensaje/printf
 typedef enum MessageSource {
-    MESSAGE_SOURCE_GLOBAL,              // no proviene de ningun lugar en especifico (no sabia que nombre ponerle y deje GLOBAL)
-    MESSAGE_SOURCE_ARGUMENT,            // proviene de los argumentos con los que se invoco al compilador
-    MESSAGE_SOURCE_LEXICAL_ANALYSIS,    // proviene del analisis lexico
-    MESSAGE_SOURCE_SINTAX_ANALYSIS,     // proviene del analisis sintactico
-    MESSAGE_SOURCE_SEMANTIC_ANALYSIS,   // proviene del analisis semantico
-    MESSAGE_SOURCE_IR_GENERATION,       // proviene de la generacion de codigo intermedio de bajo nivel
-    MESSAGE_SOURCE_ASSEMBLY_GENERATION, // proviene de la generacion de assembly
-    MESSAGE_SOURCE_AST,                 // proviene del arbol sintactico abstracto
-    MESSAGE_SOURCE_SYMBOL_TABLE,        // proviene de la tabla de simbolos
-    MESSAGE_SOURCE_DOT,                 // proviene del modulo dot.h
+    MESSAGE_SOURCE_GLOBAL,                   // no proviene de ningun lugar en especifico (no sabia que nombre ponerle y deje GLOBAL)
+    MESSAGE_SOURCE_ARGUMENT,                 // proviene de los argumentos con los que se invoco al compilador
+    MESSAGE_SOURCE_LEXICAL_ANALYSIS,         // proviene del analisis lexico
+    MESSAGE_SOURCE_SINTAX_ANALYSIS,          // proviene del analisis sintactico
+    MESSAGE_SOURCE_SEMANTIC_ANALYSIS,        // proviene del analisis semantico
+    MESSAGE_SOURCE_IR_GENERATION,            // proviene de la generacion de codigo intermedio de bajo nivel
+    MESSAGE_SOURCE_ASSEMBLY_GENERATION,      // proviene de la generacion de assembly
+    MESSAGE_SOURCE_AST,                      // proviene del arbol sintactico abstracto
+    MESSAGE_SOURCE_SYMBOL_TABLE,             // proviene de la tabla de simbolos
+    MESSAGE_SOURCE_DOT,                      // proviene del modulo dot.h
+    MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION, // proviene de la optimizacion de propagacion de constantes
 } MessageSource;
 
 extern bool debugFlag;
@@ -66,15 +67,16 @@ char * getMessageSourceString(MessageSource msgSrc);
 
 // macros que expanden en la macro LOG() invocando a la misma con el source correspondiente
 // es para evitar poner el source cada vez que invoco a LOG()
-#define DEBUG(...)            LOG(MESSAGE_SOURCE_GLOBAL, __VA_ARGS__)
-#define DEBUG_ARGUMENT(...)   LOG(MESSAGE_SOURCE_ARGUMENT, __VA_ARGS__)
-#define DEBUG_LEXER(...)      LOG(MESSAGE_SOURCE_LEXICAL_ANALYSIS, __VA_ARGS__)
-#define DEBUG_PARSER(...)     LOG(MESSAGE_SOURCE_SINTAX_ANALYSIS, __VA_ARGS__)
-#define DEBUG_SEMANTIC(...)   LOG(MESSAGE_SOURCE_SEMANTIC_ANALYSIS, __VA_ARGS__)
-#define DEBUG_IR(...)         LOG(MESSAGE_SOURCE_IR_GENERATION, __VA_ARGS__)
-#define DEBUG_ASSEMBLY(...)   LOG(MESSAGE_SOURCE_ASSEMBLY_GENERATION, __VA_ARGS__)
-#define DEBUG_AST(...)        LOG(MESSAGE_SOURCE_AST, __VA_ARGS__)
-#define DEBUG_ST(...)         LOG(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
+#define DEBUG(...)                          LOG(MESSAGE_SOURCE_GLOBAL, __VA_ARGS__)
+#define DEBUG_ARGUMENT(...)                 LOG(MESSAGE_SOURCE_ARGUMENT, __VA_ARGS__)
+#define DEBUG_LEXER(...)                    LOG(MESSAGE_SOURCE_LEXICAL_ANALYSIS, __VA_ARGS__)
+#define DEBUG_PARSER(...)                   LOG(MESSAGE_SOURCE_SINTAX_ANALYSIS, __VA_ARGS__)
+#define DEBUG_SEMANTIC(...)                 LOG(MESSAGE_SOURCE_SEMANTIC_ANALYSIS, __VA_ARGS__)
+#define DEBUG_IR(...)                       LOG(MESSAGE_SOURCE_IR_GENERATION, __VA_ARGS__)
+#define DEBUG_ASSEMBLY(...)                 LOG(MESSAGE_SOURCE_ASSEMBLY_GENERATION, __VA_ARGS__)
+#define DEBUG_AST(...)                      LOG(MESSAGE_SOURCE_AST, __VA_ARGS__)
+#define DEBUG_ST(...)                       LOG(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
+#define DEBUG_OPT_CONSTANT_PROPAGATION(...) LOG(MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION, __VA_ARGS__)
 
 // macros que expanden en la macro ERROR() invocando a la misma con el source correspondiente
 // es para evitar poner el source cada vez que invoco a ERROR()
