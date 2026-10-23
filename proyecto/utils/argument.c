@@ -333,7 +333,7 @@ void processOptionDebug(int argc, char *argv[]) {
 
     // setear los offsets para todos los simbolos de variables locales, parametros y temporales
     setSymbolOffsets(instructionList);
-    PRINT_SYMBOL_OFFSETS(instructionList)
+    //PRINT_SYMBOL_OFFSETS(instructionList)
 
     // generacion asm (no se borra el archivo generado)
     char *assemblyFileName = generateAssembly(instructionList, outputFileName);

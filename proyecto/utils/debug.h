@@ -99,4 +99,6 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define PRINT_SYMBOL(symbol)            { if (debugFlag) printSymbolInfo(symbol); }
 #define PRINT_SYMBOL_OFFSETS(list)      { if (debugFlag) printSymbolOffsets(list); }
 
+#define PRINT_SYMBOL_OFFSET(...)        LOG(MESSAGE_SOURCE_ASSEMBLY_GENERATION, __VA_ARGS__)
+
 #endif // DEBUG_H

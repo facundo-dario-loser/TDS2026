@@ -25,6 +25,7 @@ void setSymbolOffsets(Instruction *list) {
                         currentOffset   -= 8;
                         param->offsetSet = true;
                         numberOfLocalVariables++;
+                        PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", param->name, param->offset)
                     }
                     param = param->next;
                 }
@@ -52,6 +53,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset       -= 8;
                     i->result->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->result->name, i->result->offset)
                 }
 
                 i = i->next;
@@ -64,6 +66,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset    -= 8;
                     i->op1->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->op1->name, i->op1->offset)
                 }
 
                 i = i->next;
@@ -76,6 +79,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset    -= 8;
                     i->op1->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->op1->name, i->op1->offset)
                 }
 
                 i = i->next;
@@ -91,6 +95,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset    -= 8;
                     i->op1->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->op1->name, i->op1->offset)
                 }
 
                 if (i->op2 && (i->op2->type == SYMBOL_TYPE_VARIABLE) && (i->op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && !i->op2->offsetSet) {
@@ -98,6 +103,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset    -= 8;
                     i->op2->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->op2->name, i->op2->offset)
                 }
 
                 if (i->result && (i->result->type == SYMBOL_TYPE_VARIABLE) && (i->result->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) && !i->result->offsetSet) {
@@ -105,6 +111,7 @@ void setSymbolOffsets(Instruction *list) {
                     currentOffset       -= 8;
                     i->result->offsetSet = true;
                     numberOfLocalVariables++;
+                    PRINT_SYMBOL_OFFSET("symbol %s, offset: %d", i->result->name, i->result->offset)
                 }
 
                 i = i->next;
