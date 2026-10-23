@@ -10,6 +10,9 @@ C_PROGRAMS =  frontend/analizador_lexico/lex.yy.c         		  \
 			  backend/generacion_assembly/assembly_gen.c          \
 			  backend/generacion_assembly/assembly_instructions.c \
 			  backend/generacion_assembly/offsets.c 			  \
+			  optimizaciones/constant_propagation.c 			  \
+			  optimizaciones/dead_code_elimination.c		 	  \
+			  optimizaciones/reuse_offsets.c 					  \
 			  main.c
 
 main: frontend/analizador_lexico/lexer.l frontend/analizador_sintactico/parser.y $(PROGRAMAS_C)

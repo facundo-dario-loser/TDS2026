@@ -1,0 +1,4 @@
+void main() {
+    boolean a;
+    a = ((4 == 4) == true);
+}

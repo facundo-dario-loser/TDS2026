@@ -81,6 +81,7 @@ typedef struct AstNodeConfig {
     AstNodeType            type;
     AstNodeDeclarationType declarationType;
     AstNodeValue           value;
+    Symbol                 *symbol;
     AstNode                *children1;
     AstNode                *children2;
     AstNode                *children3;

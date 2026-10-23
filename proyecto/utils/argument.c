@@ -204,14 +204,68 @@ void processOptionTarget(int argc, char *argv[]) {
 
 
 void processOptionOpt(int argc, char *argv[]) {
-    TODO("OPTION_OPT 'processOptionOpt()' not implemented yet")
+    char *outputFileName = getFileNameFromPath(argv[2]);
+
+    if (argc < 3) ERROR_ARGUMENT("the path to the source file was not provided")
+    checkFileName(2, argv);
+    yyin = fopen(argv[2], "r");
+
+    if (!yyin) {
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
+    }
+
+    int parseResult = yyparse();
+    
+    if (!(parseResult == 0)) ERROR_GLOBAL("[ERROR]: parseResult is '%d'\n", parseResult)
+
+    // obtener el nombre 
+    char *aux = strrchr(argv[2], '/');
+    if (aux) aux++;
+    if (!aux) aux = argv[2];
+
+    // cambiar la extension .ctds por .dot
+    char fileName[256];
+    int i = 0;
+
+    while (aux[i] != '.') {
+        fileName[i] = aux[i]; 
+        i++;
+    }
+    
+    strcat(fileName, ".dot");
+
+    semanticAnalysis(root);
+
+    // optimizacion de propagacion de constantes
+    constantPropagation(&root);
+
+    astToDot(root, fileName);
+
+    Instruction *instructionList = generateIntermediateCode(root);
+
+    if (!instructionList)
+        ERROR_GLOBAL("instructionList is NULL")
+
+    // ya no es necesario el ast
+    freeAst(root);
+
+    // generacion asm
+    char *assemblyFileName = generateAssembly(instructionList, outputFileName);
+
+    freeInstructionLinkedList(instructionList);
+
+    char command[256];
+    snprintf(command, sizeof(command), "gcc %s files_to_link/print.c -o %s", assemblyFileName, outputFileName);
+    system(command);
+
+    remove(assemblyFileName);
 }
 
 
 
 
 void processOptionDebug(int argc, char *argv[]) {
-    debugFlag = true;
+    debugFlag            = true;
     char *outputFileName = getFileNameFromPath(argv[2]);
 
     if (argc < 3) ERROR_ARGUMENT("the path to the source file was not provided")

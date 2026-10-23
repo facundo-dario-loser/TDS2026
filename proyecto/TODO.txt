@@ -125,3 +125,5 @@ pero si esto no anda en el cod de 3 dir, seguro lo puedo hacer sobre el ast
 
 // optimizaciones ad-hoc
 - si multiplicas o dividis por 2 -> shiftear (constantes)
+
+- podria tirar warnings en division por 0
