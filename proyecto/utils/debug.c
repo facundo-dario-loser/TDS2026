@@ -13,6 +13,7 @@ char * getMessageSourceString(MessageSource msgSrc) {
         case MESSAGE_SOURCE_SYMBOL_TABLE:             return "SYMBOL_TABLE";
         case MESSAGE_SOURCE_DOT:                      return "DOT";
         case MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION: return "OPT_CONSTANT_PROPAGATION";
+        case MESSAGE_SOURCE_OPT_DEAD_CODE:            return "OPT_DEAD_CODE";
         default:                                      return "";
     }
 }

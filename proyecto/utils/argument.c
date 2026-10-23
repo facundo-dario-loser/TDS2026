@@ -239,6 +239,9 @@ void processOptionOpt(int argc, char *argv[]) {
     // optimizacion de propagacion de constantes
     constantPropagation(&root);
 
+    // optimizacion de eliminacion de codigo muerto
+    deadCodeElimination(&root);
+
     astToDot(root, fileName);
 
     Instruction *instructionList = generateIntermediateCode(root);

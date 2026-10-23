@@ -21,6 +21,7 @@ typedef enum MessageSource {
     MESSAGE_SOURCE_SYMBOL_TABLE,             // proviene de la tabla de simbolos
     MESSAGE_SOURCE_DOT,                      // proviene del modulo dot.h
     MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION, // proviene de la optimizacion de propagacion de constantes
+    MESSAGE_SOURCE_OPT_DEAD_CODE,            // proviene de la optimizacion de eliminacion de codigo muerto
 } MessageSource;
 
 extern bool debugFlag;
@@ -77,6 +78,7 @@ char * getMessageSourceString(MessageSource msgSrc);
 #define DEBUG_AST(...)                      LOG(MESSAGE_SOURCE_AST, __VA_ARGS__)
 #define DEBUG_ST(...)                       LOG(MESSAGE_SOURCE_SYMBOL_TABLE, __VA_ARGS__)
 #define DEBUG_OPT_CONSTANT_PROPAGATION(...) LOG(MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION, __VA_ARGS__)
+#define DEBUG_OPT_DEAD_CODE(...)            LOG(MESSAGE_SOURCE_OPT_DEAD_CODE, __VA_ARGS__)
 
 // macros que expanden en la macro ERROR() invocando a la misma con el source correspondiente
 // es para evitar poner el source cada vez que invoco a ERROR()

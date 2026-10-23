@@ -1,0 +1,17 @@
+extern void printInt(int n);
+
+int f() {
+    int x, y, z;
+
+    x = 1;
+    return x;
+
+    y = 2;
+    z = 3;
+}
+
+void main() {
+    int x;
+    x = f();
+    printInt(x);
+}

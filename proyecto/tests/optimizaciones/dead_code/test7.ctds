@@ -1,0 +1,9 @@
+void main() {
+    int x, y;
+
+    while (false) {
+        x = x + 1;
+    }
+
+    y = 8;
+}
