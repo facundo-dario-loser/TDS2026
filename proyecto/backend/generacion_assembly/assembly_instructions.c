@@ -764,6 +764,14 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
         if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
                 fprintf(f, "\tmov %d(%%rbp), %%r10\n", op1->offset);
+                
+                if (op2->value.intValue == 2) {
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                    return;
+                }
+
                 fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
             }
 
@@ -775,6 +783,14 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
         if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
                 fprintf(f, "\tmov %s(%%rip), %%r10\n", op1->name);
+
+                if (op2->value.intValue == 2) {
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                    return;
+                }
+
                 fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
             }
 
@@ -787,6 +803,14 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
         if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                if (op1->value.intValue == 2) {
+                    fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                    return;
+                }
+
                 fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
                 fprintf(f, "\tmov %d(%%rbp), %%r11\n", op2->offset);
             }
@@ -798,6 +822,14 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
         if (op2->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+                if (op1->value.intValue == 2) {
+                    fprintf(f, "\tmov %s(%%rip), %%r10\n", op2->name);
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                    fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                    return;
+                }
+
                 fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
                 fprintf(f, "\tmov %s(%%rip), %%r11\n", op2->name);
             }
@@ -810,6 +842,22 @@ void imul(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
         if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
+            if (op1->value.intValue == 2) {
+                fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
+                fprintf(f, "\tmov $1, %%rcx\n");
+                fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                return;
+            }
+
+            if (op2->value.intValue == 2) {
+                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov $1, %%rcx\n");
+                fprintf(f, "\tshl %%r10 # optimization (faster than imul)\n");
+                fprintf(f, "\tmov %%r10, %d(%%rbp)\n", result->offset);
+                return;
+            }
+
             fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
             fprintf(f, "\tmov $%d, %%r11\n", op2->value.intValue);
         }
@@ -950,6 +998,14 @@ void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
         if (op1->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
                 fprintf(f, "\tmov %d(%%rbp), %%rax\n", op1->offset);
+                
+                if (op2->value.intValue == 2) {
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshr %%rax # optimization (faster than idiv)\n");
+                    fprintf(f, "\tmov %%rax, %d(%%rbp) # save the quotient\n", result->offset);
+                    return;
+                }
+                
                 fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
             }
 
@@ -961,6 +1017,14 @@ void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
         if (op1->variableType == SYMBOL_VARIABLE_TYPE_GLOBAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
                 fprintf(f, "\tmov %s(%%rip), %%rax\n", op1->name);
+
+                if (op2->value.intValue == 2) {
+                    fprintf(f, "\tmov $1, %%rcx\n");
+                    fprintf(f, "\tshr %%rax # optimization (faster than idiv)\n");
+                    fprintf(f, "\tmov %%rax, %d(%%rbp) # save the quotient\n", result->offset);
+                    return;
+                }
+
                 fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
             }
 
@@ -973,7 +1037,7 @@ void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_VARIABLE)) {
         if (op2->variableType == SYMBOL_VARIABLE_TYPE_LOCAL) {
             if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-                fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+                fprintf(f, "\tmov $%d, %%rax\n", op1->value.intValue);
                 fprintf(f, "\tmov %d(%%rbp), %%r10\n", op2->offset);
             }
 
@@ -996,7 +1060,15 @@ void idiv(FILE *f, Symbol *op1, Symbol *op2, Symbol *result) {
 
     if ((op1->type == SYMBOL_TYPE_CONSTANT) && (op2->type == SYMBOL_TYPE_CONSTANT)) {
         if ((op1->semanticType == SYMBOL_SEMANTIC_TYPE_INT) && (op2->semanticType == SYMBOL_SEMANTIC_TYPE_INT)) {
-            fprintf(f, "\tmov $%d, %%r10\n", op1->value.intValue);
+            fprintf(f, "\tmov $%d, %%rax\n", op1->value.intValue);
+
+            if (op2->value.intValue == 2) {
+                fprintf(f, "\tmov $1, %%rcx\n");
+                fprintf(f, "\tshr %%rax # optimization (faster than idiv)\n");
+                fprintf(f, "\tmov %%rax, %d(%%rbp) # save the quotient\n", result->offset);
+                return;
+            }
+
             fprintf(f, "\tmov $%d, %%r10\n", op2->value.intValue);
         }
 

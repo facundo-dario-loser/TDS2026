@@ -1,0 +1,12 @@
+extern void printInt(int n);
+
+void main() {
+    int x, y;
+    x = 8;
+
+    y = x / 2;
+    printInt(y);
+
+    y = 16 / x;
+    printInt(y);
+}
