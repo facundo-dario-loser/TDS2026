@@ -1,0 +1,6 @@
+void main() {
+    int x;
+    boolean a, b;
+
+    x = (1 + 2) * (8 / 4);
+}

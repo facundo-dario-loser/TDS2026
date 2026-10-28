@@ -127,3 +127,5 @@ pero si esto no anda en el cod de 3 dir, seguro lo puedo hacer sobre el ast
 - si multiplicas o dividis por 2 -> shiftear (constantes)
 
 - podria tirar warnings en division por 0
+
+- en el reuso de offsets no estoy asignados offsets a los temporales
