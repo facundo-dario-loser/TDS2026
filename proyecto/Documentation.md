@@ -222,7 +222,7 @@ Función auxiliar que recorre el ast llamando a diferentes funciones para los di
 void setOffsetsInAstWithReuseAux(AstNode *node, int *currentOffset);
 ```
 
-Funciones para diferentes tipos de nodos. Las mas importantes son `setOffsetsNodeBlock` la cual hace el trabajo para reusar lso offsets y `setOffsetsNodeVarDecl` que se encarga de asignar el offset a las variables. 
+Funciones para diferentes tipos de nodos. Las mas importantes son `setOffsetsNodeBlock` la cual hace el trabajo para reusar los offsets.
 ```
 void setOffsetsNodeMethodDeclList(AstNode *node, int *currentOffset);
 void setOffsetsNodeVarDecl(AstNode *node, int *currentOffset);

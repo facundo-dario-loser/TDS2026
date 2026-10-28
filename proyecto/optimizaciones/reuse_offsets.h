@@ -13,4 +13,7 @@ void setOffsetsNodeBlockElems(AstNode *node, int *currentOffset);
 void setOffsetsNodeStatements(AstNode *node, int *currentOffset);
 void setOffsetsNodeIfElse(AstNode *node, int *currentOffset);
 
+void setOffsetsNodeBinaryOperator(AstNode *node, int *currentOffset);
+void setOffsetsNodeUnaryOperator(AstNode *node, int *currentOffset);
+
 #endif // REUSE_OFFSETS_H
