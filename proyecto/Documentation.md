@@ -4,8 +4,7 @@ La implementación de las optimizaciones se encuentran en el path: `/proyecto/op
 - `dead_code_elimination.h/.c`
 - `reuse_offsets.h/.c`
 
-
-## Actualizaciones en 
+**Nota**: las imágenes que presentadas a continuación se generaron ejecutando el comando `dot -Tsvg file.dot -o ast.svg` sobre el archivo `.dot` que genera el compilador. Los archivos `.dot` se almacenan en la carpeta `./dot_files` y se generan con el mismo nombre que el archivo a compilar.
 
 ## Propagación de constantes
 La implementación se encuentra en la carpeta `/optimizaciones` en los archivos `constant_propagation.h/.c`.<br> La idea que se siguio fue que al llegar a un nodo que representa una expresión aritmetica (`+`, `-`, `*`, `/`, `%`), una expresión de comparación (`<`, `>`, `==`) o una expresión lógica (`&&`, `||`) se chequea si los 2 operandos son constantes, si ese es el caso entonces se resuelve la expresión y se libera el subarbol del ast de la misma para reemplazarlo con un nodo de tipo constante que es el resultado de evaluar la expresión.<br>
@@ -238,6 +237,11 @@ void setOffsetsNodeBinaryOperator(AstNode *node, int *currentOffset);
 void setOffsetsNodeUnaryOperator(AstNode *node, int *currentOffset);
 ```
 
+Función auxiliar para obtener el numero de variables locales (y temporales) de un metodo.
+```
+void getNumberOfLocalVariablesAndTemporals(AstNode *node, int *numberOfVarsAndTemps);
+```
+
 **Ejemplo 1**:
 ```
 void main() {
@@ -335,3 +339,55 @@ main:
 	ret
 ```
 
+<br>**Ejemplo 2**:
+```
+void main() {
+    int x, y;
+    x = 8;
+
+    y = x / 2;
+    y = 16 / x;
+}
+```
+
+**Assembly generado**:
+```
+
+.text
+
+.globl main
+main:
+	enter $(8*4), $0
+
+	# AssignmentIntInt
+	mov $8, %r10
+	mov %r10, -8(%rbp)
+
+	# DivisionIntInt
+	mov -8(%rbp), %rax
+	mov $1, %rcx
+	shr %rax # optimization (faster than idiv)
+	mov %rax, -24(%rbp) # save the quotient
+
+	# AssignmentIntInt
+	mov -24(%rbp), %r10
+	mov %r10, -16(%rbp)
+
+	# DivisionIntInt
+	mov $16, %rax
+	mov -8(%rbp), %r10
+	cqto # extend rax sign to rdx
+	idiv %r10
+	mov %rax, -32(%rbp) # save the quotient
+
+	# AssignmentIntInt
+	mov -32(%rbp), %r10
+	mov %r10, -16(%rbp)
+
+	# note: setting rax with exit code 0 (even if main doesn't return anything)
+	mov $0, %rax
+
+.end_method_main:
+	leave
+	ret
+```

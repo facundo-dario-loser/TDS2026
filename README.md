@@ -41,6 +41,9 @@ gcc frontend/analizador_lexico/lex.yy.c         		\
 	backend/generacion_assembly/assembly_gen.c          \
 	backend/generacion_assembly/assembly_instructions.c \
 	backend/generacion_assembly/offsets.c 			    \
+    optimizaciones/constant_propagation.c 			    \
+	optimizaciones/dead_code_elimination.c		 	    \
+	optimizaciones/reuse_offsets.c 					    \
     main.c
 ```
 
@@ -52,8 +55,8 @@ Ejemplo para ejecutar en la terminal:<br>
 
 **Opciones**
 - `-o <salida>` Renombra el archivo ejecutable a `<salida>`.
-- `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación (implementado parcialmente).
-- `-opt` Aplicar optimizaciones (todavia no esta implementado).
+- `-target <etapa>` Indicar hasta que etapa ejecutar el proceso de compilación.
+- `-opt` Aplicar optimizaciones.
 - `-debug` Ejecuta el compilador con logs e información útil en la terminal. También genera un archivo `.dot` con el mismo nombre que el archivo con el programa fuente y lo guarda en la carpeta `/dot_files`.<br>
     Luego es posible crear una imagen `.svg` del ast a partir del archivo `.dot` ejecutando el siguiente comando:
 
@@ -91,6 +94,7 @@ Dentro de la carpeta `/proyecto/tests` se encuentran las subcarpetas:
 - `/intermediate_code`: tests para la etapa de generación de código intermedio.
 - `/assembly_gen`: tests para la etapa de la generación de assembly.
 - `/general`: tests generales para todas las etapas del compilador.
+- `/optimizaciones`: tests para cada una de las optimizaciones (propagación de constantes, eliminación de código muerto y reuso de offsets).
 
 Cada una de estas carpetas a su vez tiene dos subcarpetas `/positive` y `/negative` con tests que deben pasar y tests que no deben pasar respectivemente. 
 
@@ -144,6 +148,11 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 
 - `backend/generacion_assembly` contiene los archivos que implementan la generación de assembly.
 
+- `optimizaciones`: contiene los archivos correspondientes a cada optimización:
+    - `constant_propagation.h/.c`: implementa la propagación de constantes.
+    - `dead_code_elimination.h/.c`: implementa la eliminación de código muerto.
+    - `reuse_offsets.h/.c`: implementa el reuso de offsets para los simbolos.
+
 - `/tests` contiene subcarpetas con tests correspondientes a cada etapa implementada del compilador. Los tests son archivos `.ctds`.
     - `/lexer` contiene tests correspondientes a la etapa del analisis lexico.
     - `/parser` contiene tests correspondientes a la etapa del analisis sintactico.
@@ -163,6 +172,8 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 - `/dot_files` aca se guardan los archivos `.dot` generados.
 
 - `files_to_link` cotiene un archivo de c con funciones para printear enteros (`printInt`) y booleanos(`printBoolean`). Este archivo se puede linkear con un programa del lenguaje ctds para poder imprimir valores. 
+
+- `images`: contiene imagenes .svg usadas para la documentación.
 
 **Nota**: los archivos `.dot` solamente se generan si se ejecuta el compilador con la opcion `-debug`.
 

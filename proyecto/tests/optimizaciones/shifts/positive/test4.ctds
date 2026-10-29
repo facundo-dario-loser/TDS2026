@@ -1,0 +1,7 @@
+void main() {
+    int x, y;
+    x = 8;
+
+    y = x / 2;
+    y = 16 / x;
+}
