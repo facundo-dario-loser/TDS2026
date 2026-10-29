@@ -12,8 +12,12 @@ void setOffsetsNodeBlock(AstNode *node, int *currentOffset);
 void setOffsetsNodeBlockElems(AstNode *node, int *currentOffset);
 void setOffsetsNodeStatements(AstNode *node, int *currentOffset);
 void setOffsetsNodeIfElse(AstNode *node, int *currentOffset);
+void setOffsetsNodeMethodDecl(AstNode *node, int *currentOffset);
 
 void setOffsetsNodeBinaryOperator(AstNode *node, int *currentOffset);
 void setOffsetsNodeUnaryOperator(AstNode *node, int *currentOffset);
+
+// se debe llamar con un nodo de tipo block perteneciente a un methodDecl
+void getNumberOfLocalVariablesAndTemporals(AstNode *node, int *numberOfVarsAndTemps);
 
 #endif // REUSE_OFFSETS_H

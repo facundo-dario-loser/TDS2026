@@ -50,6 +50,7 @@ typedef struct Symbol {
     bool               offsetSet;              // para saber si a una variable o temporal ya se le asigno un offset
     int                numberOfLocalVariables; // se utiliza para metodos solamente (es para saber cuanto espacio reservar en el stack)
     int                numberOfParameters;     // se utiliza en metodos 
+    bool               marked;                 // se usa en la optimizacion de reuso de offsets
 } Symbol;
 
 typedef struct SymbolConfig {
@@ -61,6 +62,7 @@ typedef struct SymbolConfig {
     struct Symbol      *parameters;
     int                numberOfLocalVariables;
     int                numberOfParameters;
+    bool               marked;
 } SymbolConfig;
 
 // pila de niveles

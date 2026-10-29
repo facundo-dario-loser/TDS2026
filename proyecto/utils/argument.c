@@ -249,6 +249,7 @@ void processOptionOpt(int argc, char *argv[]) {
     deadCodeElimination(&root);
 
     astToDot(root, fileName);
+    printf("[LOG_GLOBAL]: '%s' file generated in folder /dot_files\n", fileName);
 
     // optimizacion de reuso de offsets
     setOffsetsInAstWithReuse(root);
@@ -269,8 +270,6 @@ void processOptionOpt(int argc, char *argv[]) {
     char command[256];
     snprintf(command, sizeof(command), "gcc %s files_to_link/print.c -o %s", assemblyFileName, outputFileName);
     system(command);
-
-    remove(assemblyFileName);
 }
 
 

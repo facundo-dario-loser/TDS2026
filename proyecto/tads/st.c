@@ -64,6 +64,7 @@ bool insertSymbol(SymbolTable *st, SymbolConfig *config) {
     s->offsetSet              = false;
     s->numberOfLocalVariables = config->numberOfLocalVariables;
     s->numberOfParameters     = config->numberOfParameters;
+    s->marked                 = config->marked;
 
     s->next       = st->top->head;
     st->top->head = s;
@@ -203,6 +204,7 @@ Symbol * newSymbol(SymbolConfig *config) {
     s->offsetSet              = false;
     s->numberOfLocalVariables = config->numberOfLocalVariables;
     s->numberOfParameters     = config->numberOfParameters;
+    s->marked                 = config->marked;
 
     PRINT_SYMBOL(s)
 

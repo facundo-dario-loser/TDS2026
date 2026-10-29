@@ -1,0 +1,15 @@
+void main() {
+    int x;
+    x = 1;
+
+    {
+        int y, z;
+        y = 4;
+        z = 4 / y;
+    }
+
+    {
+        int w;
+        w = -x;
+    }
+}

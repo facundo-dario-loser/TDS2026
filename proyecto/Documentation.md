@@ -212,7 +212,7 @@ currentOffset = -8;
 Esta implementación simple cumple que siempre se van a reusar los offsets porque al salir de un bloque todas las variables decalradas alli 'mueren' por ende se podria reusar su offsets y esto es equivalente a que currentOffset vuelva a tener el mismo valor que tenia antes de ingresar al bloque.
 
 <br>**Funciones**
-Función principal que toma la raiz del ast y crea una variable llamada `currentOffset` inicializada con -8 que representa el proximo offsets libre a asignar a un simbolo. Luego llama a la función auxiliar `setOffsetsInAstWithReuseAux` y le pasa la raiz del ast y la referencia a la variable currentOffset.
+<br><br>Función principal que toma la raiz del ast y crea una variable llamada `currentOffset` inicializada con -8 que representa el proximo offsets libre a asignar a un simbolo. Luego llama a la función auxiliar `setOffsetsInAstWithReuseAux` y le pasa la raiz del ast y la referencia a la variable currentOffset.
 ```
 void setOffsetsInAstWithReuse(AstNode *root);
 ```
@@ -232,7 +232,106 @@ void setOffsetsNodeStatements(AstNode *node, int *currentOffset);
 void setOffsetsNodeIfElse(AstNode *node, int *currentOffset);
 ```
 
-**ejemplo de salida de la terminal**
+Funciones auxiliares para resetear el offset a temporales correspondientes a nodos de expresiones aritmeticas/logicas o de comparación.
+```
+void setOffsetsNodeBinaryOperator(AstNode *node, int *currentOffset);
+void setOffsetsNodeUnaryOperator(AstNode *node, int *currentOffset);
+```
+
+**Ejemplo 1**:
+```
+void main() {
+    int x;
+    x = 1;
+
+    {
+        int y, z;
+        y = 4;
+        z = 4 / y;
+    }
+
+    {
+        int w;
+        w = -x;
+    }
+}
+```
+
+**Salida en la terminal al ejecutar sin optimizaciones (en modo debug)**:<br> El simbolo t0 corresponde al resultado de la expresion `(4 / y)` y el simbolo t1 corresponde al resultado de la expresion `-x`.
+```
+[LOG_ASSEMBLY_GENERATION]: symbol x, offset: -8
+[LOG_ASSEMBLY_GENERATION]: symbol y, offset: -16
+[LOG_ASSEMBLY_GENERATION]: symbol t0, offset: -24
+[LOG_ASSEMBLY_GENERATION]: symbol z, offset: -32
+[LOG_ASSEMBLY_GENERATION]: symbol t1, offset: -40
+[LOG_ASSEMBLY_GENERATION]: symbol w, offset: -48
+```
+
+**Salida en la terminal al ejecutar con el flag de optimizaciones**:
+```
+[LOG_REUSE_OFFSETS]: symbol x, offset: -8
+[LOG_REUSE_OFFSETS]: symbol y, offset: -16
+[LOG_REUSE_OFFSETS]: symbol z, offset: -24
+[LOG_REUSE_OFFSETS]: symbol t0, offset: -32
+[LOG_REUSE_OFFSETS]: symbol w, offset: -16
+[LOG_REUSE_OFFSETS]: symbol t1, offset: -24
+```
 
 ## Optimizaciones ad-hoc (shifteos al multiplicar o dividir por 2)
-**mostrar el assembly ejemplo**
+Finalmente realice una optimización simple que consiste en lo siguiente:
+- Si en una multiplicación alguno de los dos operandos es la constante 2, entonces para calcular el resultado shifteo el otro operando un bit a la izquierda.
+- En una división si el divisor es la constante 2, entonces para calcular el resultado shifteo un bit a la derecha el dividendo.
+Esta optimización se aplica siempre (incluso si no se ejecuta el compialdor con la opción -opt).
+<br><br>Para esto utilice las instrucciones `shl %reg` y `shr %reg` que shiftean valor almacenado en `reg` tantos bits como indique el valor almacenado en el registro `rcx`. 
+
+<br>**Ejemplo 1**:
+```
+void main() {
+    int x, y;
+    x = 4;
+
+    y = x * 2;
+    y = x * 4;
+}
+```
+
+**Assembly generado**:
+```
+.text
+
+.globl main
+main:
+	enter $(8*4), $0
+
+	# AssignmentIntInt
+	mov $4, %r10
+	mov %r10, -8(%rbp)
+
+	# MultiplicationIntInt
+	mov -8(%rbp), %r10
+	mov $1, %rcx
+	shl %r10 # optimization (faster than imul)
+	mov %r10, -24(%rbp)
+
+	# AssignmentIntInt
+	mov -24(%rbp), %r10
+	mov %r10, -16(%rbp)
+
+	# MultiplicationIntInt
+	mov -8(%rbp), %r10
+	mov $4, %r11
+	imul %r10, %r11
+	mov %r11, -32(%rbp)
+
+	# AssignmentIntInt
+	mov -32(%rbp), %r10
+	mov %r10, -16(%rbp)
+
+	# note: setting rax with exit code 0 (even if main doesn't return anything)
+	mov $0, %rax
+
+.end_method_main:
+	leave
+	ret
+```
+
