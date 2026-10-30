@@ -1,0 +1,27 @@
+extern void printInt(int n);
+
+int max(int a, int b) {
+    if (a > b) {
+        return a;
+        a = a + 1; // a proposito para ver si lo elimina
+    } else {
+        return b;
+        b = b + 2; // a proposito para ver si lo elimina
+    }
+}
+
+void main() {
+    int x, y, z;
+    x = max(2, 4);
+    y = x / 2;
+
+    if (true) {
+        z = y + 1;
+    } else {
+        z = -4;
+    }
+
+    printInt(x);
+    printInt(y);
+    printInt(z);
+}

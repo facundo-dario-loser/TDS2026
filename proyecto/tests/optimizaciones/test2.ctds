@@ -1,0 +1,17 @@
+extern void printInt(int n);
+
+int max(int a, int b) {
+    if (a > b) {
+        return a;
+        a = a + 1;
+    } else {
+        return b;
+        b = b + 1;
+    }
+}
+
+void main() {
+    int x;
+    x = max(2, 4);
+    printInt(x);
+}

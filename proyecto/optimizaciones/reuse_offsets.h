@@ -13,6 +13,10 @@ void setOffsetsNodeBlockElems(AstNode *node, int *currentOffset);
 void setOffsetsNodeStatements(AstNode *node, int *currentOffset);
 void setOffsetsNodeIfElse(AstNode *node, int *currentOffset);
 void setOffsetsNodeMethodDecl(AstNode *node, int *currentOffset);
+void setOffsetsNodeMethodCall(AstNode *node, int *currentOffset);
+void setOffsetsNodeListExpr(AstNode *node, int *currentOffset);
+void setOffsetsNodeWhile(AstNode *node, int *currentOffset);
+void setOffsetsNodeReturn(AstNode *node, int *currentOffset);
 
 void setOffsetsNodeBinaryOperator(AstNode *node, int *currentOffset);
 void setOffsetsNodeUnaryOperator(AstNode *node, int *currentOffset);

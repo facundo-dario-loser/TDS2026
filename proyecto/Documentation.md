@@ -174,7 +174,7 @@ int main() {
 ![ejemplo3_dc](images/ejemplo3_dc.svg)
 
 ## Reuso de offsets
-La implementación se encuentra en la carpeta `/optimizaciones` en los archivos `.reuse_offsets.h/.c`. La idea para implementar esto es por un lado mantener una variable llamada currentOffset inicializada en -8 que indica cual es el proximo offset libre para asignar a un simbolo. Cada vez que a un simbolo se le asigna el valor de currentOffset, este se decrementa en -8. Entonces toda la logica para reusar los offsets se realiza en los nodos de tipo bloque en donde basicamente antes de ingresar al bloque se guarda el valor de currentOffset en una variable (oldCurrentOffset = currentOffset) y luego se ingresa al bloque en donde se puede seguir asignado valores de offset a las variables que tenga drecrementando el valor de currentOffset. Luego al salir del bloque lo que se hace es restaurar el valor de currentOffset con el valor de oldCurrentOffset.
+La implementación se encuentra en la carpeta `/optimizaciones` en los archivos `reuse_offsets.h/.c`. La idea para implementar esto es por un lado mantener una variable llamada currentOffset inicializada en -8 que indica cual es el proximo offset libre para asignar a un simbolo. Cada vez que a un simbolo se le asigna el valor de currentOffset, este se decrementa en -8. Entonces toda la logica para reusar los offsets se realiza en los nodos de tipo bloque en donde basicamente antes de ingresar al bloque se guarda el valor de currentOffset en una variable (oldCurrentOffset = currentOffset) y luego se ingresa al bloque en donde se puede seguir asignado valores de offset a las variables que tenga drecrementando el valor de currentOffset. Luego al salir del bloque lo que se hace es restaurar el valor de currentOffset con el valor de oldCurrentOffset.
 <br><br>El siguiente pseudocódigo ejemplifica los descripto anteriormente:
 ```
 currentOffset = -8;
@@ -229,6 +229,11 @@ void setOffsetsNodeBlock(AstNode *node, int *currentOffset);
 void setOffsetsNodeBlockElems(AstNode *node, int *currentOffset);
 void setOffsetsNodeStatements(AstNode *node, int *currentOffset);
 void setOffsetsNodeIfElse(AstNode *node, int *currentOffset);
+void setOffsetsNodeMethodDecl(AstNode *node, int *currentOffset);
+void setOffsetsNodeMethodCall(AstNode *node, int *currentOffset);
+void setOffsetsNodeListExpr(AstNode *node, int *currentOffset);
+void setOffsetsNodeWhile(AstNode *node, int *currentOffset);
+void setOffsetsNodeReturn(AstNode *node, int *currentOffset);
 ```
 
 Funciones auxiliares para resetear el offset a temporales correspondientes a nodos de expresiones aritmeticas/logicas o de comparación.
@@ -242,7 +247,15 @@ Función auxiliar para obtener el numero de variables locales (y temporales) de 
 void getNumberOfLocalVariablesAndTemporals(AstNode *node, int *numberOfVarsAndTemps);
 ```
 
-**Ejemplo 1**:
+Para esta última función agregue un campo mas a la estructura de los simbolos para que cada vez que encuentre una variable en el ast la cuente y la pueda marcar para no volver a contarla si aparece de nuevo en otra expresión.
+```
+typedef struct Symbol {
+    ...
+    bool marked;
+} Symbol
+```
+
+<br>**Ejemplo 1**:
 ```
 void main() {
     int x;

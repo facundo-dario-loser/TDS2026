@@ -171,9 +171,9 @@ Dentro de la carpeta `/proyecto` se encuentran las siguientes subcarpetas y arch
 
 - `/dot_files` aca se guardan los archivos `.dot` generados.
 
-- `files_to_link` cotiene un archivo de c con funciones para printear enteros (`printInt`) y booleanos(`printBoolean`). Este archivo se puede linkear con un programa del lenguaje ctds para poder imprimir valores. 
+- `/files_to_link` cotiene un archivo de c con funciones para printear enteros (`printInt`) y booleanos(`printBoolean`). Este archivo se puede linkear con un programa del lenguaje ctds para poder imprimir valores. 
 
-- `images`: contiene imagenes .svg usadas para la documentación.
+- `/images`: contiene imagenes .svg usadas para la documentación.
 
 **Nota**: los archivos `.dot` solamente se generan si se ejecuta el compilador con la opcion `-debug`.
 

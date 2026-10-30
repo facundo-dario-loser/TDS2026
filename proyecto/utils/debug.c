@@ -14,6 +14,7 @@ char * getMessageSourceString(MessageSource msgSrc) {
         case MESSAGE_SOURCE_DOT:                      return "DOT";
         case MESSAGE_SOURCE_OPT_CONSTANT_PROPAGATION: return "OPT_CONSTANT_PROPAGATION";
         case MESSAGE_SOURCE_OPT_DEAD_CODE:            return "OPT_DEAD_CODE";
+        case  MESSAGE_SOURCE_REUSE_OFFSETS:           return "REUSE_OFFSETS";
         default:                                      return "";
     }
 }

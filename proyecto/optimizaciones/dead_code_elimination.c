@@ -120,6 +120,11 @@ bool deadCodeEliminationNodeIfElse(AstNode **node) {
             }
         }
     }
+
+    // si no es una constante igual debemos hacer eliminacion de codigo muerto dentro de cada bloque del if
+    if ((*node)->children2) deadCodeElimination(&(*node)->children2);
+    if ((*node)->children3) deadCodeElimination(&(*node)->children3);
+    return false;
 }
 
 
