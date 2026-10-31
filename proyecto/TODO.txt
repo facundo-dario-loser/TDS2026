@@ -1,12 +1,7 @@
-[NOTA] doc y comentarios los hago en espanol, pero codigo en ingles
 [NOTA] los comentarios multilinea que elegi no permiten comentarios anidados
-[NOTA]: puedo tener una funcion/metodo global que se llame igual que una variable global 
-
 [TEST] ponerles nombres significativos a los tests o comentarios al inicio
 
 [ANALISIS FUNCIONES]: ver una mejor forma de analizar los returns. Capaz le puedo decir al hijo del cuerpo de alguna forma que en su bloque debe haber un return y que se encarga el hijo de chequearlo.
-                            
-[ST]: insertSymbol() podria retorna un enum indicando si se inserto ok, si hay redeclaracion de variable o si colisiona con algun parametro.
 
 generar el svg:
 dot -Tsvg file.dot -o ast.svg
@@ -14,119 +9,9 @@ dot -Tsvg file.dot -o ast.svg
 
 [SEMANTICO] diferenciar entre variable redeclarada y que tengo dos variables con el mismo nombre pero diferente tipo (es otro el msj de error)
 
-- [BUG creo?]: en las macros de debug por ahi hay como un bug que se imprime repetido algunas cosas.
-- escribir la doc del analisis semantico 
-
-si tengo 
-
-int x;
-
-{
-    int x;
-}
-
-no hay drama. en las instrucciones capaz se repite el nombre, pero como son simbolos diferentes
-no hay problema ya que tendran diferentes offsets
-
-
-- [OFFSET]: - los offsets de las variables las puedo setear en el analsis semantico al crear los simbolos
-            - luego en el analisis de metodo, al temrinar dejo guardado en el simbolo del metodo la cantidada total de variables locales
-              para sacar el offset total (porque al principio de una rutina tengo que restar para guardar espacio apra var locales)
-
-
 - [CASTEOS]: los voy a hacer en la generacion de assembly
-
-- en target codinter: imprimir por lo menos las instrucciones (y algo parecido en las otras etapas)
 
 - [SEMANTICO]: si en una condicion o asignacion pongo un metodo que no retorna nada (void), dar un mejor mensaje de error
 
-- [NOTA_ASSEMBLY]: luego de cada accion dejo todo en memoria (asi es mas facil).
-                   los registros solo los uso como puentes. (no hace falta hacer register allocation).
-
-- [ASSEMBLY]: linkear con la libreria standard de C para printear resultado
-
 - [ASSEMBLY]: no hace falta implementar las operaciones y demas cosas con float
               (solo generar un comentario que diga en el assembly: aca falta implementar esto)
-              
-- [ASSEMBLY]: extender la gramatica para agregar el extern y linkear con gcc para llamar a mi propia definicion de printInt, printFloat, etc
-
-- ver lo de corto circuito del and y el or 
-
-- si me anda el fibonacci iterativo y recursivo ya esta
-
-- linkear con funciones para printear: 
-   gcc a.s files_to_link/print.c -o main
-
-- llamar en argument.c a gcc para ensamblar el assembly
-
-
-**OPTIMIZACIONES:**
-
-// sobre el ast:
-- propagacion de constantes: esto es basicamente agarrar todas las expresiones 
-  que tengan constante y resolverlas en tiempo de compilacion.
-
-  por ej si tengo:
-  (1 + 2)
-
-  node Add -> children1: 1
-           -> children2: 2
-  
-  lo resuelvo y me queda:
-  3
-
-  y en el ast reemplazo el nodo de suma por:
-  node Const
-
-- eliminacion cod muerto (if, return, while) (esto se debe hacer
-  luego de la propagacion de constantes).
-
-// reusar offset
-lista de offsets libres 
-lista offsets libres lo hago con temporales
-con variables si se complica no hacerlo
-
-osea ahora tengo 
-
-{
-    int temp1; (offset -8)
-}
-
-{
-    int temp2; (offset -16)
-}
-
-pero podria hacer:
-
-{
-    int temp1; (offset -8)
-}
-
-{
-    int temp2; (offset -8)
-}
-
-ya que luego de cerrar el primer bloque temp1 no se usa mas 
-y podria reusar el offset para que el frame quede mas chico
-
-una posible implementacion: 
-esto podria hacerlo sobre la lista de instrucciones de cod 3 dir
-puedo agregar nuevas instrucciones que sean:
-
-INSTRUCTION_TYPE_BEGIN_BLOCK
-INSTRUCTION_TYPE_END_BLOCK
-
-como tengo un offsetCount, entonces al cerrar un bloque podria
-sumarle a offsetCount +8 tantas veces como temporales habia en el bloque cerrado
-por ahora solo concentrarme en temporales. Con variables es un poco mas
-complicado, pero podria intentarlo despues
-
-pero si esto no anda en el cod de 3 dir, seguro lo puedo hacer sobre el ast
-
-// optimizaciones ad-hoc
-- si multiplicas o dividis por 2 -> shiftear (constantes)
-
-- podria tirar warnings en division por 0
-
-- en el reuso de offsets no estoy asignados offsets a los temporales
-

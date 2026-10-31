@@ -217,7 +217,7 @@ void processOptionOpt(int argc, char *argv[]) {
     yyin = fopen(argv[2], "r");
 
     if (!yyin) {
-        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[2])
     }
 
     int parseResult = yyparse();
@@ -284,7 +284,7 @@ void processOptionDebug(int argc, char *argv[]) {
     yyin = fopen(argv[2], "r");
 
     if (!yyin) {
-        ERROR_GLOBAL("couldn't open file '%s'\n", argv[3])
+        ERROR_GLOBAL("couldn't open file '%s'\n", argv[2])
     }
 
     int parseResult = yyparse();
