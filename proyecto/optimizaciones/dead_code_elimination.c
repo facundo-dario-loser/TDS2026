@@ -142,5 +142,7 @@ bool deadCodeEliminationNodeWhile(AstNode **node) {
             freeAst((*node));
             return true;
         }
+    } else {
+        deadCodeElimination(&(*node)->children2);
     }
 }

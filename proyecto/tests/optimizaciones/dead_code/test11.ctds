@@ -1,0 +1,18 @@
+extern void printInt(int n);
+
+void main() {
+    int x;
+    x = 20;
+
+    printInt(x);
+
+    while (x > 0) {
+        if (true) {
+            x = x - 1;
+        } else {
+            x = x - 2;
+        }
+    }
+
+    printInt(x);
+}
